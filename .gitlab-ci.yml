@@ -29,7 +29,6 @@ maven-build:
 build-backend-container:
   stage: docker
   script:
-    - cd gdapp-backend-service
     - echo "$DOCKER_HUB_PASSWORD" > dhpw.txt
     - docker login -u "${DOCKER_HUB_USER}" --password-stdin < dhpw.txt
     - docker build --cache-from $BACKEND_REGISTRY_IMAGE:latest -t $BACKEND_REGISTRY_IMAGE:$CI_COMMIT_SHA .
@@ -40,7 +39,6 @@ build-backend-release:
     GIT_STRATEGY: none
   stage: docker-release
   script:
-  - cd gdapp-backend-service
   - echo "$DOCKER_HUB_PASSWORD" > dhpw.txt
   - docker login -u "${DOCKER_HUB_USER}" --password-stdin < dhpw.txt
   - docker pull $BACKEND_REGISTRY_IMAGE:$CI_COMMIT_SHA
@@ -64,7 +62,7 @@ deploy-backend-sandbox:
   environment:
     name: sandbox
   only:
-    - release/sandbox
+    - develop
 
 deploy-fallback:
   image: dtzar/helm-kubectl:2.13.1
