@@ -1,0 +1,13 @@
+environments:
+- name: dev
+  config: application-dev.yml
+  dev: true
+- name: test
+  config: application-test.yml
+  dev: true
+- name: sandbox
+  config: application-sandbox.yml
+  dev: false
+- name: prod
+  config: application-prod.yml
+  dev: false

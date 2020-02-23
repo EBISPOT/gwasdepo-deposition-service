@@ -1,0 +1,25 @@
+server:
+  port: 8080
+
+spring:
+  data:
+    mongodb:
+      uri: localhost:27017
+    solr:
+      host: http://localhost:8983/solr
+
+gwas-deposition:
+  db: gwas-deposition-dev
+  solr:
+    enabled: false
+  auth:
+    curators:
+      auth-mechanism: EMAIL_WHITELISTING
+
+gwas-sumstats-service:
+  callback-schedule:
+    enabled: true
+
+quartz:
+  scheduler:
+    dbName: gwas-deposition-dev

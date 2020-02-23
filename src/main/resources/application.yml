@@ -1,0 +1,92 @@
+server:
+  name: deposition-backend
+  port: 80
+
+logging:
+  level:
+    org:
+      springframework: DEBUG
+
+quartz:
+  scheduler:
+    active: true
+    instanceName: backendSchedulerJobSchedulerCluster
+    environment-config: quartz/environment-config.yaml
+    mongodb-pool-size: 10
+  jobs:
+    ss-callback:
+      schedule: 0 */1 * * * ?
+    stats:
+      schedule: 0 0 0 * * ?
+    clean-up:
+      schedule: 0 0 0 0 * ?
+    solr-check:
+      schedule: 0 */1 * * * ?
+
+gwas-deposition:
+  auth:
+    enabled: false
+    cert: aap.der
+    unauthenticated-endpoints: /v1/publications
+    auto-curator-service-account: auto-curator-service@ebi.ac.uk
+    curators:
+      auth-mechanism: JWT_DOMAIN
+      jwt-domains: self.GWAS_Curator
+  stats-task:
+    enabled: true
+  clean-up-task:
+    enabled: false
+  solr:
+    enabled: false
+  email-config:
+    email-enabled: false
+    from-address: no-reply@ebi.ac.uk
+    from-name: GWAS Curation
+    retries: 3
+    subject: GWAS Catalog submission for publication %PMID%
+    base-url: https://www.ebi.ac.uk/gwas/deposition/submission/
+    emails:
+      success: emails/success.email
+      fail: emails/fail.email
+
+solr:
+  enable:
+    alias: false
+
+gwas-sumstats-service:
+  enabled: true
+  url: http://gwas-ss-service:8000
+  endpoints:
+    sum-stats: /v1/sum-stats
+    globus-mkdir: /v1/sum-stats/globus/mkdir
+  callback-schedule:
+    enabled: true
+
+gwas-template-service:
+  enabled: false
+  url: http://gwas-template-service:8080
+  endpoints:
+    template-schema: /gwas/deposition/template/v1/template-schema
+    prefilled-template: /gwas/deposition/template/v1/templates
+
+gwas-catalog-service:
+  enabled: true
+  endpoint: https://www.ebi.ac.uk/gwas/rest/api/studies/search/findByPublicationIdPubmedId?pubmedId=
+
+spring:
+  profiles:
+    active: dev
+
+validator:
+  error-messages: error_messages.txt
+  ss-content-validation:
+    enabled: true
+    sheet: study
+    column: study_accession
+  default-schema:
+    version: 1.0
+    file: schema_v1.json
+
+comms:
+  messaging:
+    enabled: false

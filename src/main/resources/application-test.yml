@@ -1,0 +1,20 @@
+spring:
+  data:
+    mongodb:
+      uri: snoopy.ebi.ac.uk:27017
+
+gwas-sumstats-service:
+  callback-schedule:
+    enabled: true
+
+quartz:
+  scheduler:
+    dbName: gwas-deposition-test
+
+gwas-deposition:
+  db: gwas-deposition-test
+  solr:
+    enabled: false
+  auth:
+    curators:
+      auth-mechanism: EMAIL_WHITELISTING

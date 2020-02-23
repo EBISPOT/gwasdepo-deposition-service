@@ -1,0 +1,50 @@
+server:
+  port: 8080
+  servlet:
+    context-path: /gwas/deposition/api
+
+spring:
+  main:
+    allow-bean-definition-overriding: true
+  data:
+    mongodb:
+      uri: mongodb-hhvm-062.ebi.ac.uk:27017,mongodb-hxvm-063.ebi.ac.uk:27017/admin?replicaSet=gwasdepodevrs039
+    solr:
+      host: http://solr-svc.solr:8983/solr/
+  mail:
+    host: hx-smtp.ebi.ac.uk
+    port: 25
+    properties:
+      mail:
+        smtp:
+          connectiontimeout: 5000
+          timeout: 3000
+          writetimeout: 5000
+          auth: false
+          sendpartial: true
+          starttls:
+            enable: true
+
+quartz:
+  scheduler:
+    dbName: gwasdepo
+
+gwas-deposition:
+  auth:
+    enabled: true
+    unauthenticated-endpoints: /gwas/deposition/api/v1/publications
+  db: gwasdepo
+  solr:
+    enabled: true
+  email-config:
+    email-enabled: true
+
+gwas-template-service:
+  enabled: true
+
+gwas-catalog-service:
+  enabled: false
+
+solr:
+  enable:
+    alias: true
