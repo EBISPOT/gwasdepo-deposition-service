@@ -8,6 +8,8 @@ public class GWASDepositionBackendConstants {
 
     public static final String API_PUBLICATIONS = "/publications";
 
+    public static final String API_MANUSCRIPTS = "/manuscripts";
+
     public static final String API_SUBMISSIONS = "/submissions";
 
     public static final String API_STUDIES = "/studies";

@@ -17,6 +17,7 @@ import uk.ac.ebi.spot.gwas.deposition.dto.FileUploadDto;
 import uk.ac.ebi.spot.gwas.deposition.dto.SubmissionCreationDto;
 import uk.ac.ebi.spot.gwas.deposition.dto.SubmissionDto;
 import uk.ac.ebi.spot.gwas.deposition.dto.summarystats.SSTemplateEntryDto;
+import uk.ac.ebi.spot.gwas.deposition.repository.ManuscriptRepository;
 import uk.ac.ebi.spot.gwas.deposition.rest.dto.PublicationDtoAssembler;
 import uk.ac.ebi.spot.gwas.deposition.service.*;
 
@@ -27,6 +28,7 @@ import java.util.Map;
 
 import static junit.framework.TestCase.assertTrue;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
@@ -57,6 +59,9 @@ public class SubmissionsControllerTest extends IntegrationTest {
 
     @Autowired
     private SumStatsService sumStatsService;
+
+    @Autowired
+    private ManuscriptRepository manuscriptRepository;
 
     @Before
     public void setup() {
@@ -148,9 +153,43 @@ public class SubmissionsControllerTest extends IntegrationTest {
     }
 
     /**
+     * POST /v1/submissions
+     */
+    @Test
+    public void shouldCreateManuscriptSubmission() throws Exception {
+        when(sumStatsService.createGlobusFolder(any())).thenReturn(new SSGlobusResponse(true, RandomStringUtils.randomAlphanumeric(10)));
+
+        SubmissionCreationDto submissionCreationDto = new SubmissionCreationDto(PublicationDtoAssembler.assemble(manuscriptPublication),
+                RandomStringUtils.randomAlphanumeric(10));
+        String response = mockMvc.perform(post(GWASDepositionBackendConstants.API_V1 +
+                GWASDepositionBackendConstants.API_SUBMISSIONS)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(mapper.writeValueAsString(submissionCreationDto)))
+                .andExpect(status().isCreated())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        Resource<SubmissionDto> actualResource = mapper.readValue(response, new TypeReference<Resource<SubmissionDto>>() {
+        });
+        SubmissionDto actual = actualResource.getContent();
+
+        assertNull(actual.getPublication());
+        assertEquals(SubmissionProvenanceType.MANUSCRIPT.name(), actual.getProvenanceType());
+        assertEquals(user.getName(), actual.getCreated().getUser().getName());
+        assertEquals(user.getEmail(), actual.getCreated().getUser().getEmail());
+        assertEquals(manuscriptPublication.getJournal(), actual.getManuscript().getJournal());
+        assertEquals(manuscriptPublication.getTitle(), actual.getManuscript().getTitle());
+        assertEquals(manuscriptPublication.getFirstAuthor(), actual.getManuscript().getFirstAuthor());
+
+        assertTrue(actual.getFiles().isEmpty());
+        assertEquals(1, manuscriptRepository.findAll().size());
+        verify(sumStatsService, times(0)).createGlobusFolder(any());
+    }
+
+    /**
      * GET /v1/submissions/{submissionId}
      */
-
     @Test
     public void shouldGetSubmission() throws Exception {
         SubmissionCreationDto submissionCreationDto = new SubmissionCreationDto(PublicationDtoAssembler.assemble(eligiblePublication),

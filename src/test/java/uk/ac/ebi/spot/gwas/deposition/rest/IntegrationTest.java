@@ -3,6 +3,7 @@ package uk.ac.ebi.spot.gwas.deposition.rest;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.joda.time.LocalDate;
 import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -142,6 +143,8 @@ public abstract class IntegrationTest {
 
     protected Publication publishedPublication;
 
+    protected Publication manuscriptPublication;
+
     protected Study study;
 
     protected Note note;
@@ -163,6 +166,14 @@ public abstract class IntegrationTest {
         user = userRepository.insert(TestUtil.user());
         eligiblePublication = publicationRepository.insert(TestUtil.eligiblePublication());
         publishedPublication = publicationRepository.insert(TestUtil.publishedPublication());
+        manuscriptPublication = new Publication(null,
+                RandomStringUtils.randomAlphanumeric(10),
+                RandomStringUtils.randomAlphanumeric(10),
+                RandomStringUtils.randomAlphanumeric(10) + " " + RandomStringUtils.randomAlphanumeric(10),
+                LocalDate.now(),
+                new CorrespondingAuthor(RandomStringUtils.randomAlphanumeric(10),
+                        RandomStringUtils.randomAlphanumeric(10)),
+                null);
 
         when(jwtService.extractUser(any())).thenReturn(user);
 

@@ -8,17 +8,17 @@ import org.springframework.hateoas.mvc.ControllerLinkBuilder;
 import org.springframework.stereotype.Service;
 import uk.ac.ebi.spot.gwas.deposition.config.GWASDepositionBackendConfig;
 import uk.ac.ebi.spot.gwas.deposition.constants.GWASDepositionBackendConstants;
+import uk.ac.ebi.spot.gwas.deposition.constants.SubmissionProvenanceType;
 import uk.ac.ebi.spot.gwas.deposition.domain.FileUpload;
+import uk.ac.ebi.spot.gwas.deposition.domain.Manuscript;
 import uk.ac.ebi.spot.gwas.deposition.domain.Publication;
 import uk.ac.ebi.spot.gwas.deposition.domain.Submission;
 import uk.ac.ebi.spot.gwas.deposition.dto.FileUploadDto;
 import uk.ac.ebi.spot.gwas.deposition.dto.SubmissionDto;
 import uk.ac.ebi.spot.gwas.deposition.rest.controllers.*;
-import uk.ac.ebi.spot.gwas.deposition.rest.dto.FileUploadDtoAssembler;
-import uk.ac.ebi.spot.gwas.deposition.rest.dto.ProvenanceDtoAssembler;
-import uk.ac.ebi.spot.gwas.deposition.rest.dto.PublicationDtoAssembler;
-import uk.ac.ebi.spot.gwas.deposition.rest.dto.SubmissionDtoAssembler;
+import uk.ac.ebi.spot.gwas.deposition.rest.dto.*;
 import uk.ac.ebi.spot.gwas.deposition.service.FileUploadsService;
+import uk.ac.ebi.spot.gwas.deposition.service.ManuscriptService;
 import uk.ac.ebi.spot.gwas.deposition.service.PublicationService;
 import uk.ac.ebi.spot.gwas.deposition.service.UserService;
 import uk.ac.ebi.spot.gwas.deposition.util.BackendUtil;
@@ -44,9 +44,18 @@ public class SubmissionAssemblyService implements ResourceAssembler<Submission, 
     @Autowired
     private GWASDepositionBackendConfig gwasDepositionBackendConfig;
 
+    @Autowired
+    private ManuscriptService manuscriptService;
+
     @Override
     public Resource<SubmissionDto> toResource(Submission submission) {
-        Publication publication = publicationService.retrievePublication(submission.getPublicationId(), true);
+        Publication publication = null;
+        Manuscript manuscript = null;
+        if (submission.getProvenanceType().equalsIgnoreCase(SubmissionProvenanceType.PUBLICATION.name())) {
+            publication = publicationService.retrievePublication(submission.getPublicationId(), true);
+        } else {
+            manuscript = manuscriptService.retrieveManuscript(submission.getManuscriptId(), submission.getCreated().getUserId());
+        }
         List<FileUpload> fileUploads = fileUploadsService.getFileUploads(submission.getFileUploads());
 
         List<FileUploadDto> fileUploadDtos = new ArrayList<>();
@@ -55,7 +64,8 @@ public class SubmissionAssemblyService implements ResourceAssembler<Submission, 
         }
 
         SubmissionDto submissionDto = SubmissionDtoAssembler.assemble(submission,
-                PublicationDtoAssembler.assemble(publication),
+                publication != null ? PublicationDtoAssembler.assemble(publication) : null,
+                manuscript != null ? ManuscriptDtoAssembler.assemble(manuscript) : null,
                 fileUploadDtos,
                 ProvenanceDtoAssembler.assemble(submission.getCreated(), userService.getUser(submission.getCreated().getUserId())),
                 submission.getLastUpdated() != null ?

@@ -16,10 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import uk.ac.ebi.spot.gwas.deposition.config.GWASDepositionBackendConfig;
-import uk.ac.ebi.spot.gwas.deposition.constants.GWASDepositionBackendConstants;
-import uk.ac.ebi.spot.gwas.deposition.constants.PublicationStatus;
-import uk.ac.ebi.spot.gwas.deposition.constants.Status;
-import uk.ac.ebi.spot.gwas.deposition.constants.SubmissionType;
+import uk.ac.ebi.spot.gwas.deposition.constants.*;
 import uk.ac.ebi.spot.gwas.deposition.domain.*;
 import uk.ac.ebi.spot.gwas.deposition.dto.SubmissionCreationDto;
 import uk.ac.ebi.spot.gwas.deposition.dto.SubmissionDto;
@@ -28,6 +25,7 @@ import uk.ac.ebi.spot.gwas.deposition.exception.DeleteOnSubmittedSubmissionNotAl
 import uk.ac.ebi.spot.gwas.deposition.exception.EmailAccountNotLinkedToGlobusException;
 import uk.ac.ebi.spot.gwas.deposition.exception.SSGlobusFolderCreatioException;
 import uk.ac.ebi.spot.gwas.deposition.exception.SubmissionOnUnacceptedPublicationTypeException;
+import uk.ac.ebi.spot.gwas.deposition.rest.dto.ManuscriptDtoDisassembler;
 import uk.ac.ebi.spot.gwas.deposition.service.*;
 import uk.ac.ebi.spot.gwas.deposition.service.impl.SubmissionAssemblyService;
 import uk.ac.ebi.spot.gwas.deposition.util.BackendUtil;
@@ -67,6 +65,9 @@ public class SubmissionsController {
     @Autowired
     private SumStatsService sumStatsService;
 
+    @Autowired
+    private ManuscriptService manuscriptService;
+
     /**
      * POST /v1/submissions
      */
@@ -79,11 +80,25 @@ public class SubmissionsController {
         User user = userService.findUser(jwtService.extractUser(HeadersUtil.extractJWT(request)), false);
         log.info("[{}] Request to create new submission for publication: {}", user.getName(),
                 submissionCreationDto.getPublication().getPmid());
+        if (submissionCreationDto.getPublication().getPmid() == null) {
+            log.info("Received submission based on manuscript: {}", submissionCreationDto.getPublication().getTitle());
+            Manuscript manuscript = ManuscriptDtoDisassembler.diassemble(submissionCreationDto.getPublication(),
+                    new Provenance(DateTime.now(), user.getId()));
+            manuscript = manuscriptService.createManuscript(manuscript);
+            Submission submission = new Submission(manuscript.getId(),
+                    SubmissionProvenanceType.MANUSCRIPT.name(),
+                    new Provenance(DateTime.now(), user.getId()));
+            submission = submissionService.createSubmission(submission);
+            return submissionAssemblyService.toResource(submission);
+        }
+
         Publication publication = publicationService.retrievePublication(submissionCreationDto.getPublication().getPmid(), false);
         if (publication.getStatus().equals(PublicationStatus.ELIGIBLE.name()) ||
                 publication.getStatus().equals(PublicationStatus.PUBLISHED.name())) {
 
-            Submission submission = new Submission(publication.getId(), new Provenance(DateTime.now(), user.getId()));
+            Submission submission = new Submission(publication.getId(),
+                    SubmissionProvenanceType.PUBLICATION.name(),
+                    new Provenance(DateTime.now(), user.getId()));
             String globusFolder = UUID.randomUUID().toString();
             SSGlobusResponse outcome = sumStatsService.createGlobusFolder(new SSGlobusFolderDto(globusFolder,
                     submissionCreationDto.getGlobusIdentity() != null ?
