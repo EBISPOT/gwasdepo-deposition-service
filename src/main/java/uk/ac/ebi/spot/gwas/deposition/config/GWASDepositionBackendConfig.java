@@ -33,6 +33,13 @@ public class GWASDepositionBackendConfig {
     @Value("${gwas-deposition.email-config.base-url}")
     private String submissionsBaseURL;
 
+    @Value("${gwas-deposition.db:#{NULL}}")
+    private String dbName;
+
+    public String getDbName() {
+        return dbName;
+    }
+
     public String getSubmissionsBaseURL() {
         return submissionsBaseURL;
     }

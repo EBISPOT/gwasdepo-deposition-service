@@ -4,7 +4,6 @@ import com.mongodb.MongoClient;
 import com.mongodb.MongoClientURI;
 import com.mongodb.ServerAddress;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -61,9 +60,12 @@ public class MongoConfig {
         @Autowired
         private SystemConfigProperties systemConfigProperties;
 
+        @Autowired
+        private GWASDepositionBackendConfig gwasDepositionBackendConfig;
+
         @Override
         protected String getDatabaseName() {
-            return systemConfigProperties.getDbName();
+            return gwasDepositionBackendConfig.getDbName();
         }
 
         @Bean
@@ -87,9 +89,12 @@ public class MongoConfig {
         @Autowired
         private SystemConfigProperties systemConfigProperties;
 
+        @Autowired
+        private GWASDepositionBackendConfig gwasDepositionBackendConfig;
+
         @Override
         protected String getDatabaseName() {
-            return systemConfigProperties.getDbName();
+            return gwasDepositionBackendConfig.getDbName();
         }
 
         @Bean

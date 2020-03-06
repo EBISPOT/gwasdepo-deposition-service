@@ -78,7 +78,7 @@ public class SubmissionsControllerTest extends IntegrationTest {
         when(sumStatsService.createGlobusFolder(any())).thenReturn(new SSGlobusResponse(true, RandomStringUtils.randomAlphanumeric(10)));
         SubmissionCreationDto submissionCreationDto = new SubmissionCreationDto(PublicationDtoAssembler.assemble(eligiblePublication),
                 RandomStringUtils.randomAlphanumeric(10));
-        String response = mockMvc.perform(post(GWASDepositionBackendConstants.API_V1 +
+        String response = mockMvc.perform(post(GeneralCommon.API_V1 +
                 GWASDepositionBackendConstants.API_SUBMISSIONS)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(mapper.writeValueAsString(submissionCreationDto)))
@@ -123,7 +123,7 @@ public class SubmissionsControllerTest extends IntegrationTest {
                 IOUtils.toByteArray(is));
         when(templateService.retrievePrefilledTemplate(any())).thenReturn(fileObject);
 
-        String response = mockMvc.perform(post(GWASDepositionBackendConstants.API_V1 +
+        String response = mockMvc.perform(post(GeneralCommon.API_V1 +
                 GWASDepositionBackendConstants.API_SUBMISSIONS)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(mapper.writeValueAsString(submissionCreationDto)))
@@ -161,7 +161,7 @@ public class SubmissionsControllerTest extends IntegrationTest {
 
         SubmissionCreationDto submissionCreationDto = new SubmissionCreationDto(PublicationDtoAssembler.assemble(manuscriptPublication),
                 RandomStringUtils.randomAlphanumeric(10));
-        String response = mockMvc.perform(post(GWASDepositionBackendConstants.API_V1 +
+        String response = mockMvc.perform(post(GeneralCommon.API_V1 +
                 GWASDepositionBackendConstants.API_SUBMISSIONS)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(mapper.writeValueAsString(submissionCreationDto)))
@@ -194,7 +194,7 @@ public class SubmissionsControllerTest extends IntegrationTest {
     public void shouldGetSubmission() throws Exception {
         SubmissionCreationDto submissionCreationDto = new SubmissionCreationDto(PublicationDtoAssembler.assemble(eligiblePublication),
                 RandomStringUtils.randomAlphanumeric(10));
-        String response = mockMvc.perform(post(GWASDepositionBackendConstants.API_V1 +
+        String response = mockMvc.perform(post(GeneralCommon.API_V1 +
                 GWASDepositionBackendConstants.API_SUBMISSIONS)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(mapper.writeValueAsString(submissionCreationDto)))
@@ -216,7 +216,7 @@ public class SubmissionsControllerTest extends IntegrationTest {
         submission.setNotes(Arrays.asList(new String[]{note.getId()}));
         submissionService.saveSubmission(submission);
 
-        String endpoint = GWASDepositionBackendConstants.API_V1 +
+        String endpoint = GeneralCommon.API_V1 +
                 GWASDepositionBackendConstants.API_SUBMISSIONS +
                 "/" + submissionDto.getSubmissionId();
 
@@ -251,7 +251,7 @@ public class SubmissionsControllerTest extends IntegrationTest {
     public void shouldDeleteSubmission() throws Exception {
         SubmissionCreationDto submissionCreationDto = new SubmissionCreationDto(PublicationDtoAssembler.assemble(eligiblePublication),
                 RandomStringUtils.randomAlphanumeric(10));
-        String response = mockMvc.perform(post(GWASDepositionBackendConstants.API_V1 +
+        String response = mockMvc.perform(post(GeneralCommon.API_V1 +
                 GWASDepositionBackendConstants.API_SUBMISSIONS)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(mapper.writeValueAsString(submissionCreationDto)))
@@ -263,7 +263,7 @@ public class SubmissionsControllerTest extends IntegrationTest {
         Resource<SubmissionDto> actual = mapper.readValue(response, new TypeReference<Resource<SubmissionDto>>() {
         });
 
-        String endpoint = GWASDepositionBackendConstants.API_V1 +
+        String endpoint = GeneralCommon.API_V1 +
                 GWASDepositionBackendConstants.API_SUBMISSIONS +
                 "/" + actual.getContent().getSubmissionId();
 
@@ -299,7 +299,7 @@ public class SubmissionsControllerTest extends IntegrationTest {
                 IOUtils.toByteArray(is));
         when(templateService.retrievePrefilledTemplate(any())).thenReturn(fileObject);
 
-        String response = mockMvc.perform(post(GWASDepositionBackendConstants.API_V1 +
+        String response = mockMvc.perform(post(GeneralCommon.API_V1 +
                 GWASDepositionBackendConstants.API_SUBMISSIONS)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(mapper.writeValueAsString(submissionCreationDto)))
@@ -311,7 +311,7 @@ public class SubmissionsControllerTest extends IntegrationTest {
         Resource<SubmissionDto> actual = mapper.readValue(response, new TypeReference<Resource<SubmissionDto>>() {
         });
 
-        String endpoint = GWASDepositionBackendConstants.API_V1 +
+        String endpoint = GeneralCommon.API_V1 +
                 GWASDepositionBackendConstants.API_SUBMISSIONS +
                 "/" + actual.getContent().getSubmissionId();
 
@@ -334,7 +334,7 @@ public class SubmissionsControllerTest extends IntegrationTest {
     public void shouldSubmitSubmission() throws Exception {
         SubmissionCreationDto submissionCreationDto = new SubmissionCreationDto(PublicationDtoAssembler.assemble(eligiblePublication),
                 RandomStringUtils.randomAlphanumeric(10));
-        String response = mockMvc.perform(post(GWASDepositionBackendConstants.API_V1 +
+        String response = mockMvc.perform(post(GeneralCommon.API_V1 +
                 GWASDepositionBackendConstants.API_SUBMISSIONS)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(mapper.writeValueAsString(submissionCreationDto)))
@@ -346,7 +346,7 @@ public class SubmissionsControllerTest extends IntegrationTest {
         Resource<SubmissionDto> actual = mapper.readValue(response, new TypeReference<Resource<SubmissionDto>>() {
         });
 
-        String endpoint = GWASDepositionBackendConstants.API_V1 +
+        String endpoint = GeneralCommon.API_V1 +
                 GWASDepositionBackendConstants.API_SUBMISSIONS +
                 "/" + actual.getContent().getSubmissionId() +
                 GWASDepositionBackendConstants.API_SUBMIT;
@@ -371,7 +371,7 @@ public class SubmissionsControllerTest extends IntegrationTest {
     public void shouldGetSubmissions() throws Exception {
         SubmissionCreationDto submissionCreationDto = new SubmissionCreationDto(PublicationDtoAssembler.assemble(eligiblePublication),
                 RandomStringUtils.randomAlphanumeric(10));
-        String response = mockMvc.perform(post(GWASDepositionBackendConstants.API_V1 +
+        String response = mockMvc.perform(post(GeneralCommon.API_V1 +
                 GWASDepositionBackendConstants.API_SUBMISSIONS)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(mapper.writeValueAsString(submissionCreationDto)))
@@ -393,7 +393,7 @@ public class SubmissionsControllerTest extends IntegrationTest {
         submission.setNotes(Arrays.asList(new String[]{note.getId()}));
         submissionService.saveSubmission(submission);
 
-        String endpoint = GWASDepositionBackendConstants.API_V1 + GWASDepositionBackendConstants.API_SUBMISSIONS;
+        String endpoint = GeneralCommon.API_V1 + GWASDepositionBackendConstants.API_SUBMISSIONS;
 
         response = mockMvc.perform(get(endpoint)
                 .contentType(MediaType.APPLICATION_JSON))

@@ -15,6 +15,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import uk.ac.ebi.spot.gwas.deposition.config.GWASDepositionBackendConfig;
 import uk.ac.ebi.spot.gwas.deposition.constants.GWASDepositionBackendConstants;
+import uk.ac.ebi.spot.gwas.deposition.constants.GeneralCommon;
 import uk.ac.ebi.spot.gwas.deposition.domain.Manuscript;
 import uk.ac.ebi.spot.gwas.deposition.domain.User;
 import uk.ac.ebi.spot.gwas.deposition.dto.ManuscriptDto;
@@ -28,7 +29,7 @@ import uk.ac.ebi.spot.gwas.deposition.util.HeadersUtil;
 import javax.servlet.http.HttpServletRequest;
 
 @RestController
-@RequestMapping(value = GWASDepositionBackendConstants.API_V1 + GWASDepositionBackendConstants.API_MANUSCRIPTS)
+@RequestMapping(value = GeneralCommon.API_V1 + GWASDepositionBackendConstants.API_MANUSCRIPTS)
 public class ManuscriptController {
 
     private static final Logger log = LoggerFactory.getLogger(PublicationsController.class);

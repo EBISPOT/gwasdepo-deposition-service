@@ -23,6 +23,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 import uk.ac.ebi.spot.gwas.deposition.Application;
 import uk.ac.ebi.spot.gwas.deposition.constants.GWASDepositionBackendConstants;
+import uk.ac.ebi.spot.gwas.deposition.constants.GeneralCommon;
 import uk.ac.ebi.spot.gwas.deposition.domain.*;
 import uk.ac.ebi.spot.gwas.deposition.dto.SubmissionCreationDto;
 import uk.ac.ebi.spot.gwas.deposition.dto.SubmissionDto;
@@ -240,7 +241,7 @@ public abstract class IntegrationTest {
     protected SubmissionDto createSubmissionFromEligible() throws Exception {
         SubmissionCreationDto submissionCreationDto = new SubmissionCreationDto(PublicationDtoAssembler.assemble(eligiblePublication),
                 RandomStringUtils.randomAlphanumeric(10));
-        String response = mockMvc.perform(post(GWASDepositionBackendConstants.API_V1 +
+        String response = mockMvc.perform(post(GeneralCommon.API_V1 +
                 GWASDepositionBackendConstants.API_SUBMISSIONS)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(mapper.writeValueAsString(submissionCreationDto)))

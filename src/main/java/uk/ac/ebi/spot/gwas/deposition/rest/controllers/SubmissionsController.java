@@ -36,7 +36,7 @@ import javax.validation.Valid;
 import java.util.UUID;
 
 @RestController
-@RequestMapping(value = GWASDepositionBackendConstants.API_V1 + GWASDepositionBackendConstants.API_SUBMISSIONS)
+@RequestMapping(value = GeneralCommon.API_V1 + GWASDepositionBackendConstants.API_SUBMISSIONS)
 public class SubmissionsController {
 
     private static final Logger log = LoggerFactory.getLogger(SubmissionsController.class);
@@ -88,6 +88,7 @@ public class SubmissionsController {
             Submission submission = new Submission(manuscript.getId(),
                     SubmissionProvenanceType.MANUSCRIPT.name(),
                     new Provenance(DateTime.now(), user.getId()));
+
             submission = submissionService.createSubmission(submission);
             return submissionAssemblyService.toResource(submission);
         }

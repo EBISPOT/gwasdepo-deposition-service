@@ -14,10 +14,7 @@ import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import uk.ac.ebi.spot.gwas.deposition.constants.FileUploadStatus;
-import uk.ac.ebi.spot.gwas.deposition.constants.GWASDepositionBackendConstants;
-import uk.ac.ebi.spot.gwas.deposition.constants.Status;
-import uk.ac.ebi.spot.gwas.deposition.constants.SubmissionType;
+import uk.ac.ebi.spot.gwas.deposition.constants.*;
 import uk.ac.ebi.spot.gwas.deposition.domain.*;
 import uk.ac.ebi.spot.gwas.deposition.dto.FileUploadDto;
 import uk.ac.ebi.spot.gwas.deposition.dto.SubmissionCreationDto;
@@ -89,7 +86,7 @@ public class FileUploadsControllerSSTest extends IntegrationTest {
     @Test
     public void shouldFailWithInvalidFile() throws Exception {
         SubmissionDto submissionDto = createSubmissionFromPublished();
-        String endpoint = GWASDepositionBackendConstants.API_V1 +
+        String endpoint = GeneralCommon.API_V1 +
                 GWASDepositionBackendConstants.API_SUBMISSIONS +
                 "/" + submissionDto.getSubmissionId() +
                 GWASDepositionBackendConstants.API_UPLOADS;
@@ -125,7 +122,7 @@ public class FileUploadsControllerSSTest extends IntegrationTest {
     @Test
     public void shouldFailWithNoSchema() throws Exception {
         SubmissionDto submissionDto = createSubmissionFromPublished();
-        String endpoint = GWASDepositionBackendConstants.API_V1 +
+        String endpoint = GeneralCommon.API_V1 +
                 GWASDepositionBackendConstants.API_SUBMISSIONS +
                 "/" + submissionDto.getSubmissionId() +
                 GWASDepositionBackendConstants.API_UPLOADS;
@@ -161,7 +158,7 @@ public class FileUploadsControllerSSTest extends IntegrationTest {
     @Test
     public void shouldFailWithSchemaMistmatch() throws Exception {
         SubmissionDto submissionDto = createSubmissionFromPublished();
-        String endpoint = GWASDepositionBackendConstants.API_V1 +
+        String endpoint = GeneralCommon.API_V1 +
                 GWASDepositionBackendConstants.API_SUBMISSIONS +
                 "/" + submissionDto.getSubmissionId() +
                 GWASDepositionBackendConstants.API_UPLOADS;
@@ -197,7 +194,7 @@ public class FileUploadsControllerSSTest extends IntegrationTest {
     @Test
     public void shouldFailWithNoSchemaVersion1() throws Exception {
         SubmissionDto submissionDto = createSubmissionFromPublished();
-        String endpoint = GWASDepositionBackendConstants.API_V1 +
+        String endpoint = GeneralCommon.API_V1 +
                 GWASDepositionBackendConstants.API_SUBMISSIONS +
                 "/" + submissionDto.getSubmissionId() +
                 GWASDepositionBackendConstants.API_UPLOADS;
@@ -234,7 +231,7 @@ public class FileUploadsControllerSSTest extends IntegrationTest {
     @Test
     public void shouldFailWithNoSchemaVersion2() throws Exception {
         SubmissionDto submissionDto = createSubmissionFromPublished();
-        String endpoint = GWASDepositionBackendConstants.API_V1 +
+        String endpoint = GeneralCommon.API_V1 +
                 GWASDepositionBackendConstants.API_SUBMISSIONS +
                 "/" + submissionDto.getSubmissionId() +
                 GWASDepositionBackendConstants.API_UPLOADS;
@@ -277,7 +274,7 @@ public class FileUploadsControllerSSTest extends IntegrationTest {
     @Test
     public void shouldFailWithInvalidData() throws Exception {
         SubmissionDto submissionDto = createSubmissionFromPublished();
-        String endpoint = GWASDepositionBackendConstants.API_V1 +
+        String endpoint = GeneralCommon.API_V1 +
                 GWASDepositionBackendConstants.API_SUBMISSIONS +
                 "/" + submissionDto.getSubmissionId() +
                 GWASDepositionBackendConstants.API_UPLOADS;
@@ -327,7 +324,7 @@ public class FileUploadsControllerSSTest extends IntegrationTest {
     @Test
     public void shouldHandleSummaryStats() throws Exception {
         SubmissionDto submissionDto = createSubmissionFromPublished();
-        String endpoint = GWASDepositionBackendConstants.API_V1 +
+        String endpoint = GeneralCommon.API_V1 +
                 GWASDepositionBackendConstants.API_SUBMISSIONS +
                 "/" + submissionDto.getSubmissionId() +
                 GWASDepositionBackendConstants.API_UPLOADS;
@@ -404,7 +401,7 @@ public class FileUploadsControllerSSTest extends IntegrationTest {
         FileObject fileObject = new FileObject("ss_template.xlsx", IOUtils.toByteArray(is));
         when(templateService.retrievePrefilledTemplate(any())).thenReturn(fileObject);
 
-        String response = mockMvc.perform(post(GWASDepositionBackendConstants.API_V1 +
+        String response = mockMvc.perform(post(GeneralCommon.API_V1 +
                 GWASDepositionBackendConstants.API_SUBMISSIONS)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(mapper.writeValueAsString(submissionCreationDto)))

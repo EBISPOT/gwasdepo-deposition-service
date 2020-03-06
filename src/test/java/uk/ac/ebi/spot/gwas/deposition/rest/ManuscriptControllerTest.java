@@ -12,6 +12,7 @@ import org.springframework.hateoas.Resource;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
 import uk.ac.ebi.spot.gwas.deposition.constants.GWASDepositionBackendConstants;
+import uk.ac.ebi.spot.gwas.deposition.constants.GeneralCommon;
 import uk.ac.ebi.spot.gwas.deposition.domain.Manuscript;
 import uk.ac.ebi.spot.gwas.deposition.domain.Provenance;
 import uk.ac.ebi.spot.gwas.deposition.domain.SSGlobusResponse;
@@ -61,7 +62,7 @@ public class ManuscriptControllerTest extends IntegrationTest {
      */
     @Test
     public void shouldGetManuscript() throws Exception {
-        String endpoint = GWASDepositionBackendConstants.API_V1 +
+        String endpoint = GeneralCommon.API_V1 +
                 GWASDepositionBackendConstants.API_MANUSCRIPTS +
                 "/" + manuscript.getId();
 
@@ -87,7 +88,7 @@ public class ManuscriptControllerTest extends IntegrationTest {
      */
     @Test
     public void shouldGetManuscripts() throws Exception {
-        String endpoint = GWASDepositionBackendConstants.API_V1 +
+        String endpoint = GeneralCommon.API_V1 +
                 GWASDepositionBackendConstants.API_MANUSCRIPTS;
 
         String response = mockMvc.perform(get(endpoint)

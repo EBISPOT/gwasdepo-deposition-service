@@ -11,6 +11,7 @@ import org.springframework.hateoas.Resource;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
 import uk.ac.ebi.spot.gwas.deposition.constants.GWASDepositionBackendConstants;
+import uk.ac.ebi.spot.gwas.deposition.constants.GeneralCommon;
 import uk.ac.ebi.spot.gwas.deposition.domain.SSGlobusResponse;
 import uk.ac.ebi.spot.gwas.deposition.domain.Submission;
 import uk.ac.ebi.spot.gwas.deposition.domain.User;
@@ -60,7 +61,7 @@ public class AssociationsControllerTest extends IntegrationTest {
     public void shouldGetSamples() throws Exception {
         SubmissionCreationDto submissionCreationDto = new SubmissionCreationDto(PublicationDtoAssembler.assemble(eligiblePublication),
                 RandomStringUtils.randomAlphanumeric(10));
-        String response = mockMvc.perform(post(GWASDepositionBackendConstants.API_V1 +
+        String response = mockMvc.perform(post(GeneralCommon.API_V1 +
                 GWASDepositionBackendConstants.API_SUBMISSIONS)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(mapper.writeValueAsString(submissionCreationDto)))
@@ -92,7 +93,7 @@ public class AssociationsControllerTest extends IntegrationTest {
         submission.setNotes(Arrays.asList(new String[]{note.getId()}));
         submissionService.saveSubmission(submission);
 
-        String endpoint = GWASDepositionBackendConstants.API_V1 + GWASDepositionBackendConstants.API_SUBMISSIONS +
+        String endpoint = GeneralCommon.API_V1 + GWASDepositionBackendConstants.API_SUBMISSIONS +
                 "/" + submissionDto.getSubmissionId() + GWASDepositionBackendConstants.API_ASSOCIATIONS;
 
         response = mockMvc.perform(get(endpoint)

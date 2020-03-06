@@ -53,6 +53,12 @@ solr:
   enable:
     alias: false
 
+audit:
+  enabled: false
+  url: http://gwas-audit-service:8080
+  endpoints:
+    audit-entries: /v1/audit-entries
+
 gwas-sumstats-service:
   enabled: true
   url: http://gwas-ss-service:8000

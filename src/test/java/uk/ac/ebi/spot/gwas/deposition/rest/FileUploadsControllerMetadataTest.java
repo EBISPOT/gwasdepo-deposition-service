@@ -13,6 +13,7 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import uk.ac.ebi.spot.gwas.deposition.constants.GWASDepositionBackendConstants;
+import uk.ac.ebi.spot.gwas.deposition.constants.GeneralCommon;
 import uk.ac.ebi.spot.gwas.deposition.constants.Status;
 import uk.ac.ebi.spot.gwas.deposition.constants.SubmissionType;
 import uk.ac.ebi.spot.gwas.deposition.domain.*;
@@ -87,7 +88,7 @@ public class FileUploadsControllerMetadataTest extends IntegrationTest {
     @Test
     public void shouldFailWithInvalidFile() throws Exception {
         SubmissionDto submissionDto = createSubmissionFromEligible();
-        String endpoint = GWASDepositionBackendConstants.API_V1 +
+        String endpoint = GeneralCommon.API_V1 +
                 GWASDepositionBackendConstants.API_SUBMISSIONS +
                 "/" + submissionDto.getSubmissionId() +
                 GWASDepositionBackendConstants.API_UPLOADS;
@@ -121,7 +122,7 @@ public class FileUploadsControllerMetadataTest extends IntegrationTest {
     @Test
     public void shouldFailWithNoSchema() throws Exception {
         SubmissionDto submissionDto = createSubmissionFromEligible();
-        String endpoint = GWASDepositionBackendConstants.API_V1 +
+        String endpoint = GeneralCommon.API_V1 +
                 GWASDepositionBackendConstants.API_SUBMISSIONS +
                 "/" + submissionDto.getSubmissionId() +
                 GWASDepositionBackendConstants.API_UPLOADS;
@@ -155,7 +156,7 @@ public class FileUploadsControllerMetadataTest extends IntegrationTest {
     @Test
     public void shouldFailWithUnusableSchema() throws Exception {
         SubmissionDto submissionDto = createSubmissionFromEligible();
-        String endpoint = GWASDepositionBackendConstants.API_V1 +
+        String endpoint = GeneralCommon.API_V1 +
                 GWASDepositionBackendConstants.API_SUBMISSIONS +
                 "/" + submissionDto.getSubmissionId() +
                 GWASDepositionBackendConstants.API_UPLOADS;
@@ -199,7 +200,7 @@ public class FileUploadsControllerMetadataTest extends IntegrationTest {
     @Test
     public void shouldFailWithNoSchemaVersion1() throws Exception {
         SubmissionDto submissionDto = createSubmissionFromEligible();
-        String endpoint = GWASDepositionBackendConstants.API_V1 +
+        String endpoint = GeneralCommon.API_V1 +
                 GWASDepositionBackendConstants.API_SUBMISSIONS +
                 "/" + submissionDto.getSubmissionId() +
                 GWASDepositionBackendConstants.API_UPLOADS;
@@ -234,7 +235,7 @@ public class FileUploadsControllerMetadataTest extends IntegrationTest {
     @Test
     public void shouldFailWithNoSchemaVersion2() throws Exception {
         SubmissionDto submissionDto = createSubmissionFromEligible();
-        String endpoint = GWASDepositionBackendConstants.API_V1 +
+        String endpoint = GeneralCommon.API_V1 +
                 GWASDepositionBackendConstants.API_SUBMISSIONS +
                 "/" + submissionDto.getSubmissionId() +
                 GWASDepositionBackendConstants.API_UPLOADS;
@@ -273,7 +274,7 @@ public class FileUploadsControllerMetadataTest extends IntegrationTest {
     @Test
     public void shouldFailWithInvalidData() throws Exception {
         SubmissionDto submissionDto = createSubmissionFromEligible();
-        String endpoint = GWASDepositionBackendConstants.API_V1 +
+        String endpoint = GeneralCommon.API_V1 +
                 GWASDepositionBackendConstants.API_SUBMISSIONS +
                 "/" + submissionDto.getSubmissionId() +
                 GWASDepositionBackendConstants.API_UPLOADS;
@@ -314,7 +315,7 @@ public class FileUploadsControllerMetadataTest extends IntegrationTest {
     }
 
     private FileUploadDto createMetadataFileUpload(SubmissionDto submissionDto) throws Exception {
-        String endpoint = GWASDepositionBackendConstants.API_V1 +
+        String endpoint = GeneralCommon.API_V1 +
                 GWASDepositionBackendConstants.API_SUBMISSIONS +
                 "/" + submissionDto.getSubmissionId() +
                 GWASDepositionBackendConstants.API_UPLOADS;

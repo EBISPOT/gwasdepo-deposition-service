@@ -2,8 +2,6 @@ package uk.ac.ebi.spot.gwas.deposition.constants;
 
 public class GWASDepositionBackendConstants {
 
-    public static final String API_V1 = "/v1";
-
     public static final String API_DAILYSTATS = "/daily-stats";
 
     public static final String API_PUBLICATIONS = "/publications";
@@ -27,12 +25,6 @@ public class GWASDepositionBackendConstants {
     public static final String API_REINDEX_PUBLICATIONS = "/reindex-publications";
 
     public static final String API_CLEAR_PUBLICATIONS = "/clear-publications";
-
-    public static final String LOG_FILE_NAME = "LOG_FILE_NAME";
-
-    public static final String DB_USER = "DB_USER";
-
-    public static final String DB_PASSWORD = "DB_PASSWORD";
 
     public static final String PARAM_PMID = "pmid";
 
