@@ -90,11 +90,11 @@ public abstract class IntegrationTest {
     }
 
     @Configuration
-    public static class MockEmailServiceConfig {
+    public static class MockBackendEmailServiceConfig {
 
         @Bean
-        public EmailService emailService() {
-            return mock(EmailService.class);
+        public BackendEmailService backendEmailService() {
+            return mock(BackendEmailService.class);
         }
     }
 

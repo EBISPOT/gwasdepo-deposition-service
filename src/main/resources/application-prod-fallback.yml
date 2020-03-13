@@ -36,8 +36,9 @@ gwas-deposition:
   db: gwasdepo
   solr:
     enabled: true
-  email-config:
-    email-enabled: true
+
+email:
+  enabled: true
 
 gwas-template-service:
   enabled: true

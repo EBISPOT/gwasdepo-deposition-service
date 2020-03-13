@@ -39,10 +39,6 @@ gwas-deposition:
   solr:
     enabled: false
   email-config:
-    email-enabled: false
-    from-address: no-reply@ebi.ac.uk
-    from-name: GWAS Curation
-    retries: 3
     subject: GWAS Catalog submission for publication %PMID%
     base-url: https://www.ebi.ac.uk/gwas/deposition/submission/
     emails:
@@ -52,6 +48,13 @@ gwas-deposition:
 solr:
   enable:
     alias: false
+
+email:
+  enabled: false
+  config:
+    from-address: no-reply@ebi.ac.uk
+    from-name: GWAS Curation
+    retries: 3
 
 audit:
   enabled: false

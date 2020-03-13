@@ -1,6 +1,7 @@
 package uk.ac.ebi.spot.gwas.deposition.service;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import uk.ac.ebi.spot.gwas.deposition.dto.summarystats.SSTemplateEntryDto;
@@ -23,6 +24,7 @@ public class GWASCatalogRESTServiceTest extends IntegrationTest {
     }
 
     @Test
+    @Ignore
     public void shouldRetrievePMIDData() {
         List<SSTemplateEntryDto> list = gwasCatalogRESTService.getSSTemplateEntries(pmid);
         assertEquals(36, list.size());

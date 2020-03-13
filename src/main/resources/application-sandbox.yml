@@ -36,7 +36,9 @@ gwas-deposition:
     enabled: true
   email-config:
     base-url: http://193.62.54.159/gwas/deposition/submission/
-    email-enabled: true
+
+email:
+  enabled: true
 
 gwas-template-service:
   enabled: true

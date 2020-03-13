@@ -4,6 +4,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.thymeleaf.context.Context;
 import uk.ac.ebi.spot.gwas.deposition.constants.MailConstants;
+import uk.ac.ebi.spot.gwas.deposition.messaging.email.AbstractEmailBuilder;
+import uk.ac.ebi.spot.gwas.deposition.messaging.email.EmailBuilder;
 
 import java.util.List;
 import java.util.Map;

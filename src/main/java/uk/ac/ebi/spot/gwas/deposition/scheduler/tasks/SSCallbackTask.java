@@ -4,6 +4,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import uk.ac.ebi.spot.gwas.deposition.audit.AuditHelper;
+import uk.ac.ebi.spot.gwas.deposition.audit.AuditProxy;
+import uk.ac.ebi.spot.gwas.deposition.config.BackendMailConfig;
 import uk.ac.ebi.spot.gwas.deposition.config.GWASDepositionBackendConfig;
 import uk.ac.ebi.spot.gwas.deposition.constants.FileUploadStatus;
 import uk.ac.ebi.spot.gwas.deposition.constants.MailConstants;
@@ -45,10 +48,16 @@ public class SSCallbackTask {
     private GWASDepositionBackendConfig gwasDepositionBackendConfig;
 
     @Autowired
-    private EmailService emailService;
+    private BackendEmailService backendEmailService;
+
+    @Autowired
+    private BackendMailConfig backendMailConfig;
 
     @Autowired
     private PublicationService publicationService;
+
+    @Autowired
+    private AuditProxy auditProxy;
 
     public void checkCallbackIds() {
         log.info("Running callback ID checks.");
@@ -83,6 +92,7 @@ public class SSCallbackTask {
                             fileUpload.setStatus(FileUploadStatus.INVALID.name());
                             fileUploadsService.save(fileUpload);
 
+                            auditProxy.addAuditEntry(AuditHelper.fileValidationFailed(null, fileUpload, errors, true));
                             callbackId.setValid(false);
                         }
                     }
@@ -99,7 +109,7 @@ public class SSCallbackTask {
                     metadata.put(MailConstants.PUBLICATION_TITLE, publication.getTitle());
                     metadata.put(MailConstants.PMID, publication.getPmid());
                     metadata.put(MailConstants.FIRST_AUTHOR, publication.getFirstAuthor());
-                    metadata.put(MailConstants.SUBMISSION_ID, gwasDepositionBackendConfig.getSubmissionsBaseURL() + submission.getId());
+                    metadata.put(MailConstants.SUBMISSION_ID, backendMailConfig.getSubmissionsBaseURL() + submission.getId());
 
                     String userId = submission.getLastUpdated() != null ? submission.getLastUpdated().getUserId() :
                             submission.getCreated().getUserId();
@@ -111,13 +121,16 @@ public class SSCallbackTask {
                         if (fileUpload != null) {
                             fileUpload.setStatus(FileUploadStatus.VALID.name());
                             fileUploadsService.save(fileUpload);
+                            auditProxy.addAuditEntry(AuditHelper.fileValidationSuccess(userId, fileUpload, true));
                         }
 
-                        emailService.sendSuccessEmail(userId, publication.getPmid(), metadata);
+                        backendEmailService.sendSuccessEmail(userId, publication.getPmid(), metadata);
+                        auditProxy.addAuditEntry(AuditHelper.submissionSuccess(submission.getCreated().getUserId(), submission));
                     } else {
                         submission.setOverallStatus(Status.INVALID.name());
                         submission.setSummaryStatsStatus(Status.INVALID.name());
-                        emailService.sendFailEmail(userId, publication.getPmid(), metadata, errors);
+                        backendEmailService.sendFailEmail(userId, publication.getPmid(), metadata, errors);
+                        auditProxy.addAuditEntry(AuditHelper.submissionFailed(submission.getCreated().getUserId(), submission));
                     }
                     submissionService.saveSubmission(submission);
 

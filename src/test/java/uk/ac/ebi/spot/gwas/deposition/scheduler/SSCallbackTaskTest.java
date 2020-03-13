@@ -18,7 +18,7 @@ import uk.ac.ebi.spot.gwas.deposition.dto.summarystats.SummaryStatsStatusDto;
 import uk.ac.ebi.spot.gwas.deposition.repository.*;
 import uk.ac.ebi.spot.gwas.deposition.rest.IntegrationTest;
 import uk.ac.ebi.spot.gwas.deposition.scheduler.tasks.SSCallbackTask;
-import uk.ac.ebi.spot.gwas.deposition.service.EmailService;
+import uk.ac.ebi.spot.gwas.deposition.service.BackendEmailService;
 import uk.ac.ebi.spot.gwas.deposition.service.SumStatsService;
 
 import java.util.ArrayList;
@@ -34,7 +34,7 @@ import static org.mockito.Mockito.when;
 @ContextConfiguration(classes = {IntegrationTest.MockJWTServiceConfig.class,
         IntegrationTest.MockTaskExecutorConfig.class,
         IntegrationTest.MockSumStatsServiceConfig.class,
-        IntegrationTest.MockEmailServiceConfig.class})
+        IntegrationTest.MockBackendEmailServiceConfig.class})
 public class SSCallbackTaskTest extends IntegrationTest {
 
     @Autowired
@@ -62,7 +62,7 @@ public class SSCallbackTaskTest extends IntegrationTest {
     private SummaryStatsEntryRepository summaryStatsEntryRepository;
 
     @Autowired
-    private EmailService emailService;
+    private BackendEmailService backendEmailService;
 
     @Autowired
     private PublicationRepository publicationRepository;
@@ -119,8 +119,8 @@ public class SSCallbackTaskTest extends IntegrationTest {
                 RandomStringUtils.randomAlphanumeric(10),
                 RandomStringUtils.randomAlphanumeric(10));
         summaryStatsEntry = summaryStatsEntryRepository.insert(summaryStatsEntry);
-        doNothing().when(emailService).sendSuccessEmail(any(), any(), any());
-        doNothing().when(emailService).sendFailEmail(any(), any(), any(), any());
+        doNothing().when(backendEmailService).sendSuccessEmail(any(), any(), any());
+        doNothing().when(backendEmailService).sendFailEmail(any(), any(), any(), any());
     }
 
     @Test

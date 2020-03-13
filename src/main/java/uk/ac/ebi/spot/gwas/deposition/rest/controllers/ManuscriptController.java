@@ -13,6 +13,8 @@ import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.mvc.ControllerLinkBuilder;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import uk.ac.ebi.spot.gwas.deposition.audit.AuditHelper;
+import uk.ac.ebi.spot.gwas.deposition.audit.AuditProxy;
 import uk.ac.ebi.spot.gwas.deposition.config.GWASDepositionBackendConfig;
 import uk.ac.ebi.spot.gwas.deposition.constants.GWASDepositionBackendConstants;
 import uk.ac.ebi.spot.gwas.deposition.constants.GeneralCommon;
@@ -49,6 +51,9 @@ public class ManuscriptController {
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private AuditProxy auditProxy;
+
     /**
      * GET /v1/manuscripts/{manuscriptId}
      */
@@ -59,6 +64,7 @@ public class ManuscriptController {
         User user = userService.findUser(jwtService.extractUser(HeadersUtil.extractJWT(request)), false);
         log.info("[{}] Request to get manuscript: {}", user.getId(), manuscriptId);
         Manuscript manuscript = manuscriptService.retrieveManuscript(manuscriptId, user.getId());
+        auditProxy.addAuditEntry(AuditHelper.manuscriptRetrieved(user.getId(), manuscript));
         log.info("Returning manuscript: {}", manuscript.getId());
         return manuscriptDtoAssembler.toResource(manuscript);
     }

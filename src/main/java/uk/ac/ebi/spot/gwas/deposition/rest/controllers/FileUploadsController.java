@@ -12,6 +12,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import uk.ac.ebi.spot.gwas.deposition.audit.AuditHelper;
+import uk.ac.ebi.spot.gwas.deposition.audit.AuditProxy;
 import uk.ac.ebi.spot.gwas.deposition.config.GWASDepositionBackendConfig;
 import uk.ac.ebi.spot.gwas.deposition.constants.GWASDepositionBackendConstants;
 import uk.ac.ebi.spot.gwas.deposition.constants.GeneralCommon;
@@ -57,6 +59,9 @@ public class FileUploadsController {
     @Autowired
     private GWASDepositionBackendConfig gwasDepositionBackendConfig;
 
+    @Autowired
+    private AuditProxy auditProxy;
+
     /*
      * POST /v1/submissions/{submissionId}/uploads
      */
@@ -79,6 +84,7 @@ public class FileUploadsController {
         } else {
             fileUpload = fileHandlerService.handleMetadataFile(submission, file, user);
         }
+        auditProxy.addAuditEntry(AuditHelper.fileCreated(user.getId(), fileUpload, submission));
 
         final ControllerLinkBuilder lb = linkTo(
                 methodOn(FileUploadsController.class).getFileUpload(submissionId, fileUpload.getId(), null));
@@ -105,6 +111,7 @@ public class FileUploadsController {
         }
         FileUpload fileUpload = fileUploadsService.getFileUpload(fileUploadId);
         log.info("Returning file [{}] for submission: {}", fileUpload.getFileName(), submission.getId());
+        auditProxy.addAuditEntry(AuditHelper.fileRetrieved(user.getId(), fileUpload));
 
         final ControllerLinkBuilder lb = linkTo(
                 methodOn(FileUploadsController.class).getFileUpload(submissionId, fileUploadId, null));
@@ -155,6 +162,7 @@ public class FileUploadsController {
         log.info("[{}] Request to download file [{}] from submission: {}", user.getName(), fileUploadId, submissionId);
         Submission submission = submissionService.getSubmission(submissionId, user);
         FileUpload fileUpload = fileUploadsService.getFileUpload(fileUploadId);
+        auditProxy.addAuditEntry(AuditHelper.fileRetrieved(user.getId(), fileUpload));
         byte[] payload = fileUploadsService.retrieveFileContent(fileUpload.getId());
         log.info("Returning content for file [{}] for submission: {}", fileUpload.getFileName(), submission.getId());
 

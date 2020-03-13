@@ -15,6 +15,9 @@ import org.springframework.hateoas.mvc.ControllerLinkBuilder;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
+import uk.ac.ebi.spot.gwas.deposition.audit.AuditHelper;
+import uk.ac.ebi.spot.gwas.deposition.audit.AuditProxy;
+import uk.ac.ebi.spot.gwas.deposition.audit.AuditService;
 import uk.ac.ebi.spot.gwas.deposition.config.GWASDepositionBackendConfig;
 import uk.ac.ebi.spot.gwas.deposition.constants.*;
 import uk.ac.ebi.spot.gwas.deposition.domain.*;
@@ -68,6 +71,9 @@ public class SubmissionsController {
     @Autowired
     private ManuscriptService manuscriptService;
 
+    @Autowired
+    private AuditProxy auditProxy;
+
     /**
      * POST /v1/submissions
      */
@@ -80,16 +86,20 @@ public class SubmissionsController {
         User user = userService.findUser(jwtService.extractUser(HeadersUtil.extractJWT(request)), false);
         log.info("[{}] Request to create new submission for publication: {}", user.getName(),
                 submissionCreationDto.getPublication().getPmid());
+
         if (submissionCreationDto.getPublication().getPmid() == null) {
             log.info("Received submission based on manuscript: {}", submissionCreationDto.getPublication().getTitle());
             Manuscript manuscript = ManuscriptDtoDisassembler.diassemble(submissionCreationDto.getPublication(),
                     new Provenance(DateTime.now(), user.getId()));
             manuscript = manuscriptService.createManuscript(manuscript);
+            auditProxy.addAuditEntry(AuditHelper.manuscriptCreated(user.getId(), manuscript));
+
             Submission submission = new Submission(manuscript.getId(),
                     SubmissionProvenanceType.MANUSCRIPT.name(),
                     new Provenance(DateTime.now(), user.getId()));
 
             submission = submissionService.createSubmission(submission);
+            auditProxy.addAuditEntry(AuditHelper.submissionCreated(user.getId(), submission, manuscript));
             return submissionAssemblyService.toResource(submission);
         }
 
@@ -107,10 +117,12 @@ public class SubmissionsController {
                             user.getEmail()));
             if (outcome != null) {
                 if (!outcome.isValid()) {
+                    auditProxy.addAuditEntry(AuditHelper.globusFailed(user.getId(), submissionCreationDto.getPublication(), outcome));
                     log.error("Unable to create Globus folder: {}", outcome.getOutcome());
                     throw new EmailAccountNotLinkedToGlobusException(outcome.getOutcome());
                 }
 
+                auditProxy.addAuditEntry(AuditHelper.globusSuccess(user.getEmail(), submissionCreationDto.getPublication(), outcome));
                 submission.setGlobusFolderId(globusFolder);
                 submission.setGlobusOriginId(outcome.getOutcome());
 
@@ -118,6 +130,8 @@ public class SubmissionsController {
                     publication.setStatus(PublicationStatus.UNDER_SUBMISSION.name());
                     submission.setType(SubmissionType.METADATA.name());
                     submission = submissionService.createSubmission(submission);
+                    auditProxy.addAuditEntry(AuditHelper.submissionCreated(user.getId(),
+                            submission, submissionCreationDto.getPublication()));
                 }
                 if (publication.getStatus().equals(PublicationStatus.PUBLISHED.name())) {
                     publication.setStatus(PublicationStatus.UNDER_SUMMARY_STATS_SUBMISSION.name());
@@ -129,6 +143,7 @@ public class SubmissionsController {
                 log.info("Returning new submission: {}", submission.getId());
                 return submissionAssemblyService.toResource(submission);
             } else {
+                auditProxy.addAuditEntry(AuditHelper.globusFailed(user.getId(), submissionCreationDto.getPublication(), outcome));
                 throw new SSGlobusFolderCreatioException("Sorry! There is a fault on our end. Please contact gwas-info@ebi.ac.uk for help.");
             }
         }
@@ -146,6 +161,7 @@ public class SubmissionsController {
         User user = userService.findUser(jwtService.extractUser(HeadersUtil.extractJWT(request)), false);
         log.info("[{}] Request to retrieve submission: {}", user.getName(), submissionId);
         Submission submission = submissionService.getSubmission(submissionId, user);
+        auditProxy.addAuditEntry(AuditHelper.submissionRetrieved(user.getId(), submission));
         log.info("Returning submission: {}", submission.getId());
         return submissionAssemblyService.toResource(submission);
     }
@@ -160,10 +176,12 @@ public class SubmissionsController {
         log.info("[{}] Request to delete submission: {}", user.getName(), submissionId);
         Submission submission = submissionService.getSubmission(submissionId, user);
         if (submission.getOverallStatus().equalsIgnoreCase(Status.SUBMITTED.name())) {
+            auditProxy.addAuditEntry(AuditHelper.submissionDeleted(user.getId(), submission, false));
             log.error("Unable to DELETE submission [{}]. Submission has already been SUBMITTED.", submissionId);
             throw new DeleteOnSubmittedSubmissionNotAllowedException("Unable to DELETE submission [" + submissionId + "]. Submission has already been SUBMITTED.");
         }
 
+        auditProxy.addAuditEntry(AuditHelper.submissionDeleted(user.getId(), submission, true));
         submissionService.deleteSubmission(submissionId, user);
 
         Publication publication = publicationService.retrievePublication(submission.getPublicationId(), true);
@@ -186,6 +204,7 @@ public class SubmissionsController {
         User user = userService.findUser(jwtService.extractUser(HeadersUtil.extractJWT(request)), false);
         log.info("[{}] Request to submit submission: {}", user.getName(), submissionId);
         Submission submission = submissionService.updateSubmissionStatus(submissionId, Status.SUBMITTED.name(), user);
+        auditProxy.addAuditEntry(AuditHelper.submissionSubmit(user.getId(), submission));
         log.info("Submissions successfully updated.");
         return submissionAssemblyService.toResource(submission);
     }
