@@ -120,4 +120,45 @@ public class MongoConfig {
             return new MongoClient(new MongoClientURI("mongodb://" + credentials + mongoUri));
         }
     }
+
+    @Configuration
+    @EnableMongoRepositories(basePackages = {"uk.ac.ebi.spot.gwas.deposition.repository"})
+    @EnableTransactionManagement
+    @Profile({"gcp-sandbox"})
+    public static class MongoConfiGCPSandbox extends AbstractMongoConfiguration {
+
+        @Autowired
+        private SystemConfigProperties systemConfigProperties;
+
+        @Autowired
+        private GWASDepositionBackendConfig gwasDepositionBackendConfig;
+
+        @Override
+        protected String getDatabaseName() {
+            return gwasDepositionBackendConfig.getDbName();
+        }
+
+        @Bean
+        public GridFsTemplate gridFsTemplate() throws Exception {
+            return new GridFsTemplate(mongoDbFactory(), mappingMongoConverter());
+        }
+
+        @Override
+        public MongoClient mongoClient() {
+            String mongoUri = systemConfigProperties.getMongoUri();
+            String dbUser = systemConfigProperties.getDbUser();
+            String dbPassword = systemConfigProperties.getDbPassword();
+            String credentials = "";
+            if (dbUser != null && dbPassword != null) {
+                dbUser = dbUser.trim();
+                dbPassword = dbPassword.trim();
+                if (!dbUser.equalsIgnoreCase("") &&
+                        !dbPassword.equalsIgnoreCase("")) {
+                    credentials = dbUser + ":" + dbPassword + "@";
+                }
+            }
+
+            return new MongoClient(new MongoClientURI("mongodb+srv://" + credentials + mongoUri));
+        }
+    }
 }

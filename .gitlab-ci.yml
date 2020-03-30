@@ -53,16 +53,34 @@ deploy-backend-sandbox:
   image: dtzar/helm-kubectl:2.13.1
   stage: deploy-sandbox
   script:
-    - echo "Deploy to sandbox server"
+    - echo "Deploy to GCP sandbox server"
     - mkdir -p /root/.kube
-    - echo ${SANBOX_KUBECONF} | base64 -d > /root/.kube/config
+    - echo ${GCP_KUBECONF} | base64 -d > /root/.kube/kubeconfig.yaml
+    - echo ${GCP_ROBOT_CREDENTIALS} | base64 -d > /root/.kube/robot-k8-sandbox.json
+    - export GOOGLE_APPLICATION_CREDENTIALS=/root/.kube/tudor-k8-sandbox.json
+    - export KUBECONFIG=/root/.kube/kubeconfig.yaml
     - helm init
     - helm delete --purge gwas-deposition-backend || true
-    - helm install --name gwas-deposition-backend --set k8Namespace=gwas,image.repository=$BACKEND_REGISTRY_IMAGE,image.tag=$CI_COMMIT_SHA,image.env.secretsName=sandbox-secrets,image.env.secretsKey=db-backend ./k8chart/ --wait
+    - helm install --name gwas-deposition-backend --set k8Namespace=gwas,image.env.envName=gcp-sandbox,image.repository=$BACKEND_REGISTRY_IMAGE,image.tag=$CI_COMMIT_SHA,image.env.secretsName=sandbox-secrets,image.env.secretsKey=db-backend ./k8chart/ --wait
   environment:
     name: sandbox
   only:
     - develop
+
+#deploy-backend-sandbox:
+#  image: dtzar/helm-kubectl:2.13.1
+#  stage: deploy-sandbox
+#  script:
+#  - echo "Deploy to sandbox server"
+#  - mkdir -p /root/.kube
+#  - echo ${SANBOX_KUBECONF} | base64 -d > /root/.kube/config
+#  - helm init
+#  - helm delete --purge gwas-deposition-backend || true
+#  - helm install --name gwas-deposition-backend --set k8Namespace=gwas,image.repository=$BACKEND_REGISTRY_IMAGE,image.tag=$CI_COMMIT_SHA,image.env.secretsName=sandbox-secrets,image.env.secretsKey=db-backend ./k8chart/ --wait
+#  environment:
+#    name: sandbox
+#  only:
+#  - develop
 
 deploy-fallback:
   image: dtzar/helm-kubectl:2.13.1

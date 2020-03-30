@@ -13,8 +13,8 @@ image:
   env:
     envName: "sandbox"
     logFileName: "deposition-service"
-    xms: "-Xms4096m"
-    xmx: "-Xmx4096m"
+    xms: "-Xms1024m"
+    xmx: "-Xmx1024m"
     dbUser: ""
     secretsName: ""
     secretsKey: ""
@@ -49,11 +49,11 @@ k8Namespace: default
 
 resources:
   limits:
-    cpu: 250m
-    memory: 5120Mi
+    cpu: 200m
+    memory: 1024Mi
   requests:
     cpu: 100m
-    memory: 4096Mi
+    memory: 1024Mi
 
 nodeSelector: {}
 

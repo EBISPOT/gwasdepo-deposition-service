@@ -1,0 +1,36 @@
+server:
+  port: 8080
+
+spring:
+  main:
+    allow-bean-definition-overriding: true
+  data:
+    mongodb:
+      uri: deposition-sandbox-x7yjx.gcp.mongodb.net/test?retryWrites=true&w=majority
+
+quartz:
+  scheduler:
+    dbName: deposition-backend-sandbox
+
+gwas-deposition:
+  auth:
+    enabled: false
+  db: deposition-backend-sandbox
+  proxy-prefix: /gwas/deposition/api
+  solr:
+    enabled: false
+  email-config:
+    base-url: http://193.62.54.159/gwas/deposition/submission/
+
+email:
+  enabled: false
+
+gwas-template-service:
+  enabled: true
+
+gwas-catalog-service:
+  enabled: false
+
+solr:
+  enable:
+    alias: true
