@@ -8,7 +8,7 @@ spring:
     allow-bean-definition-overriding: true
   data:
     mongodb:
-      uri: mongodb-hxvm-063.ebi.ac.uk:27017/admin?replicaSet=gwasdepodevrs039
+      uri: mongodb-hxvm-063.ebi.ac.uk:27017/admin?replicaSet=gwasdepodevrs039&w=1
     solr:
       host: http://solr-svc.solr:8983/solr/
   mail:
