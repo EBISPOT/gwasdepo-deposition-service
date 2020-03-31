@@ -3,6 +3,7 @@ package uk.ac.ebi.spot.gwas.deposition.scheduler.tasks;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import uk.ac.ebi.spot.gwas.deposition.config.GWASDepositionBackendConfig;
 import uk.ac.ebi.spot.gwas.deposition.constants.FileUploadStatus;
@@ -50,6 +51,7 @@ public class SSCallbackTask {
     @Autowired
     private PublicationService publicationService;
 
+    @Scheduled(cron = "0 */1 * * * ?")
     public void checkCallbackIds() {
         log.info("Running callback ID checks.");
         if (sumStatsService == null) {

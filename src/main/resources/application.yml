@@ -9,7 +9,7 @@ logging:
 
 quartz:
   scheduler:
-    active: true
+    active: false
     instanceName: backendSchedulerJobSchedulerCluster
     environment-config: quartz/environment-config.yaml
     mongodb-pool-size: 10

@@ -8,7 +8,7 @@ spring:
     allow-bean-definition-overriding: true
   data:
     mongodb:
-      uri: mongodb-hxvm-063.ebi.ac.uk:27017/admin?replicaSet=gwasdepodevrs039&w=1
+      uri: mongodb-hhvm-062.ebi.ac.uk:27017,mongodb-hxvm-063.ebi.ac.uk:27017/admin?replicaSet=gwasdepodevrs039
     solr:
       host: http://solr-svc.solr:8983/solr/
   mail:
@@ -27,7 +27,6 @@ spring:
 
 quartz:
   scheduler:
-    isClustered: false
     dbName: gwasdepo
 
 gwas-deposition:

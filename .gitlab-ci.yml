@@ -73,7 +73,7 @@ deploy-fallback:
   - echo ${PFALLBACK_KUBECONFIG} | base64 -d > /root/.kube/config
   - helm init
   - helm delete --purge gwas-deposition-backend || true
-  - helm install --name gwas-deposition-backend --set k8Namespace=gwas,replicaCount=3,image.env.envName=prod-fallback,image.repository=$BACKEND_REGISTRY_IMAGE,image.tag=$CI_COMMIT_SHA,image.env.dbUser=gwasdepo,image.env.secretsName=prod-secrets,image.env.secretsKey=db-backend ./k8chart/ --wait
+  - helm install --name gwas-deposition-backend --set k8Namespace=gwas,replicaCount=1,image.env.envName=prod-fallback,image.repository=$BACKEND_REGISTRY_IMAGE,image.tag=$CI_COMMIT_SHA,image.env.dbUser=gwasdepo,image.env.secretsName=prod-secrets,image.env.secretsKey=db-backend ./k8chart/ --wait
   environment:
     name: prod
   only:
