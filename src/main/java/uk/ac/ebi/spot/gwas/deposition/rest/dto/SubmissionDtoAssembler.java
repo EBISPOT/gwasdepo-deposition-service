@@ -9,13 +9,13 @@ public class SubmissionDtoAssembler {
 
     public static SubmissionDto assemble(Submission submission,
                                          PublicationDto publication,
-                                         ManuscriptDto manuscript,
+                                         BodyOfWorkDto bodyOfWork,
                                          List<FileUploadDto> fileUploads,
                                          ProvenanceDto created,
                                          ProvenanceDto lastUpdated) {
         return new SubmissionDto(submission.getId(),
                 publication,
-                manuscript,
+                bodyOfWork,
                 fileUploads,
                 submission.getGlobusFolderId(),
                 submission.getGlobusOriginId(),

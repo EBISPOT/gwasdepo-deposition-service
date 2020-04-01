@@ -17,18 +17,14 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import uk.ac.ebi.spot.gwas.deposition.audit.AuditHelper;
 import uk.ac.ebi.spot.gwas.deposition.audit.AuditProxy;
-import uk.ac.ebi.spot.gwas.deposition.audit.AuditService;
 import uk.ac.ebi.spot.gwas.deposition.config.GWASDepositionBackendConfig;
 import uk.ac.ebi.spot.gwas.deposition.constants.*;
 import uk.ac.ebi.spot.gwas.deposition.domain.*;
 import uk.ac.ebi.spot.gwas.deposition.dto.SubmissionCreationDto;
 import uk.ac.ebi.spot.gwas.deposition.dto.SubmissionDto;
 import uk.ac.ebi.spot.gwas.deposition.dto.summarystats.SSGlobusFolderDto;
-import uk.ac.ebi.spot.gwas.deposition.exception.DeleteOnSubmittedSubmissionNotAllowedException;
-import uk.ac.ebi.spot.gwas.deposition.exception.EmailAccountNotLinkedToGlobusException;
-import uk.ac.ebi.spot.gwas.deposition.exception.SSGlobusFolderCreatioException;
-import uk.ac.ebi.spot.gwas.deposition.exception.SubmissionOnUnacceptedPublicationTypeException;
-import uk.ac.ebi.spot.gwas.deposition.rest.dto.ManuscriptDtoDisassembler;
+import uk.ac.ebi.spot.gwas.deposition.exception.*;
+import uk.ac.ebi.spot.gwas.deposition.rest.dto.BodyOfWorkDtoDisassembler;
 import uk.ac.ebi.spot.gwas.deposition.service.*;
 import uk.ac.ebi.spot.gwas.deposition.service.impl.SubmissionAssemblyService;
 import uk.ac.ebi.spot.gwas.deposition.util.BackendUtil;
@@ -69,7 +65,7 @@ public class SubmissionsController {
     private SumStatsService sumStatsService;
 
     @Autowired
-    private ManuscriptService manuscriptService;
+    private BodyOfWorkService bodyOfWorkService;
 
     @Autowired
     private AuditProxy auditProxy;
@@ -87,19 +83,22 @@ public class SubmissionsController {
         log.info("[{}] Request to create new submission for publication: {}", user.getName(),
                 submissionCreationDto.getPublication().getPmid());
 
-        if (submissionCreationDto.getPublication().getPmid() == null) {
-            log.info("Received submission based on manuscript: {}", submissionCreationDto.getPublication().getTitle());
-            Manuscript manuscript = ManuscriptDtoDisassembler.diassemble(submissionCreationDto.getPublication(),
+        if (submissionCreationDto.getPublication() == null) {
+            if (submissionCreationDto.getBodyOfWork() == null) {
+                throw new InvalidSubmissionTypeException("Submission is missing body payload.");
+            }
+            log.info("Received submission based on body of work: {}", submissionCreationDto.getBodyOfWork().getTitle());
+            BodyOfWork bodyOfWork = BodyOfWorkDtoDisassembler.disassemble(submissionCreationDto.getBodyOfWork(),
                     new Provenance(DateTime.now(), user.getId()));
-            manuscript = manuscriptService.createManuscript(manuscript);
-            auditProxy.addAuditEntry(AuditHelper.manuscriptCreated(user.getId(), manuscript));
+            bodyOfWork = bodyOfWorkService.retrieveBodyOfWork(bodyOfWork.getId(), user.getId());
+//            auditProxy.addAuditEntry(AuditHelper.manuscriptCreated(user.getId(), manuscript));
 
-            Submission submission = new Submission(manuscript.getId(),
-                    SubmissionProvenanceType.MANUSCRIPT.name(),
+            Submission submission = new Submission(bodyOfWork.getId(),
+                    SubmissionProvenanceType.BODY_OF_WORK.name(),
                     new Provenance(DateTime.now(), user.getId()));
 
             submission = submissionService.createSubmission(submission);
-            auditProxy.addAuditEntry(AuditHelper.submissionCreated(user.getId(), submission, manuscript));
+//            auditProxy.addAuditEntry(AuditHelper.submissionCreated(user.getId(), submission, manuscript));
             return submissionAssemblyService.toResource(submission);
         }
 

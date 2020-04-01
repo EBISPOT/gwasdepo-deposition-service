@@ -34,6 +34,13 @@ public class ExceptionHandlerAdvice {
         return new ResponseEntity<>(e.getMessage(), headers, HttpStatus.BAD_REQUEST);
     }
 
+    @ExceptionHandler(InvalidSubmissionTypeException.class)
+    public ResponseEntity<String> handleInvalidSubmissionTypeExceptionException(InvalidSubmissionTypeException e) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.TEXT_PLAIN);
+        return new ResponseEntity<>(e.getMessage(), headers, HttpStatus.BAD_REQUEST);
+    }
+
     @ExceptionHandler(SSGlobusFolderCreatioException.class)
     public ResponseEntity<String> handleSSGlobusFolderCreatioException(SSGlobusFolderCreatioException e) {
         HttpHeaders headers = new HttpHeaders();

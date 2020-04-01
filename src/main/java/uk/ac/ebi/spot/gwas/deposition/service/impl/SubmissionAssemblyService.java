@@ -9,16 +9,16 @@ import org.springframework.stereotype.Service;
 import uk.ac.ebi.spot.gwas.deposition.config.GWASDepositionBackendConfig;
 import uk.ac.ebi.spot.gwas.deposition.constants.GWASDepositionBackendConstants;
 import uk.ac.ebi.spot.gwas.deposition.constants.SubmissionProvenanceType;
+import uk.ac.ebi.spot.gwas.deposition.domain.BodyOfWork;
 import uk.ac.ebi.spot.gwas.deposition.domain.FileUpload;
-import uk.ac.ebi.spot.gwas.deposition.domain.Manuscript;
 import uk.ac.ebi.spot.gwas.deposition.domain.Publication;
 import uk.ac.ebi.spot.gwas.deposition.domain.Submission;
 import uk.ac.ebi.spot.gwas.deposition.dto.FileUploadDto;
 import uk.ac.ebi.spot.gwas.deposition.dto.SubmissionDto;
 import uk.ac.ebi.spot.gwas.deposition.rest.controllers.*;
 import uk.ac.ebi.spot.gwas.deposition.rest.dto.*;
+import uk.ac.ebi.spot.gwas.deposition.service.BodyOfWorkService;
 import uk.ac.ebi.spot.gwas.deposition.service.FileUploadsService;
-import uk.ac.ebi.spot.gwas.deposition.service.ManuscriptService;
 import uk.ac.ebi.spot.gwas.deposition.service.PublicationService;
 import uk.ac.ebi.spot.gwas.deposition.service.UserService;
 import uk.ac.ebi.spot.gwas.deposition.util.BackendUtil;
@@ -45,16 +45,16 @@ public class SubmissionAssemblyService implements ResourceAssembler<Submission, 
     private GWASDepositionBackendConfig gwasDepositionBackendConfig;
 
     @Autowired
-    private ManuscriptService manuscriptService;
+    private BodyOfWorkService bodyOfWorkService;
 
     @Override
     public Resource<SubmissionDto> toResource(Submission submission) {
         Publication publication = null;
-        Manuscript manuscript = null;
+        BodyOfWork bodyOfWork = null;
         if (submission.getProvenanceType().equalsIgnoreCase(SubmissionProvenanceType.PUBLICATION.name())) {
             publication = publicationService.retrievePublication(submission.getPublicationId(), true);
         } else {
-            manuscript = manuscriptService.retrieveManuscript(submission.getManuscriptId(), submission.getCreated().getUserId());
+            bodyOfWork = bodyOfWorkService.retrieveBodyOfWork(submission.getBodyOfWorks().get(0), submission.getCreated().getUserId());
         }
         List<FileUpload> fileUploads = fileUploadsService.getFileUploads(submission.getFileUploads());
 
@@ -65,7 +65,7 @@ public class SubmissionAssemblyService implements ResourceAssembler<Submission, 
 
         SubmissionDto submissionDto = SubmissionDtoAssembler.assemble(submission,
                 publication != null ? PublicationDtoAssembler.assemble(publication) : null,
-                manuscript != null ? ManuscriptDtoAssembler.assemble(manuscript) : null,
+                bodyOfWork != null ? BodyOfWorkDtoAssembler.assemble(bodyOfWork) : null,
                 fileUploadDtos,
                 ProvenanceDtoAssembler.assemble(submission.getCreated(), userService.getUser(submission.getCreated().getUserId())),
                 submission.getLastUpdated() != null ?
