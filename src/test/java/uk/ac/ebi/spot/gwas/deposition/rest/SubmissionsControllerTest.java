@@ -161,7 +161,8 @@ public class SubmissionsControllerTest extends IntegrationTest {
     @Test
     public void shouldCreateManuscriptSubmission() throws Exception {
         when(sumStatsService.createGlobusFolder(any())).thenReturn(new SSGlobusResponse(true, RandomStringUtils.randomAlphanumeric(10)));
-
+        bodyOfWorkRepository.insert(bodyOfWork);
+        
         SubmissionCreationDto submissionCreationDto = new SubmissionCreationDto(null,
                 BodyOfWorkDtoAssembler.assemble(bodyOfWork),
                 RandomStringUtils.randomAlphanumeric(10));

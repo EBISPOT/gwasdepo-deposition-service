@@ -80,8 +80,7 @@ public class SubmissionsController {
     public Resource<SubmissionDto> createSubmission(@Valid @RequestBody SubmissionCreationDto submissionCreationDto,
                                                     HttpServletRequest request) {
         User user = userService.findUser(jwtService.extractUser(HeadersUtil.extractJWT(request)), false);
-        log.info("[{}] Request to create new submission for publication: {}", user.getName(),
-                submissionCreationDto.getPublication().getPmid());
+        log.info("[{}] Request to create new submission.", user.getName());
 
         if (submissionCreationDto.getPublication() == null) {
             if (submissionCreationDto.getBodyOfWork() == null) {

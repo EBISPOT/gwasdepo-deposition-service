@@ -3,6 +3,8 @@ package uk.ac.ebi.spot.gwas.deposition.rest;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.joda.time.DateTime;
+import org.joda.time.LocalDate;
 import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +33,8 @@ import uk.ac.ebi.spot.gwas.deposition.rest.dto.PublicationDtoAssembler;
 import uk.ac.ebi.spot.gwas.deposition.scheduler.tasks.SSCallbackTask;
 import uk.ac.ebi.spot.gwas.deposition.service.*;
 import uk.ac.ebi.spot.gwas.deposition.util.TestUtil;
+
+import java.util.ArrayList;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -169,9 +173,22 @@ public abstract class IntegrationTest {
         user = userRepository.insert(TestUtil.user());
         eligiblePublication = publicationRepository.insert(TestUtil.eligiblePublication());
         publishedPublication = publicationRepository.insert(TestUtil.publishedPublication());
-        bodyOfWork = bodyOfWorkRepository.insert(TestUtil.bodyOfWork(user.getId()));
 
         when(jwtService.extractUser(any())).thenReturn(user);
+        bodyOfWork = new BodyOfWork(RandomStringUtils.randomAlphanumeric(10),
+                RandomStringUtils.randomAlphanumeric(10),
+                RandomStringUtils.randomAlphanumeric(10),
+                RandomStringUtils.randomAlphanumeric(10),
+                RandomStringUtils.randomAlphanumeric(10),
+                RandomStringUtils.randomAlphanumeric(10),
+                RandomStringUtils.randomAlphanumeric(10),
+                new ArrayList<>(),
+                new ArrayList<>(),
+                RandomStringUtils.randomAlphanumeric(10),
+                RandomStringUtils.randomAlphanumeric(10),
+                LocalDate.now(),
+                true,
+                new Provenance(DateTime.now(), user.getId()));
 
         createPrerequisites();
     }
