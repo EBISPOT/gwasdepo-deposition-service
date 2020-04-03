@@ -185,7 +185,7 @@ public class SubmissionsControllerTest extends IntegrationTest {
         assertEquals(user.getEmail(), actual.getCreated().getUser().getEmail());
         assertEquals(bodyOfWork.getJournal(), actual.getBodyOfWork().getJournal());
         assertEquals(bodyOfWork.getTitle(), actual.getBodyOfWork().getTitle());
-        assertEquals(bodyOfWork.getFirstAuthorFirstName(), actual.getBodyOfWork().getFirstAuthorFirstName());
+        assertEquals(bodyOfWork.getFirstAuthor().getFirstName(), actual.getBodyOfWork().getFirstAuthor().getFirstName());
 
         assertTrue(actual.getFiles().isEmpty());
         assertEquals(1, bodyOfWorkRepository.findAll().size());

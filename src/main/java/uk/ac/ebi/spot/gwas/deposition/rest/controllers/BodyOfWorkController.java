@@ -107,4 +107,16 @@ public class BodyOfWorkController {
 
     }
 
+    /**
+     * DELETE /v1/bodyofwork/{bodyofworkId}
+     */
+    @DeleteMapping(value = "/{bodyofworkId}")
+    @ResponseStatus(HttpStatus.OK)
+    public void deleteBodyOfWork(@PathVariable String bodyofworkId,
+                                 HttpServletRequest request) {
+        User user = userService.findUser(jwtService.extractUser(HeadersUtil.extractJWT(request)), false);
+        log.info("[{}] Request to delete body of work: {}", user.getId(), bodyofworkId);
+        bodyOfWorkService.deleteBodyOfWork(bodyofworkId, user.getId());
+//        auditProxy.addAuditEntry(AuditHelper.manuscriptRetrieved(user.getId(), bodyOfWork));
+    }
 }

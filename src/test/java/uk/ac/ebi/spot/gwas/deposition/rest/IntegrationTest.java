@@ -175,13 +175,18 @@ public abstract class IntegrationTest {
         publishedPublication = publicationRepository.insert(TestUtil.publishedPublication());
 
         when(jwtService.extractUser(any())).thenReturn(user);
+
+        Author author = new Author(RandomStringUtils.randomAlphanumeric(10),
+                RandomStringUtils.randomAlphanumeric(10),
+                RandomStringUtils.randomAlphanumeric(10),
+                RandomStringUtils.randomAlphanumeric(10));
         bodyOfWork = new BodyOfWork(RandomStringUtils.randomAlphanumeric(10),
                 RandomStringUtils.randomAlphanumeric(10),
                 RandomStringUtils.randomAlphanumeric(10),
                 RandomStringUtils.randomAlphanumeric(10),
                 RandomStringUtils.randomAlphanumeric(10),
-                RandomStringUtils.randomAlphanumeric(10),
-                RandomStringUtils.randomAlphanumeric(10),
+                author,
+                author,
                 new ArrayList<>(),
                 new ArrayList<>(),
                 RandomStringUtils.randomAlphanumeric(10),

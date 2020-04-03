@@ -7,14 +7,14 @@ import org.springframework.hateoas.mvc.ControllerLinkBuilder;
 import org.springframework.stereotype.Component;
 import uk.ac.ebi.spot.gwas.deposition.config.GWASDepositionBackendConfig;
 import uk.ac.ebi.spot.gwas.deposition.domain.BodyOfWork;
-import uk.ac.ebi.spot.gwas.deposition.domain.CorrespondingAuthor;
+import uk.ac.ebi.spot.gwas.deposition.dto.AuthorDto;
 import uk.ac.ebi.spot.gwas.deposition.dto.BodyOfWorkDto;
-import uk.ac.ebi.spot.gwas.deposition.dto.CorrespondingAuthorDto;
 import uk.ac.ebi.spot.gwas.deposition.rest.controllers.BodyOfWorkController;
 import uk.ac.ebi.spot.gwas.deposition.util.BackendUtil;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 public class BodyOfWorkDtoAssembler implements ResourceAssembler<BodyOfWork, Resource<BodyOfWorkDto>> {
@@ -23,19 +23,16 @@ public class BodyOfWorkDtoAssembler implements ResourceAssembler<BodyOfWork, Res
     private GWASDepositionBackendConfig gwasDepositionBackendConfig;
 
     public static BodyOfWorkDto assemble(BodyOfWork bodyOfWork) {
-        List<CorrespondingAuthorDto> correspondingAuthorDtoList = new ArrayList<>();
+        List<AuthorDto> correspondingAuthorDtoList = new ArrayList<>();
         if (bodyOfWork.getCorrespondingAuthors() != null) {
-            for (CorrespondingAuthor correspondingAuthor : bodyOfWork.getCorrespondingAuthors()) {
-                correspondingAuthorDtoList.add(new CorrespondingAuthorDto(correspondingAuthor.getAuthorName(),
-                        correspondingAuthor.getEmail()));
-            }
+            correspondingAuthorDtoList = bodyOfWork.getCorrespondingAuthors().stream().map(AuthorDtoAssembler::assemble).collect(Collectors.toList());
         }
 
         return new BodyOfWorkDto(bodyOfWork.getId(),
                 bodyOfWork.getTitle(),
                 bodyOfWork.getDescription(),
-                bodyOfWork.getFirstAuthorFirstName(),
-                bodyOfWork.getFirstAuthorLastName(),
+                AuthorDtoAssembler.assemble(bodyOfWork.getFirstAuthor()),
+                AuthorDtoAssembler.assemble(bodyOfWork.getLastAuthor()),
                 bodyOfWork.getJournal(),
                 bodyOfWork.getDoi(),
                 bodyOfWork.getUrl(),
@@ -50,19 +47,16 @@ public class BodyOfWorkDtoAssembler implements ResourceAssembler<BodyOfWork, Res
 
     @Override
     public Resource<BodyOfWorkDto> toResource(BodyOfWork bodyOfWork) {
-        List<CorrespondingAuthorDto> correspondingAuthorDtoList = new ArrayList<>();
+        List<AuthorDto> correspondingAuthorDtoList = new ArrayList<>();
         if (bodyOfWork.getCorrespondingAuthors() != null) {
-            for (CorrespondingAuthor correspondingAuthor : bodyOfWork.getCorrespondingAuthors()) {
-                correspondingAuthorDtoList.add(new CorrespondingAuthorDto(correspondingAuthor.getAuthorName(),
-                        correspondingAuthor.getEmail()));
-            }
+            correspondingAuthorDtoList = bodyOfWork.getCorrespondingAuthors().stream().map(AuthorDtoAssembler::assemble).collect(Collectors.toList());
         }
 
         BodyOfWorkDto bodyOfWorkDto = new BodyOfWorkDto(bodyOfWork.getId(),
                 bodyOfWork.getTitle(),
                 bodyOfWork.getDescription(),
-                bodyOfWork.getFirstAuthorFirstName(),
-                bodyOfWork.getFirstAuthorLastName(),
+                AuthorDtoAssembler.assemble(bodyOfWork.getFirstAuthor()),
+                AuthorDtoAssembler.assemble(bodyOfWork.getLastAuthor()),
                 bodyOfWork.getJournal(),
                 bodyOfWork.getDoi(),
                 bodyOfWork.getUrl(),

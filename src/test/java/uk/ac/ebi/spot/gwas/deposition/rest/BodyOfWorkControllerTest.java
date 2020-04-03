@@ -23,8 +23,7 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ContextConfiguration(classes = {IntegrationTest.MockJWTServiceConfig.class,
@@ -61,8 +60,8 @@ public class BodyOfWorkControllerTest extends IntegrationTest {
 
         assertEquals(bodyOfWork.getTitle(), actual.getTitle());
         assertEquals(bodyOfWork.getJournal(), actual.getJournal());
-        assertEquals(bodyOfWork.getFirstAuthorFirstName(), actual.getFirstAuthorFirstName());
-        assertEquals(bodyOfWork.getFirstAuthorLastName(), actual.getFirstAuthorLastName());
+        assertEquals(bodyOfWork.getFirstAuthor().getFirstName(), actual.getFirstAuthor().getFirstName());
+        assertEquals(bodyOfWork.getLastAuthor().getFirstName(), actual.getLastAuthor().getFirstName());
         return actual;
     }
 
@@ -97,8 +96,43 @@ public class BodyOfWorkControllerTest extends IntegrationTest {
 
         assertEquals(bodyOfWork.getTitle(), actual.getTitle());
         assertEquals(bodyOfWork.getJournal(), actual.getJournal());
-        assertEquals(bodyOfWork.getFirstAuthorFirstName(), actual.getFirstAuthorFirstName());
-        assertEquals(bodyOfWork.getFirstAuthorLastName(), actual.getFirstAuthorLastName());
+        assertEquals(bodyOfWork.getFirstAuthor().getFirstName(), actual.getFirstAuthor().getFirstName());
+        assertEquals(bodyOfWork.getLastAuthor().getFirstName(), actual.getLastAuthor().getFirstName());
+    }
+
+    /**
+     * DELETE /v1/bodyofwork/{bodyofworkId}
+     */
+    @Test
+    public void shouldDeleteBodyOfWork() throws Exception {
+        BodyOfWorkDto bodyOfWorkDto = create();
+        String endpoint = GeneralCommon.API_V1 +
+                GWASDepositionBackendConstants.API_BODY_OF_WORK +
+                "/" + bodyOfWorkDto.getBodyOfWorkId();
+
+        String response = mockMvc.perform(get(endpoint)
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        Resource<BodyOfWorkDto> actualResource = mapper.readValue(response, new TypeReference<Resource<BodyOfWorkDto>>() {
+        });
+        BodyOfWorkDto actual = actualResource.getContent();
+
+        assertEquals(bodyOfWork.getTitle(), actual.getTitle());
+        assertEquals(bodyOfWork.getJournal(), actual.getJournal());
+        assertEquals(bodyOfWork.getFirstAuthor().getFirstName(), actual.getFirstAuthor().getFirstName());
+        assertEquals(bodyOfWork.getLastAuthor().getFirstName(), actual.getLastAuthor().getFirstName());
+
+        mockMvc.perform(delete(endpoint)
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+
+        mockMvc.perform(get(endpoint)
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound());
     }
 
     /**

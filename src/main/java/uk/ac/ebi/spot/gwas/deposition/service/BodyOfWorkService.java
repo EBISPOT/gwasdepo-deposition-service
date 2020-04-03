@@ -10,4 +10,6 @@ public interface BodyOfWorkService {
     BodyOfWork retrieveBodyOfWork(String bodyOfWork, String userId);
 
     Page<BodyOfWork> retrieveBodyOfWorks(String userId, Pageable pageable);
+
+    void deleteBodyOfWork(String bodyofworkId, String id);
 }

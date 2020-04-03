@@ -24,13 +24,18 @@ public class TestUtil {
     }
 
     public static BodyOfWork bodyOfWork(String userId) {
+        Author author = new Author(RandomStringUtils.randomAlphanumeric(10),
+                RandomStringUtils.randomAlphanumeric(10),
+                RandomStringUtils.randomAlphanumeric(10),
+                RandomStringUtils.randomAlphanumeric(10));
+
         return new BodyOfWork(RandomStringUtils.randomAlphanumeric(10),
                 RandomStringUtils.randomAlphanumeric(10),
                 RandomStringUtils.randomAlphanumeric(10),
                 RandomStringUtils.randomAlphanumeric(10),
                 RandomStringUtils.randomAlphanumeric(10),
-                RandomStringUtils.randomAlphanumeric(10),
-                RandomStringUtils.randomAlphanumeric(10),
+                author,
+                author,
                 new ArrayList<>(),
                 new ArrayList<>(),
                 RandomStringUtils.randomAlphanumeric(10),
