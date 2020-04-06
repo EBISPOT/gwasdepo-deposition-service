@@ -54,7 +54,9 @@ public class SubmissionAssemblyService implements ResourceAssembler<Submission, 
         if (submission.getProvenanceType().equalsIgnoreCase(SubmissionProvenanceType.PUBLICATION.name())) {
             publication = publicationService.retrievePublication(submission.getPublicationId(), true);
         } else {
-            bodyOfWork = bodyOfWorkService.retrieveBodyOfWork(submission.getBodyOfWorks().get(0), submission.getCreated().getUserId());
+            if (!submission.getBodyOfWorks().isEmpty()) {
+                bodyOfWork = bodyOfWorkService.retrieveBodyOfWork(submission.getBodyOfWorks().get(0), submission.getCreated().getUserId());
+            }
         }
         List<FileUpload> fileUploads = fileUploadsService.getFileUploads(submission.getFileUploads());
 

@@ -23,6 +23,7 @@ import uk.ac.ebi.spot.gwas.deposition.service.FileUploadsService;
 import uk.ac.ebi.spot.gwas.deposition.service.SubmissionService;
 import uk.ac.ebi.spot.gwas.deposition.service.SummaryStatsProcessingService;
 import uk.ac.ebi.spot.gwas.deposition.util.BackendUtil;
+import uk.ac.ebi.spot.gwas.deposition.util.GCSTCounter;
 import uk.ac.ebi.spot.gwas.template.validator.service.TemplateConverterService;
 import uk.ac.ebi.spot.gwas.template.validator.util.StreamSubmissionTemplateReader;
 import uk.ac.ebi.spot.gwas.template.validator.util.SubmissionConverter;
@@ -59,6 +60,9 @@ public class ConversionServiceImpl implements ConversionService {
     @Autowired
     private SummaryStatsProcessingService summaryStatsProcessingService;
 
+    @Autowired
+    private GCSTCounter gcstCounter;
+
     @Async
     @Override
     public void convertData(Submission submission, FileUpload fileUpload,
@@ -73,6 +77,9 @@ public class ConversionServiceImpl implements ConversionService {
         log.info("Found {} studies.", submissionDataDto.getStudies().size());
         for (StudyDto studyDto : submissionDataDto.getStudies()) {
             Study study = StudyDtoAssembler.disassemble(studyDto);
+            if (study.getAccession() == null) {
+                study.setAccession(gcstCounter.getNext());
+            }
             study.setSubmissionId(submission.getId());
             study = studyRepository.insert(study);
             submission.addStudy(study.getId());
