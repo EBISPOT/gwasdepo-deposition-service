@@ -46,6 +46,8 @@ public class GWASDepositionBackendConstants {
 
     public static final String PREFIX_GCST = "GCST";
 
+    public static final String PREFIX_GCP = "GCP";
+
     public static final String PREFIX_LABEL = "LABEL";
 
     public static final String PROFILE_PRODUCTION = "prod";

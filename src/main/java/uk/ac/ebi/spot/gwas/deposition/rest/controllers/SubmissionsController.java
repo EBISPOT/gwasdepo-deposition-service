@@ -89,10 +89,10 @@ public class SubmissionsController {
             log.info("Received submission based on body of work: {}", submissionCreationDto.getBodyOfWork().getTitle());
             BodyOfWork bodyOfWork = BodyOfWorkDtoDisassembler.disassemble(submissionCreationDto.getBodyOfWork(),
                     new Provenance(DateTime.now(), user.getId()));
-            bodyOfWork = bodyOfWorkService.retrieveBodyOfWork(bodyOfWork.getId(), user.getId());
+            bodyOfWork = bodyOfWorkService.retrieveBodyOfWork(bodyOfWork.getBowId(), user.getId());
 //            auditProxy.addAuditEntry(AuditHelper.manuscriptCreated(user.getId(), manuscript));
 
-            Submission submission = new Submission(bodyOfWork.getId(),
+            Submission submission = new Submission(bodyOfWork.getBowId(),
                     SubmissionProvenanceType.BODY_OF_WORK.name(),
                     new Provenance(DateTime.now(), user.getId()));
 

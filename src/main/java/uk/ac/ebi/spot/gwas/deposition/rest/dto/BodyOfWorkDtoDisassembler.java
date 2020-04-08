@@ -33,7 +33,7 @@ public class BodyOfWorkDtoDisassembler {
                 bodyOfWorkDto.getEmbargoUntilPublished(),
                 provenance);
         if (bodyOfWorkDto.getBodyOfWorkId() != null) {
-            bodyOfWork.setId(bodyOfWorkDto.getBodyOfWorkId());
+            bodyOfWork.setBowId(bodyOfWorkDto.getBodyOfWorkId());
         }
         return bodyOfWork;
     }

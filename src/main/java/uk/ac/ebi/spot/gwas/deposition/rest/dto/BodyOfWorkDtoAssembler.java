@@ -28,7 +28,7 @@ public class BodyOfWorkDtoAssembler implements ResourceAssembler<BodyOfWork, Res
             correspondingAuthorDtoList = bodyOfWork.getCorrespondingAuthors().stream().map(AuthorDtoAssembler::assemble).collect(Collectors.toList());
         }
 
-        return new BodyOfWorkDto(bodyOfWork.getId(),
+        return new BodyOfWorkDto(bodyOfWork.getBowId(),
                 bodyOfWork.getTitle(),
                 bodyOfWork.getDescription(),
                 AuthorDtoAssembler.assemble(bodyOfWork.getFirstAuthor()),
@@ -52,7 +52,7 @@ public class BodyOfWorkDtoAssembler implements ResourceAssembler<BodyOfWork, Res
             correspondingAuthorDtoList = bodyOfWork.getCorrespondingAuthors().stream().map(AuthorDtoAssembler::assemble).collect(Collectors.toList());
         }
 
-        BodyOfWorkDto bodyOfWorkDto = new BodyOfWorkDto(bodyOfWork.getId(),
+        BodyOfWorkDto bodyOfWorkDto = new BodyOfWorkDto(bodyOfWork.getBowId(),
                 bodyOfWork.getTitle(),
                 bodyOfWork.getDescription(),
                 AuthorDtoAssembler.assemble(bodyOfWork.getFirstAuthor()),

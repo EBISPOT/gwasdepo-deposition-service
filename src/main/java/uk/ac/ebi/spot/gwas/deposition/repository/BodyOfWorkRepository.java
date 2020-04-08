@@ -9,7 +9,7 @@ import java.util.Optional;
 
 public interface BodyOfWorkRepository extends MongoRepository<BodyOfWork, String> {
 
-    Optional<BodyOfWork> findByIdAndArchivedAndCreated_UserId(String id, boolean archived, String userId);
+    Optional<BodyOfWork> findByBowIdAndArchivedAndCreated_UserId(String bowId, boolean archived, String userId);
 
     Page<BodyOfWork> findByArchivedAndCreated_UserId(boolean archived, String userId, Pageable page);
 
