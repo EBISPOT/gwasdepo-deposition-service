@@ -20,12 +20,15 @@ import uk.ac.ebi.spot.gwas.deposition.constants.GWASDepositionBackendConstants;
 import uk.ac.ebi.spot.gwas.deposition.constants.GeneralCommon;
 import uk.ac.ebi.spot.gwas.deposition.domain.BodyOfWork;
 import uk.ac.ebi.spot.gwas.deposition.domain.Provenance;
+import uk.ac.ebi.spot.gwas.deposition.domain.Submission;
 import uk.ac.ebi.spot.gwas.deposition.domain.User;
 import uk.ac.ebi.spot.gwas.deposition.dto.BodyOfWorkDto;
+import uk.ac.ebi.spot.gwas.deposition.exception.CannotDeleteBodyOfWorkException;
 import uk.ac.ebi.spot.gwas.deposition.rest.dto.BodyOfWorkDtoAssembler;
 import uk.ac.ebi.spot.gwas.deposition.rest.dto.BodyOfWorkDtoDisassembler;
 import uk.ac.ebi.spot.gwas.deposition.service.BodyOfWorkService;
 import uk.ac.ebi.spot.gwas.deposition.service.JWTService;
+import uk.ac.ebi.spot.gwas.deposition.service.SubmissionService;
 import uk.ac.ebi.spot.gwas.deposition.service.UserService;
 import uk.ac.ebi.spot.gwas.deposition.util.BackendUtil;
 import uk.ac.ebi.spot.gwas.deposition.util.HeadersUtil;
@@ -55,6 +58,9 @@ public class BodyOfWorkController {
 
     @Autowired
     private AuditProxy auditProxy;
+
+    @Autowired
+    private SubmissionService submissionService;
 
     /**
      * POST /v1/bodyofwork
@@ -116,6 +122,11 @@ public class BodyOfWorkController {
                                  HttpServletRequest request) {
         User user = userService.findUser(jwtService.extractUser(HeadersUtil.extractJWT(request)), false);
         log.info("[{}] Request to delete body of work: {}", user.getId(), bodyofworkId);
+        Submission submission = submissionService.findByBodyOfWork(bodyofworkId, user.getId());
+        if (submission != null) {
+            log.error("Unable to delete body of work {} because a submission already exists on it: {}", bodyofworkId, submission.getId());
+            throw new CannotDeleteBodyOfWorkException("Unable to delete body of work: " + bodyofworkId + ". A submission was created using this artefact.");
+        }
         bodyOfWorkService.deleteBodyOfWork(bodyofworkId, user.getId());
 //        auditProxy.addAuditEntry(AuditHelper.manuscriptRetrieved(user.getId(), bodyOfWork));
     }

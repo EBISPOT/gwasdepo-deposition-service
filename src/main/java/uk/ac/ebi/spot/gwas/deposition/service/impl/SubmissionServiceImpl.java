@@ -122,6 +122,19 @@ public class SubmissionServiceImpl implements SubmissionService {
     }
 
     @Override
+    public Submission findByBodyOfWork(String bodyOfWorkId, String userId) {
+        log.info("Retrieving submission for: {} | {}", bodyOfWorkId, userId);
+        Optional<Submission> submissionOptional = submissionRepository.findByBodyOfWorksContainsAndCreated_UserIdAndArchived(bodyOfWorkId, userId, false);
+        if (submissionOptional.isPresent()) {
+            log.info("Found submission {} for: {} | {}", submissionOptional.get().getId(), bodyOfWorkId, userId);
+            return submissionOptional.get();
+        }
+
+        log.info("No submission found for: {} | {}", bodyOfWorkId, userId);
+        return null;
+    }
+
+    @Override
     public void deleteSubmission(String submissionId, User user) {
         log.info("Deleting submission: {}", submissionId);
         Submission submission = this.getSubmission(submissionId, user);
@@ -143,6 +156,7 @@ public class SubmissionServiceImpl implements SubmissionService {
         submission.setSamples(new ArrayList<>());
         submission.setNotes(new ArrayList<>());
         submission.setFileUploads(new ArrayList<>());
+        submission.setLastUpdated(new Provenance(DateTime.now(), user.getId()));
         submissionRepository.save(submission);
     }
 

@@ -1,5 +1,6 @@
 package uk.ac.ebi.spot.gwas.deposition.service.impl;
 
+import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,6 +8,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import uk.ac.ebi.spot.gwas.deposition.domain.BodyOfWork;
+import uk.ac.ebi.spot.gwas.deposition.domain.Provenance;
 import uk.ac.ebi.spot.gwas.deposition.exception.EntityNotFoundException;
 import uk.ac.ebi.spot.gwas.deposition.repository.BodyOfWorkRepository;
 import uk.ac.ebi.spot.gwas.deposition.service.BodyOfWorkService;
@@ -63,6 +65,7 @@ public class BodyOfWorkServiceImpl implements BodyOfWorkService {
             throw new EntityNotFoundException("Unable to find body of work with ID: " + bodyofworkId);
         }
         BodyOfWork bodyOfWork = optionalBodyOfWork.get();
+        bodyOfWork.setLastUpdated(new Provenance(DateTime.now(), userId));
         bodyOfWork.setArchived(true);
         bodyOfWorkRepository.save(bodyOfWork);
         log.info("Body of work successfully deleted: {}", bodyOfWork.getBowId());

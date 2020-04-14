@@ -17,6 +17,8 @@ public interface SubmissionService {
 
     Page<Submission> getSubmissions(String pmid, Pageable page, User user);
 
+    Submission findByBodyOfWork(String bodyOfWorkId, String userId);
+
     void deleteSubmission(String submissionId, User user);
 
     Submission updateSubmissionStatus(String submissionId, String status, User user);

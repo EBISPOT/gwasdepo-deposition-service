@@ -167,7 +167,7 @@ public class SubmissionsControllerTest extends IntegrationTest {
         when(sumStatsService.createGlobusFolder(any())).thenReturn(new SSGlobusResponse(true, RandomStringUtils.randomAlphanumeric(10)));
         bodyOfWork.setBowId(gcpCounter.getNext());
         bodyOfWorkRepository.insert(bodyOfWork);
-        
+
         SubmissionCreationDto submissionCreationDto = new SubmissionCreationDto(null,
                 BodyOfWorkDtoAssembler.assemble(bodyOfWork),
                 RandomStringUtils.randomAlphanumeric(10));
@@ -195,6 +195,12 @@ public class SubmissionsControllerTest extends IntegrationTest {
         assertTrue(actual.getFiles().isEmpty());
         assertEquals(1, bodyOfWorkRepository.findAll().size());
         verify(sumStatsService, times(0)).createGlobusFolder(any());
+
+        mockMvc.perform(delete(GeneralCommon.API_V1 +
+                GWASDepositionBackendConstants.API_BODY_OF_WORK +
+                "/" + bodyOfWork.getBowId())
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
     }
 
     /**

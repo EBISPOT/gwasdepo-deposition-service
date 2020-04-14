@@ -62,6 +62,20 @@ public class ExceptionHandlerAdvice {
         return new ResponseEntity<>(e.getMessage(), headers, HttpStatus.BAD_REQUEST);
     }
 
+    @ExceptionHandler(CannotDeleteBodyOfWorkException.class)
+    public ResponseEntity<String> handleCannotDeleteBodyOfWorkException(CannotDeleteBodyOfWorkException e) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.TEXT_PLAIN);
+        return new ResponseEntity<>(e.getMessage(), headers, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(CannotCreateSubmissionOnExistingBodyOfWork.class)
+    public ResponseEntity<String> handleCannotCreateSubmissionOnExistingBodyOfWork(CannotCreateSubmissionOnExistingBodyOfWork e) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.TEXT_PLAIN);
+        return new ResponseEntity<>(e.getMessage(), headers, HttpStatus.BAD_REQUEST);
+    }
+
     @ExceptionHandler(DeleteOnSubmittedSubmissionNotAllowedException.class)
     public ResponseEntity<String> handleDeleteOnSubmittedSubmissionNotAllowedException(DeleteOnSubmittedSubmissionNotAllowedException e) {
         HttpHeaders headers = new HttpHeaders();

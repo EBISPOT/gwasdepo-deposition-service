@@ -92,6 +92,12 @@ public class SubmissionsController {
             bodyOfWork = bodyOfWorkService.retrieveBodyOfWork(bodyOfWork.getBowId(), user.getId());
 //            auditProxy.addAuditEntry(AuditHelper.manuscriptCreated(user.getId(), manuscript));
 
+            Submission existing = submissionService.findByBodyOfWork(bodyOfWork.getBowId(), user.getId());
+            if (existing != null) {
+                log.error("Unable to create submission using: {}. A submission already exists.");
+                throw new CannotCreateSubmissionOnExistingBodyOfWork("Unable to create submission using: " + bodyOfWork.getBowId() + ". A submission already exists.");
+            }
+
             Submission submission = new Submission(bodyOfWork.getBowId(),
                     SubmissionProvenanceType.BODY_OF_WORK.name(),
                     new Provenance(DateTime.now(), user.getId()));
