@@ -157,7 +157,7 @@ public class SummaryStatsValidationServiceImpl implements SummaryStatsValidation
                             this.markInvalidFile(dataFile, submission, ErrorType.INVALID_FILE, dataFile.getFileName(), dataReader, schemaReader);
                         }
                         if (validationOutcome.getErrorMessages().isEmpty()) {
-                            auditProxy.addAuditEntry(AuditHelper.fileValidationSuccess(submission.getCreated().getUserId(), dataFile, false));
+                            auditProxy.addAuditEntry(AuditHelper.fileValidate(submission.getCreated().getUserId(), dataFile, submission, true, true, null));
                             conversionService.convertData(submission, dataFile, dataReader, schema);
                         } else {
                             submission.setOverallStatus(Status.INVALID.name());
@@ -169,16 +169,17 @@ public class SummaryStatsValidationServiceImpl implements SummaryStatsValidation
                             dataFile.setErrors(errors);
                             dataFile.setStatus(FileUploadStatus.INVALID.name());
                             fileUploadsService.save(dataFile);
-                            auditProxy.addAuditEntry(AuditHelper.fileValidationFailed(submission.getCreated().getUserId(), dataFile, errors, false));
+                            auditProxy.addAuditEntry(AuditHelper.fileValidate(submission.getCreated().getUserId(), dataFile, submission, true, false, errors));
                         }
                     } else {
-                        auditProxy.addAuditEntry(AuditHelper.fileValidationSuccess(submission.getCreated().getUserId(), dataFile, false));
+                        auditProxy.addAuditEntry(AuditHelper.fileValidate(submission.getCreated().getUserId(), dataFile, submission, true, true, null));
                         conversionService.convertData(submission, dataFile, dataReader, schema);
                     }
                 } else {
                     submission.setOverallStatus(Status.INVALID.name());
                     submission.setSummaryStatsStatus(Status.INVALID.name());
                     submissionService.saveSubmission(submission);
+                    auditProxy.addAuditEntry(AuditHelper.submissionValidate(submission.getCreated().getUserId(), submission, false));
 
                     List<String> errors = ErrorUtil.transform(validationOutcome.getErrorMessages(), errorMessageTemplateProcessor);
                     dataFile.setErrors(errors);
@@ -186,7 +187,7 @@ public class SummaryStatsValidationServiceImpl implements SummaryStatsValidation
                     fileUploadsService.save(dataFile);
                     dataReader.close();
                     schemaReader.close();
-                    auditProxy.addAuditEntry(AuditHelper.fileValidationFailed(submission.getCreated().getUserId(), dataFile, errors, false));
+                    auditProxy.addAuditEntry(AuditHelper.fileValidate(submission.getCreated().getUserId(), dataFile, submission, true, false, errors));
                 }
             }
 
@@ -203,10 +204,11 @@ public class SummaryStatsValidationServiceImpl implements SummaryStatsValidation
         fileUpload.setErrors(errors);
         fileUpload.setStatus(FileUploadStatus.INVALID.name());
         fileUploadsService.save(fileUpload);
-        auditProxy.addAuditEntry(AuditHelper.fileValidationFailed(submission.getCreated().getUserId(), fileUpload, errors, false));
+        auditProxy.addAuditEntry(AuditHelper.fileValidate(submission.getCreated().getUserId(), fileUpload, submission, true, false, errors));
 
         submission.setSummaryStatsStatus(Status.INVALID.name());
         submission.setOverallStatus(Status.INVALID.name());
+        auditProxy.addAuditEntry(AuditHelper.submissionValidate(submission.getCreated().getUserId(), submission, false));
         submissionService.saveSubmission(submission);
         if (dataReader != null) {
             dataReader.close();

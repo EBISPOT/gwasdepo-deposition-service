@@ -90,20 +90,21 @@ public class SubmissionsController {
             BodyOfWork bodyOfWork = BodyOfWorkDtoDisassembler.disassemble(submissionCreationDto.getBodyOfWork(),
                     new Provenance(DateTime.now(), user.getId()));
             bodyOfWork = bodyOfWorkService.retrieveBodyOfWork(bodyOfWork.getBowId(), user.getId());
-//            auditProxy.addAuditEntry(AuditHelper.manuscriptCreated(user.getId(), manuscript));
-
-            Submission existing = submissionService.findByBodyOfWork(bodyOfWork.getBowId(), user.getId());
-            if (existing != null) {
-                log.error("Unable to create submission using: {}. A submission already exists.");
-                throw new CannotCreateSubmissionOnExistingBodyOfWork("Unable to create submission using: " + bodyOfWork.getBowId() + ". A submission already exists.");
-            }
 
             Submission submission = new Submission(bodyOfWork.getBowId(),
                     SubmissionProvenanceType.BODY_OF_WORK.name(),
                     new Provenance(DateTime.now(), user.getId()));
+            auditProxy.addAuditEntry(AuditHelper.submissionCreateBOW(user.getId(), submission, bodyOfWork, true, true));
+
+            Submission existing = submissionService.findByBodyOfWork(bodyOfWork.getBowId(), user.getId());
+            if (existing != null) {
+                log.error("Unable to create submission using: {}. A submission already exists.");
+                auditProxy.addAuditEntry(AuditHelper.submissionCreateBOW(user.getId(), submission, bodyOfWork, false, false));
+                throw new CannotCreateSubmissionOnExistingBodyOfWork("Unable to create submission using: " + bodyOfWork.getBowId() + ". A submission already exists.");
+            }
 
             submission = submissionService.createSubmission(submission);
-//            auditProxy.addAuditEntry(AuditHelper.submissionCreated(user.getId(), submission, manuscript));
+            auditProxy.addAuditEntry(AuditHelper.submissionCreateBOW(user.getId(), submission, bodyOfWork, false, true));
             return submissionAssemblyService.toResource(submission);
         }
 
@@ -114,6 +115,7 @@ public class SubmissionsController {
             Submission submission = new Submission(publication.getId(),
                     SubmissionProvenanceType.PUBLICATION.name(),
                     new Provenance(DateTime.now(), user.getId()));
+
             String globusFolder = UUID.randomUUID().toString();
             SSGlobusResponse outcome = sumStatsService.createGlobusFolder(new SSGlobusFolderDto(globusFolder,
                     submissionCreationDto.getGlobusIdentity() != null ?
@@ -121,33 +123,38 @@ public class SubmissionsController {
                             user.getEmail()));
             if (outcome != null) {
                 if (!outcome.isValid()) {
-                    auditProxy.addAuditEntry(AuditHelper.globusFailed(user.getId(), submissionCreationDto.getPublication(), outcome));
+                    auditProxy.addAuditEntry(AuditHelper.submissionCreatePub(user.getId(),
+                            submission, submissionCreationDto.getPublication(), true, false, outcome.getOutcome()));
                     log.error("Unable to create Globus folder: {}", outcome.getOutcome());
                     throw new EmailAccountNotLinkedToGlobusException(outcome.getOutcome());
                 }
-
-                auditProxy.addAuditEntry(AuditHelper.globusSuccess(user.getEmail(), submissionCreationDto.getPublication(), outcome));
                 submission.setGlobusFolderId(globusFolder);
                 submission.setGlobusOriginId(outcome.getOutcome());
+                auditProxy.addAuditEntry(AuditHelper.submissionCreatePub(user.getId(),
+                        submission, submissionCreationDto.getPublication(), true, true, null));
+
 
                 if (publication.getStatus().equals(PublicationStatus.ELIGIBLE.name())) {
                     publication.setStatus(PublicationStatus.UNDER_SUBMISSION.name());
                     submission.setType(SubmissionType.METADATA.name());
                     submission = submissionService.createSubmission(submission);
-                    auditProxy.addAuditEntry(AuditHelper.submissionCreated(user.getId(),
-                            submission, submissionCreationDto.getPublication()));
+                    auditProxy.addAuditEntry(AuditHelper.submissionCreatePub(user.getId(),
+                            submission, submissionCreationDto.getPublication(), false, true, null));
                 }
                 if (publication.getStatus().equals(PublicationStatus.PUBLISHED.name())) {
                     publication.setStatus(PublicationStatus.UNDER_SUMMARY_STATS_SUBMISSION.name());
                     submission.setType(SubmissionType.SUMMARY_STATS.name());
                     submission = submissionService.createSubmission(submission);
+                    auditProxy.addAuditEntry(AuditHelper.submissionCreatePub(user.getId(),
+                            submission, submissionCreationDto.getPublication(), false, true, null));
                     fileHandlerService.handleSummaryStatsTemplate(submission, publication);
                 }
                 publicationService.savePublication(publication);
                 log.info("Returning new submission: {}", submission.getId());
                 return submissionAssemblyService.toResource(submission);
             } else {
-                auditProxy.addAuditEntry(AuditHelper.globusFailed(user.getId(), submissionCreationDto.getPublication(), outcome));
+                auditProxy.addAuditEntry(AuditHelper.submissionCreatePub(user.getId(),
+                        submission, submissionCreationDto.getPublication(), true, false, null));
                 throw new SSGlobusFolderCreatioException("Sorry! There is a fault on our end. Please contact gwas-info@ebi.ac.uk for help.");
             }
         }
@@ -165,7 +172,7 @@ public class SubmissionsController {
         User user = userService.findUser(jwtService.extractUser(HeadersUtil.extractJWT(request)), false);
         log.info("[{}] Request to retrieve submission: {}", user.getName(), submissionId);
         Submission submission = submissionService.getSubmission(submissionId, user);
-        auditProxy.addAuditEntry(AuditHelper.submissionRetrieved(user.getId(), submission));
+        auditProxy.addAuditEntry(AuditHelper.submissionRetrieve(user.getId(), submission));
         log.info("Returning submission: {}", submission.getId());
         return submissionAssemblyService.toResource(submission);
     }
@@ -180,12 +187,12 @@ public class SubmissionsController {
         log.info("[{}] Request to delete submission: {}", user.getName(), submissionId);
         Submission submission = submissionService.getSubmission(submissionId, user);
         if (submission.getOverallStatus().equalsIgnoreCase(Status.SUBMITTED.name())) {
-            auditProxy.addAuditEntry(AuditHelper.submissionDeleted(user.getId(), submission, false));
+            auditProxy.addAuditEntry(AuditHelper.submissionDelete(user.getId(), submission, false));
             log.error("Unable to DELETE submission [{}]. Submission has already been SUBMITTED.", submissionId);
             throw new DeleteOnSubmittedSubmissionNotAllowedException("Unable to DELETE submission [" + submissionId + "]. Submission has already been SUBMITTED.");
         }
 
-        auditProxy.addAuditEntry(AuditHelper.submissionDeleted(user.getId(), submission, true));
+        auditProxy.addAuditEntry(AuditHelper.submissionDelete(user.getId(), submission, true));
         submissionService.deleteSubmission(submissionId, user);
 
         Publication publication = publicationService.retrievePublication(submission.getPublicationId(), true);

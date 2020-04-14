@@ -84,7 +84,7 @@ public class FileUploadsController {
         } else {
             fileUpload = fileHandlerService.handleMetadataFile(submission, file, user);
         }
-        auditProxy.addAuditEntry(AuditHelper.fileCreated(user.getId(), fileUpload, submission));
+        auditProxy.addAuditEntry(AuditHelper.fileCreate(submission.getCreated().getUserId(), fileUpload, submission, true, null));
 
         final ControllerLinkBuilder lb = linkTo(
                 methodOn(FileUploadsController.class).getFileUpload(submissionId, fileUpload.getId(), null));
@@ -111,7 +111,7 @@ public class FileUploadsController {
         }
         FileUpload fileUpload = fileUploadsService.getFileUpload(fileUploadId);
         log.info("Returning file [{}] for submission: {}", fileUpload.getFileName(), submission.getId());
-        auditProxy.addAuditEntry(AuditHelper.fileRetrieved(user.getId(), fileUpload));
+        auditProxy.addAuditEntry(AuditHelper.fileRetrieve(submission.getCreated().getUserId(), fileUpload, submission));
 
         final ControllerLinkBuilder lb = linkTo(
                 methodOn(FileUploadsController.class).getFileUpload(submissionId, fileUploadId, null));
@@ -162,7 +162,7 @@ public class FileUploadsController {
         log.info("[{}] Request to download file [{}] from submission: {}", user.getName(), fileUploadId, submissionId);
         Submission submission = submissionService.getSubmission(submissionId, user);
         FileUpload fileUpload = fileUploadsService.getFileUpload(fileUploadId);
-        auditProxy.addAuditEntry(AuditHelper.fileRetrieved(user.getId(), fileUpload));
+        auditProxy.addAuditEntry(AuditHelper.fileRetrieve(user.getId(), fileUpload, submission));
         byte[] payload = fileUploadsService.retrieveFileContent(fileUpload.getId());
         log.info("Returning content for file [{}] for submission: {}", fileUpload.getFileName(), submission.getId());
 
@@ -182,8 +182,10 @@ public class FileUploadsController {
                                  @PathVariable String fileUploadId, HttpServletRequest request) {
         User user = userService.findUser(jwtService.extractUser(HeadersUtil.extractJWT(request)), false);
         log.info("[{}] Request to delete file [{}] from submission: {}", user.getName(), fileUploadId, submissionId);
+        FileUpload fileUpload = fileUploadsService.getFileUpload(fileUploadId);
         Submission submission = submissionService.getSubmission(submissionId, user);
         submissionService.deleteSubmissionFile(submission, fileUploadId, user.getId());
+        auditProxy.addAuditEntry(AuditHelper.fileDelete(submission.getCreated().getUserId(), fileUpload, submission));
 //        submissionDataCleaningService.cleanSubmission(submission, fileUploadId);
         log.info("File [{}] successfully removed from submission: {}", fileUploadId, submission.getId());
     }

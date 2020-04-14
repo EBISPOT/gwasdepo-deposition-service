@@ -14,6 +14,7 @@ import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.mvc.ControllerLinkBuilder;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import uk.ac.ebi.spot.gwas.deposition.audit.AuditHelper;
 import uk.ac.ebi.spot.gwas.deposition.audit.AuditProxy;
 import uk.ac.ebi.spot.gwas.deposition.config.GWASDepositionBackendConfig;
 import uk.ac.ebi.spot.gwas.deposition.constants.GWASDepositionBackendConstants;
@@ -73,7 +74,7 @@ public class BodyOfWorkController {
         log.info("[{}] Request to create body of work: {}", user.getId(), bodyOfWorkDto.getTitle());
         BodyOfWork bodyOfWork = BodyOfWorkDtoDisassembler.disassemble(bodyOfWorkDto, new Provenance(DateTime.now(), user.getId()));
         bodyOfWork = bodyOfWorkService.createBodyOfWork(bodyOfWork);
-//        auditProxy.addAuditEntry(AuditHelper.manuscriptRetrieved(user.getId(), bodyOfWork));
+        auditProxy.addAuditEntry(AuditHelper.bowCreate(user.getId(), bodyOfWork));
         log.info("Body of work  created: {}", bodyOfWork.getId());
         return bodyOfWorkDtoAssembler.toResource(bodyOfWork);
     }
@@ -88,7 +89,7 @@ public class BodyOfWorkController {
         User user = userService.findUser(jwtService.extractUser(HeadersUtil.extractJWT(request)), false);
         log.info("[{}] Request to get body of work: {}", user.getId(), bodyofworkId);
         BodyOfWork bodyOfWork = bodyOfWorkService.retrieveBodyOfWork(bodyofworkId, user.getId());
-//        auditProxy.addAuditEntry(AuditHelper.manuscriptRetrieved(user.getId(), bodyOfWork));
+        auditProxy.addAuditEntry(AuditHelper.bowRetrieve(user.getId(), bodyOfWork));
         log.info("Returning body of work: {}", bodyOfWork.getId());
         return bodyOfWorkDtoAssembler.toResource(bodyOfWork);
     }
@@ -104,6 +105,7 @@ public class BodyOfWorkController {
         User user = userService.findUser(jwtService.extractUser(HeadersUtil.extractJWT(request)), false);
         log.info("[{}] Request to retrieve body of works.", user.getId());
         Page<BodyOfWork> facetedBodyOfWorks = bodyOfWorkService.retrieveBodyOfWorks(user.getId(), pageable);
+        auditProxy.addAuditEntry(AuditHelper.bowRetrieve(user.getId(), null));
 
         final ControllerLinkBuilder lb = ControllerLinkBuilder.linkTo(
                 ControllerLinkBuilder.methodOn(BodyOfWorkController.class).getBodyOfWorks(pageable, assembler, null));
@@ -122,12 +124,14 @@ public class BodyOfWorkController {
                                  HttpServletRequest request) {
         User user = userService.findUser(jwtService.extractUser(HeadersUtil.extractJWT(request)), false);
         log.info("[{}] Request to delete body of work: {}", user.getId(), bodyofworkId);
+        BodyOfWork bodyOfWork = bodyOfWorkService.retrieveBodyOfWork(bodyofworkId, user.getId());
         Submission submission = submissionService.findByBodyOfWork(bodyofworkId, user.getId());
         if (submission != null) {
+            auditProxy.addAuditEntry(AuditHelper.bowDelete(user.getId(), bodyOfWork, false));
             log.error("Unable to delete body of work {} because a submission already exists on it: {}", bodyofworkId, submission.getId());
             throw new CannotDeleteBodyOfWorkException("Unable to delete body of work: " + bodyofworkId + ". A submission was created using this artefact.");
         }
         bodyOfWorkService.deleteBodyOfWork(bodyofworkId, user.getId());
-//        auditProxy.addAuditEntry(AuditHelper.manuscriptRetrieved(user.getId(), bodyOfWork));
+        auditProxy.addAuditEntry(AuditHelper.bowDelete(user.getId(), bodyOfWork, true));
     }
 }

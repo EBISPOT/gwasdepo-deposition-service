@@ -6,6 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import uk.ac.ebi.spot.gwas.deposition.audit.AuditHelper;
+import uk.ac.ebi.spot.gwas.deposition.audit.AuditProxy;
 import uk.ac.ebi.spot.gwas.deposition.constants.FileUploadStatus;
 import uk.ac.ebi.spot.gwas.deposition.constants.FileUploadType;
 import uk.ac.ebi.spot.gwas.deposition.constants.Status;
@@ -50,6 +52,9 @@ public class FileHandlerServiceImpl implements FileHandlerService {
     @Autowired
     private ErrorMessageTemplateProcessor errorMessageTemplateProcessor;
 
+    @Autowired
+    private AuditProxy auditProxy;
+
     @Override
     @Async
     public void handleSummaryStatsTemplate(Submission submission, Publication publication) {
@@ -71,6 +76,8 @@ public class FileHandlerServiceImpl implements FileHandlerService {
             log.error("No summary stats data available for publication: {}", publication.getPmid());
             fileUpload = fileUploadsService.storeFile(null, null, null, 0, FileUploadType.SUMMARY_STATS_TEMPLATE.name());
             submission.addFileUpload(fileUpload.getId());
+            auditProxy.addAuditEntry(AuditHelper.fileCreate(submission.getCreated().getUserId(), fileUpload, submission, false,
+                    "No summary stats data available for publication: {}" + publication.getPmid()));
             submissionService.saveSubmission(submission);
             markInvalidFile(fileUpload, submission, ErrorType.NO_SS_DATA, publication.getPmid());
             return;
@@ -80,6 +87,7 @@ public class FileHandlerServiceImpl implements FileHandlerService {
             log.error("Template service not available.");
             fileUpload = fileUploadsService.storeFile(null, null, null, 0, FileUploadType.SUMMARY_STATS_TEMPLATE.name());
             submission.addFileUpload(fileUpload.getId());
+            auditProxy.addAuditEntry(AuditHelper.fileCreate(submission.getCreated().getUserId(), fileUpload, submission, false, "Template service not available."));
             submissionService.saveSubmission(submission);
             markInvalidFile(fileUpload, submission, ErrorType.NO_TEMPLATE_SERVICE, null);
         } else {
@@ -89,6 +97,7 @@ public class FileHandlerServiceImpl implements FileHandlerService {
                 log.error("No file object received from the template service!");
                 fileUpload = fileUploadsService.storeFile(null, null, null, 0, FileUploadType.SUMMARY_STATS_TEMPLATE.name());
                 submission.addFileUpload(fileUpload.getId());
+                auditProxy.addAuditEntry(AuditHelper.fileCreate(submission.getCreated().getUserId(), fileUpload, submission, false, "No file object received from the template service!"));
                 submissionService.saveSubmission(submission);
                 markInvalidFile(fileUpload, submission, ErrorType.UNUSABLE_DATA, null);
                 return;
@@ -99,6 +108,7 @@ public class FileHandlerServiceImpl implements FileHandlerService {
                     fileObject.getContent().length, FileUploadType.SUMMARY_STATS_TEMPLATE.name());
             fileUpload.setStatus(FileUploadStatus.VALID.name());
             fileUploadsService.save(fileUpload);
+            auditProxy.addAuditEntry(AuditHelper.fileCreate(submission.getCreated().getUserId(), fileUpload, submission, true, null));
 
             log.info("File upload created: {}", fileUpload.getId());
             submission.addFileUpload(fileUpload.getId());

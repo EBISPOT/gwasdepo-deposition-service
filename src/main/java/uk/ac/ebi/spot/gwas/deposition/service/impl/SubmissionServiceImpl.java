@@ -8,8 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import uk.ac.ebi.spot.gwas.deposition.audit.AuditHelper;
-import uk.ac.ebi.spot.gwas.deposition.audit.AuditProxy;
 import uk.ac.ebi.spot.gwas.deposition.constants.Status;
 import uk.ac.ebi.spot.gwas.deposition.domain.*;
 import uk.ac.ebi.spot.gwas.deposition.exception.EntityNotFoundException;
@@ -47,9 +45,6 @@ public class SubmissionServiceImpl implements SubmissionService {
 
     @Autowired
     private SummaryStatsEntryRepository summaryStatsEntryRepository;
-
-    @Autowired
-    private AuditProxy auditProxy;
 
     @Override
     public Submission createSubmission(Submission submission) {
@@ -194,7 +189,6 @@ public class SubmissionServiceImpl implements SubmissionService {
         submission.setSummaryStatsStatus(Status.NA.name());
         submission.setLastUpdated(new Provenance(DateTime.now(), userId));
         submissionRepository.save(submission);
-        auditProxy.addAuditEntry(AuditHelper.fileDeleted(userId, fileUpload));
     }
 
     private void deleteCallbackId(String callbackId) {

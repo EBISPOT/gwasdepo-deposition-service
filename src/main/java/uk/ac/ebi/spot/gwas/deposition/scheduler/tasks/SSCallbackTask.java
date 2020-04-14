@@ -92,7 +92,11 @@ public class SSCallbackTask {
                             fileUpload.setStatus(FileUploadStatus.INVALID.name());
                             fileUploadsService.save(fileUpload);
 
-                            auditProxy.addAuditEntry(AuditHelper.fileValidationFailed(null, fileUpload, errors, true));
+                            Submission submission = submissionService.getSubmission(callbackId.getSubmissionId(),
+                                    new User(gwasDepositionBackendConfig.getAutoCuratorServiceAccount(),
+                                            gwasDepositionBackendConfig.getAutoCuratorServiceAccount()));
+
+                            auditProxy.addAuditEntry(AuditHelper.fileValidate(submission.getCreated().getUserId(), fileUpload, submission, true, false, errors));
                             callbackId.setValid(false);
                         }
                     }
@@ -121,16 +125,16 @@ public class SSCallbackTask {
                         if (fileUpload != null) {
                             fileUpload.setStatus(FileUploadStatus.VALID.name());
                             fileUploadsService.save(fileUpload);
-                            auditProxy.addAuditEntry(AuditHelper.fileValidationSuccess(userId, fileUpload, true));
+                            auditProxy.addAuditEntry(AuditHelper.fileValidate(submission.getCreated().getUserId(), fileUpload, submission, true, true, null));
                         }
 
                         backendEmailService.sendSuccessEmail(userId, publication.getPmid(), metadata);
-                        auditProxy.addAuditEntry(AuditHelper.submissionSuccess(submission.getCreated().getUserId(), submission));
+                        auditProxy.addAuditEntry(AuditHelper.submissionValidate(submission.getCreated().getUserId(), submission, true));
                     } else {
                         submission.setOverallStatus(Status.INVALID.name());
                         submission.setSummaryStatsStatus(Status.INVALID.name());
                         backendEmailService.sendFailEmail(userId, publication.getPmid(), metadata, errors);
-                        auditProxy.addAuditEntry(AuditHelper.submissionFailed(submission.getCreated().getUserId(), submission));
+                        auditProxy.addAuditEntry(AuditHelper.submissionValidate(submission.getCreated().getUserId(), submission, false));
                     }
                     submissionService.saveSubmission(submission);
 

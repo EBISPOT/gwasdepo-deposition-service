@@ -106,7 +106,8 @@ public class MetadataValidationServiceImpl implements MetadataValidationService 
             } else {
                 log.info("Validation outcome: {}", validationOutcome.getErrorMessages());
                 if (validationOutcome.getErrorMessages().isEmpty()) {
-                    auditProxy.addAuditEntry(AuditHelper.fileValidationSuccess(submission.getCreated().getUserId(), fileUpload, false));
+                    auditProxy.addAuditEntry(AuditHelper.fileValidate(submission.getCreated().getUserId(), fileUpload, submission,
+                            false, true, null));
                     conversionService.convertData(submission, fileUpload, streamSubmissionTemplateReader, schema);
                 } else {
                     submission.setOverallStatus(Status.INVALID.name());
@@ -118,8 +119,8 @@ public class MetadataValidationServiceImpl implements MetadataValidationService 
                     fileUpload.setStatus(FileUploadStatus.INVALID.name());
                     fileUploadsService.save(fileUpload);
                     streamSubmissionTemplateReader.close();
-                    auditProxy.addAuditEntry(AuditHelper.fileValidationFailed(submission.getCreated().getUserId(), fileUpload, errors, false));
-                    auditProxy.addAuditEntry(AuditHelper.submissionFailed(submission.getCreated().getUserId(), submission));
+                    auditProxy.addAuditEntry(AuditHelper.fileValidate(submission.getCreated().getUserId(), fileUpload, submission, false, false, errors));
+                    auditProxy.addAuditEntry(AuditHelper.submissionValidate(submission.getCreated().getUserId(), submission, false));
                 }
             }
 
@@ -139,7 +140,7 @@ public class MetadataValidationServiceImpl implements MetadataValidationService 
         fileUpload.setStatus(FileUploadStatus.INVALID.name());
         fileUploadsService.save(fileUpload);
         streamSubmissionTemplateReader.close();
-        auditProxy.addAuditEntry(AuditHelper.submissionFailed(submission.getCreated().getUserId(), submission));
-        auditProxy.addAuditEntry(AuditHelper.fileValidationFailed(submission.getCreated().getUserId(), fileUpload, errors, false));
+        auditProxy.addAuditEntry(AuditHelper.submissionValidate(submission.getCreated().getUserId(), submission, false));
+        auditProxy.addAuditEntry(AuditHelper.fileValidate(submission.getCreated().getUserId(), fileUpload, submission, false, false, errors));
     }
 }
