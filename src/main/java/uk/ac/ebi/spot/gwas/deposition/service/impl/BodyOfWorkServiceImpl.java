@@ -70,4 +70,10 @@ public class BodyOfWorkServiceImpl implements BodyOfWorkService {
         bodyOfWorkRepository.save(bodyOfWork);
         log.info("Body of work successfully deleted: {}", bodyOfWork.getBowId());
     }
+
+    @Override
+    public void save(BodyOfWork bodyOfWork) {
+        log.info("Saving: {}", bodyOfWork.getBowId());
+        bodyOfWorkRepository.save(bodyOfWork);
+    }
 }

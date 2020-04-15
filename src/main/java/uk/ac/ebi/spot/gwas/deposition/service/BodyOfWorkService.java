@@ -12,4 +12,6 @@ public interface BodyOfWorkService {
     Page<BodyOfWork> retrieveBodyOfWorks(String userId, Pageable pageable);
 
     void deleteBodyOfWork(String bodyofworkId, String userId);
+
+    void save(BodyOfWork bodyOfWork);
 }

@@ -120,7 +120,7 @@ public class MetadataValidationServiceImpl implements MetadataValidationService 
                     fileUploadsService.save(fileUpload);
                     streamSubmissionTemplateReader.close();
                     auditProxy.addAuditEntry(AuditHelper.fileValidate(submission.getCreated().getUserId(), fileUpload, submission, false, false, errors));
-                    auditProxy.addAuditEntry(AuditHelper.submissionValidate(submission.getCreated().getUserId(), submission, false));
+                    auditProxy.addAuditEntry(AuditHelper.submissionValidate(submission.getCreated().getUserId(), submission, false, errors));
                 }
             }
 
@@ -140,7 +140,7 @@ public class MetadataValidationServiceImpl implements MetadataValidationService 
         fileUpload.setStatus(FileUploadStatus.INVALID.name());
         fileUploadsService.save(fileUpload);
         streamSubmissionTemplateReader.close();
-        auditProxy.addAuditEntry(AuditHelper.submissionValidate(submission.getCreated().getUserId(), submission, false));
+        auditProxy.addAuditEntry(AuditHelper.submissionValidate(submission.getCreated().getUserId(), submission, false, errors));
         auditProxy.addAuditEntry(AuditHelper.fileValidate(submission.getCreated().getUserId(), fileUpload, submission, false, false, errors));
     }
 }

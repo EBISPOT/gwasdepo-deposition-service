@@ -179,7 +179,6 @@ public class SummaryStatsValidationServiceImpl implements SummaryStatsValidation
                     submission.setOverallStatus(Status.INVALID.name());
                     submission.setSummaryStatsStatus(Status.INVALID.name());
                     submissionService.saveSubmission(submission);
-                    auditProxy.addAuditEntry(AuditHelper.submissionValidate(submission.getCreated().getUserId(), submission, false));
 
                     List<String> errors = ErrorUtil.transform(validationOutcome.getErrorMessages(), errorMessageTemplateProcessor);
                     dataFile.setErrors(errors);
@@ -188,6 +187,7 @@ public class SummaryStatsValidationServiceImpl implements SummaryStatsValidation
                     dataReader.close();
                     schemaReader.close();
                     auditProxy.addAuditEntry(AuditHelper.fileValidate(submission.getCreated().getUserId(), dataFile, submission, true, false, errors));
+                    auditProxy.addAuditEntry(AuditHelper.submissionValidate(submission.getCreated().getUserId(), submission, false, errors));
                 }
             }
 
@@ -208,7 +208,7 @@ public class SummaryStatsValidationServiceImpl implements SummaryStatsValidation
 
         submission.setSummaryStatsStatus(Status.INVALID.name());
         submission.setOverallStatus(Status.INVALID.name());
-        auditProxy.addAuditEntry(AuditHelper.submissionValidate(submission.getCreated().getUserId(), submission, false));
+        auditProxy.addAuditEntry(AuditHelper.submissionValidate(submission.getCreated().getUserId(), submission, false, errors));
         submissionService.saveSubmission(submission);
         if (dataReader != null) {
             dataReader.close();

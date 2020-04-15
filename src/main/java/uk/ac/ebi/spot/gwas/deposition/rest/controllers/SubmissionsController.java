@@ -104,6 +104,8 @@ public class SubmissionsController {
             }
 
             submission = submissionService.createSubmission(submission);
+            bodyOfWork.setStatus(BodyOfWorkStatus.SUBMISSION_EXISTS.name());
+            bodyOfWorkService.save(bodyOfWork);
             auditProxy.addAuditEntry(AuditHelper.submissionCreateBOW(user.getId(), submission, bodyOfWork, false, true));
             return submissionAssemblyService.toResource(submission);
         }

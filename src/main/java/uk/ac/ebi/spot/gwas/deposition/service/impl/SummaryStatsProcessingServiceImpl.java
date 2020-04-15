@@ -90,7 +90,7 @@ public class SummaryStatsProcessingServiceImpl implements SummaryStatsProcessing
             fileUploadsService.save(fileUpload);
 
             auditProxy.addAuditEntry(AuditHelper.fileValidate(submission.getCreated().getUserId(), fileUpload, submission, true, false, errors));
-            auditProxy.addAuditEntry(AuditHelper.submissionValidate(submission.getCreated().getUserId(), submission, false));
+            auditProxy.addAuditEntry(AuditHelper.submissionValidate(submission.getCreated().getUserId(), submission, false, errors));
         } else {
             log.info("Successfully registered {} summary stats with callback ID: {}",
                     summaryStatsEntries.size(), callbackId);

@@ -129,12 +129,12 @@ public class SSCallbackTask {
                         }
 
                         backendEmailService.sendSuccessEmail(userId, publication.getPmid(), metadata);
-                        auditProxy.addAuditEntry(AuditHelper.submissionValidate(submission.getCreated().getUserId(), submission, true));
+                        auditProxy.addAuditEntry(AuditHelper.submissionValidate(submission.getCreated().getUserId(), submission, true, null));
                     } else {
                         submission.setOverallStatus(Status.INVALID.name());
                         submission.setSummaryStatsStatus(Status.INVALID.name());
                         backendEmailService.sendFailEmail(userId, publication.getPmid(), metadata, errors);
-                        auditProxy.addAuditEntry(AuditHelper.submissionValidate(submission.getCreated().getUserId(), submission, false));
+                        auditProxy.addAuditEntry(AuditHelper.submissionValidate(submission.getCreated().getUserId(), submission, false, errors));
                     }
                     submissionService.saveSubmission(submission);
 
