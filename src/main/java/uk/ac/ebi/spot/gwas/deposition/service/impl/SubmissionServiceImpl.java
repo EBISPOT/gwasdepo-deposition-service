@@ -90,17 +90,25 @@ public class SubmissionServiceImpl implements SubmissionService {
     }
 
     @Override
-    public Page<Submission> getSubmissions(String publicationId, Pageable page, User user) {
+    public Page<Submission> getSubmissions(String publicationId, String bowId, Pageable page, User user) {
         log.info("Retrieving submissions: {} - {} - {}", page.getPageNumber(), page.getPageSize(), page.getSort().toString());
         if (curatorAuthService.isCurator(user)) {
-            return publicationId != null ?
-                    submissionRepository.findByPublicationIdAndArchived(publicationId, false, page) :
-                    submissionRepository.findByArchived(false, page);
+            if (publicationId != null) {
+                return submissionRepository.findByPublicationIdAndArchived(publicationId, false, page);
+            }
+            if (bowId != null) {
+                return submissionRepository.findByBodyOfWorksContainsAndArchived(bowId, false, page);
+            }
+            return submissionRepository.findByArchived(false, page);
         }
 
-        return publicationId != null ?
-                submissionRepository.findByPublicationIdAndArchivedAndCreated_UserId(publicationId, false, user.getId(), page) :
-                submissionRepository.findByArchivedAndCreated_UserId(false, user.getId(), page);
+        if (publicationId != null) {
+            return submissionRepository.findByPublicationIdAndArchivedAndCreated_UserId(publicationId, false, user.getId(), page);
+        }
+        if (bowId != null) {
+            return submissionRepository.findByBodyOfWorksContainsAndCreated_UserIdAndArchived(bowId, user.getId(), false, page);
+        }
+        return submissionRepository.findByArchivedAndCreated_UserId(false, user.getId(), page);
     }
 
     @Override

@@ -229,18 +229,21 @@ public class SubmissionsController {
                                                         @RequestParam(value = GWASDepositionBackendConstants.PARAM_PMID,
                                                                 required = false)
                                                                 String pmid,
+                                                        @RequestParam(value = GWASDepositionBackendConstants.PARAM_BOWID,
+                                                                required = false)
+                                                                String bowId,
                                                         @PageableDefault(size = 20, page = 0) Pageable pageable,
                                                         PagedResourcesAssembler assembler) {
         User user = userService.findUser(jwtService.extractUser(HeadersUtil.extractJWT(request)), false);
-        log.info("[{}] Request to retrieve submissions: {} - {} - {} - {}", user.getName(),
-                pmid, pageable.getPageNumber(), pageable.getPageSize(), pageable.getSort().toString());
+        log.info("[{}] Request to retrieve submissions: {} - {} - {} - {} - {}", user.getName(),
+                pmid, bowId, pageable.getPageNumber(), pageable.getPageSize(), pageable.getSort().toString());
         Publication publication = pmid != null ? publicationService.retrievePublication(pmid, false) : null;
         Page<Submission> facetedSearchSubmissions = submissionService.getSubmissions(publication != null ?
-                publication.getId() : null, pageable, user);
+                publication.getId() : null, bowId, pageable, user);
         log.info("Returning {} submissions.", facetedSearchSubmissions.getTotalElements());
 
         final ControllerLinkBuilder lb = ControllerLinkBuilder.linkTo(
-                ControllerLinkBuilder.methodOn(SubmissionsController.class).getSubmissions(null, pmid, pageable, assembler));
+                ControllerLinkBuilder.methodOn(SubmissionsController.class).getSubmissions(null, pmid, bowId, pageable, assembler));
         return assembler.toResource(facetedSearchSubmissions, submissionAssemblyService,
                 new Link(BackendUtil.underBasePath(lb, gwasDepositionBackendConfig.getProxyPrefix()).toUri().toString()));
     }

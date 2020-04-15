@@ -28,6 +28,8 @@ public class GWASDepositionBackendConstants {
 
     public static final String PARAM_PMID = "pmid";
 
+    public static final String PARAM_BOWID = "bowId";
+
     public static final String PARAM_AUTHOR = "author";
 
     public static final String PARAM_TITLE = "title";
