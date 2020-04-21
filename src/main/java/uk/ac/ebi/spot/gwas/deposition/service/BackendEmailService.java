@@ -5,8 +5,8 @@ import java.util.Map;
 
 public interface BackendEmailService {
 
-    void sendSuccessEmail(String userId, String pubmedId, Map<String, String> metadata);
+    void sendSuccessEmail(String userId, String pubmedId, Map<String, Object> metadata);
 
-    void sendFailEmail(String userId, String pubmedId, Map<String, String> metadata, List<String> errors);
+    void sendFailEmail(String userId, String pubmedId, Map<String, Object> metadata, List<String> errors);
 
 }

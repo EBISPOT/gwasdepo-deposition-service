@@ -27,7 +27,7 @@ public class BackendEmailServiceImpl implements BackendEmailService {
     @Autowired
     private UserService userService;
 
-    public void sendSuccessEmail(String userId, String pubmedId, Map<String, String> metadata) {
+    public void sendSuccessEmail(String userId, String pubmedId, Map<String, Object> metadata) {
         User user = userService.getUser(userId);
         metadata.put(MailConstants.USER_NAME, user.getName());
 
@@ -37,7 +37,7 @@ public class BackendEmailServiceImpl implements BackendEmailService {
         }
     }
 
-    public void sendFailEmail(String userId, String pubmedId, Map<String, String> metadata, List<String> errors) {
+    public void sendFailEmail(String userId, String pubmedId, Map<String, Object> metadata, List<String> errors) {
         User user = userService.getUser(userId);
         metadata.put(MailConstants.USER_NAME, user.getName());
 

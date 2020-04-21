@@ -109,7 +109,7 @@ public class SSCallbackTask {
                             new User(gwasDepositionBackendConfig.getAutoCuratorServiceAccount(),
                                     gwasDepositionBackendConfig.getAutoCuratorServiceAccount()));
                     Publication publication = publicationService.retrievePublication(submission.getPublicationId(), true);
-                    Map<String, String> metadata = new HashMap<>();
+                    Map<String, Object> metadata = new HashMap<>();
                     metadata.put(MailConstants.PUBLICATION_TITLE, publication.getTitle());
                     metadata.put(MailConstants.PMID, publication.getPmid());
                     metadata.put(MailConstants.FIRST_AUTHOR, publication.getFirstAuthor());
