@@ -22,6 +22,8 @@ quartz:
       schedule: 0 0 0 0 * ?
     solr-check:
       schedule: 0 */1 * * * ?
+    complete-submissions:
+      schedule: 0 */10 * * * ?
 
 gwas-deposition:
   auth:
