@@ -36,6 +36,7 @@ public class CompleteSubmissionsTask {
                 log.info("Calling SS Service to wrap up Globus for publication: {}", publication.getPmid());
                 summaryStatsProcessingService.callGlobusWrapUp(publication);
             }
+            completedSubmissionRepository.delete(completedSubmission);
         }
         log.info("Completed submissions check done.");
     }
