@@ -8,10 +8,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
-import uk.ac.ebi.spot.gwas.deposition.constants.FileUploadStatus;
-import uk.ac.ebi.spot.gwas.deposition.constants.FileUploadType;
-import uk.ac.ebi.spot.gwas.deposition.constants.Status;
-import uk.ac.ebi.spot.gwas.deposition.constants.SummaryStatsEntryStatus;
+import uk.ac.ebi.spot.gwas.deposition.constants.*;
 import uk.ac.ebi.spot.gwas.deposition.domain.*;
 import uk.ac.ebi.spot.gwas.deposition.dto.summarystats.SummaryStatsResponseDto;
 import uk.ac.ebi.spot.gwas.deposition.dto.summarystats.SummaryStatsStatusDto;
@@ -100,6 +97,7 @@ public class SSCallbackTaskTest extends IntegrationTest {
         submission.setSamples(new ArrayList<>());
         submission.setAssociations(new ArrayList<>());
         submission.setNotes(new ArrayList<>());
+        submission.setProvenanceType(SubmissionProvenanceType.PUBLICATION.name());
         submission = submissionRepository.insert(submission);
 
         callbackId = new CallbackId(RandomStringUtils.randomAlphanumeric(10), submission.getId());

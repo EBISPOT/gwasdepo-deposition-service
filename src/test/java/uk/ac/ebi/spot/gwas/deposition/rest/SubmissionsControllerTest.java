@@ -194,7 +194,7 @@ public class SubmissionsControllerTest extends IntegrationTest {
 
         assertTrue(actual.getFiles().isEmpty());
         assertEquals(1, bodyOfWorkRepository.findAll().size());
-        verify(sumStatsService, times(0)).createGlobusFolder(any());
+        verify(sumStatsService, times(1)).createGlobusFolder(any());
 
         mockMvc.perform(delete(GeneralCommon.API_V1 +
                 GWASDepositionBackendConstants.API_BODY_OF_WORK +
