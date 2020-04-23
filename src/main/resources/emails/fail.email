@@ -349,9 +349,9 @@
                     <tr>
                       <td>
                         <p>Dear <span th:text="${USER_NAME}"></span>,</p>
-                        <p>We were unable to validate your submission of summary statistics for the publication
+                        <p>We were unable to validate your submission of summary statistics for
                         <a th:href="${SUBMISSION_ID}"><span th:text="${PUBLICATION_TITLE}"></span></a>
-                        by <span th:text="${FIRST_AUTHOR}"></span> et al., PMID <span th:text="${PMID}"></span>.</p>
+                        by <span th:text="${FIRST_AUTHOR}"></span> et al., ID <span th:text="${PMID}"></span>.</p>
 
                         <p>This is a list of errors we have encountered:</p>
                         <ul th:each="error: ${ERRORS}">

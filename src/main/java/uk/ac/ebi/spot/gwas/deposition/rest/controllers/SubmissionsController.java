@@ -81,11 +81,28 @@ public class SubmissionsController {
                                                     HttpServletRequest request) {
         User user = userService.findUser(jwtService.extractUser(HeadersUtil.extractJWT(request)), false);
         log.info("[{}] Request to create new submission.", user.getName());
+        if (submissionCreationDto.getPublication() == null && submissionCreationDto.getBodyOfWork() == null) {
+            log.error("Submission is missing body payload.");
+            throw new InvalidSubmissionTypeException("Submission is missing body payload.");
+        }
 
-        if (submissionCreationDto.getPublication() == null) {
-            if (submissionCreationDto.getBodyOfWork() == null) {
-                throw new InvalidSubmissionTypeException("Submission is missing body payload.");
+        String globusFolder = UUID.randomUUID().toString();
+        SSGlobusResponse outcome = sumStatsService.createGlobusFolder(new SSGlobusFolderDto(globusFolder,
+                submissionCreationDto.getGlobusIdentity() != null ?
+                        submissionCreationDto.getGlobusIdentity() :
+                        user.getEmail()));
+        if (outcome != null) {
+            if (!outcome.isValid()) {
+                auditProxy.addAuditEntry(AuditHelper.globusCreate(user.getId(), false, outcome));
+                log.error("Unable to create Globus folder: {}", outcome.getOutcome());
+                throw new EmailAccountNotLinkedToGlobusException(outcome.getOutcome());
             }
+        } else {
+            auditProxy.addAuditEntry(AuditHelper.globusCreate(user.getId(), false, null));
+            throw new SSGlobusFolderCreatioException("Sorry! There is a fault on our end. Please contact gwas-info@ebi.ac.uk for help.");
+        }
+
+        if (submissionCreationDto.getBodyOfWork() != null) {
             log.info("Received submission based on body of work: {}", submissionCreationDto.getBodyOfWork().getTitle());
             BodyOfWork bodyOfWork = BodyOfWorkDtoDisassembler.disassemble(submissionCreationDto.getBodyOfWork(),
                     new Provenance(DateTime.now(), user.getId()));
@@ -94,11 +111,14 @@ public class SubmissionsController {
             Submission submission = new Submission(bodyOfWork.getBowId(),
                     SubmissionProvenanceType.BODY_OF_WORK.name(),
                     new Provenance(DateTime.now(), user.getId()));
+            submission.setGlobusFolderId(globusFolder);
+            submission.setGlobusOriginId(outcome.getOutcome());
+            submission.setType(SubmissionType.METADATA.name());
             auditProxy.addAuditEntry(AuditHelper.submissionCreateBOW(user.getId(), submission, bodyOfWork, true, true));
 
             Submission existing = submissionService.findByBodyOfWork(bodyOfWork.getBowId(), user.getId());
             if (existing != null) {
-                log.error("Unable to create submission using: {}. A submission already exists.");
+                log.error("Unable to create submission using: {}. A submission already exists.", bodyOfWork.getBowId());
                 auditProxy.addAuditEntry(AuditHelper.submissionCreateBOW(user.getId(), submission, bodyOfWork, false, false));
                 throw new CannotCreateSubmissionOnExistingBodyOfWork("Unable to create submission using: " + bodyOfWork.getBowId() + ". A submission already exists.");
             }
@@ -118,47 +138,29 @@ public class SubmissionsController {
                     SubmissionProvenanceType.PUBLICATION.name(),
                     new Provenance(DateTime.now(), user.getId()));
 
-            String globusFolder = UUID.randomUUID().toString();
-            SSGlobusResponse outcome = sumStatsService.createGlobusFolder(new SSGlobusFolderDto(globusFolder,
-                    submissionCreationDto.getGlobusIdentity() != null ?
-                            submissionCreationDto.getGlobusIdentity() :
-                            user.getEmail()));
-            if (outcome != null) {
-                if (!outcome.isValid()) {
-                    auditProxy.addAuditEntry(AuditHelper.submissionCreatePub(user.getId(),
-                            submission, submissionCreationDto.getPublication(), true, false, outcome.getOutcome()));
-                    log.error("Unable to create Globus folder: {}", outcome.getOutcome());
-                    throw new EmailAccountNotLinkedToGlobusException(outcome.getOutcome());
-                }
-                submission.setGlobusFolderId(globusFolder);
-                submission.setGlobusOriginId(outcome.getOutcome());
-                auditProxy.addAuditEntry(AuditHelper.submissionCreatePub(user.getId(),
-                        submission, submissionCreationDto.getPublication(), true, true, null));
+            submission.setGlobusFolderId(globusFolder);
+            submission.setGlobusOriginId(outcome.getOutcome());
+            auditProxy.addAuditEntry(AuditHelper.submissionCreatePub(user.getId(),
+                    submission, submissionCreationDto.getPublication(), true, true, null));
 
-
-                if (publication.getStatus().equals(PublicationStatus.ELIGIBLE.name())) {
-                    publication.setStatus(PublicationStatus.UNDER_SUBMISSION.name());
-                    submission.setType(SubmissionType.METADATA.name());
-                    submission = submissionService.createSubmission(submission);
-                    auditProxy.addAuditEntry(AuditHelper.submissionCreatePub(user.getId(),
-                            submission, submissionCreationDto.getPublication(), false, true, null));
-                }
-                if (publication.getStatus().equals(PublicationStatus.PUBLISHED.name())) {
-                    publication.setStatus(PublicationStatus.UNDER_SUMMARY_STATS_SUBMISSION.name());
-                    submission.setType(SubmissionType.SUMMARY_STATS.name());
-                    submission = submissionService.createSubmission(submission);
-                    auditProxy.addAuditEntry(AuditHelper.submissionCreatePub(user.getId(),
-                            submission, submissionCreationDto.getPublication(), false, true, null));
-                    fileHandlerService.handleSummaryStatsTemplate(submission, publication);
-                }
-                publicationService.savePublication(publication);
-                log.info("Returning new submission: {}", submission.getId());
-                return submissionAssemblyService.toResource(submission);
-            } else {
+            if (publication.getStatus().equals(PublicationStatus.ELIGIBLE.name())) {
+                publication.setStatus(PublicationStatus.UNDER_SUBMISSION.name());
+                submission.setType(SubmissionType.METADATA.name());
+                submission = submissionService.createSubmission(submission);
                 auditProxy.addAuditEntry(AuditHelper.submissionCreatePub(user.getId(),
-                        submission, submissionCreationDto.getPublication(), true, false, null));
-                throw new SSGlobusFolderCreatioException("Sorry! There is a fault on our end. Please contact gwas-info@ebi.ac.uk for help.");
+                        submission, submissionCreationDto.getPublication(), false, true, null));
             }
+            if (publication.getStatus().equals(PublicationStatus.PUBLISHED.name())) {
+                publication.setStatus(PublicationStatus.UNDER_SUMMARY_STATS_SUBMISSION.name());
+                submission.setType(SubmissionType.SUMMARY_STATS.name());
+                submission = submissionService.createSubmission(submission);
+                auditProxy.addAuditEntry(AuditHelper.submissionCreatePub(user.getId(),
+                        submission, submissionCreationDto.getPublication(), false, true, null));
+                fileHandlerService.handleSummaryStatsTemplate(submission, publication);
+            }
+            publicationService.savePublication(publication);
+            log.info("Returning new submission: {}", submission.getId());
+            return submissionAssemblyService.toResource(submission);
         }
 
         throw new SubmissionOnUnacceptedPublicationTypeException("Submissions are only accepted on ELIGIBLE or PUBLISHED publications.");

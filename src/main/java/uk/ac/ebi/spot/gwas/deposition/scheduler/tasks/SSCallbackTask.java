@@ -8,10 +8,7 @@ import uk.ac.ebi.spot.gwas.deposition.audit.AuditHelper;
 import uk.ac.ebi.spot.gwas.deposition.audit.AuditProxy;
 import uk.ac.ebi.spot.gwas.deposition.config.BackendMailConfig;
 import uk.ac.ebi.spot.gwas.deposition.config.GWASDepositionBackendConfig;
-import uk.ac.ebi.spot.gwas.deposition.constants.FileUploadStatus;
-import uk.ac.ebi.spot.gwas.deposition.constants.MailConstants;
-import uk.ac.ebi.spot.gwas.deposition.constants.Status;
-import uk.ac.ebi.spot.gwas.deposition.constants.SummaryStatsEntryStatus;
+import uk.ac.ebi.spot.gwas.deposition.constants.*;
 import uk.ac.ebi.spot.gwas.deposition.domain.*;
 import uk.ac.ebi.spot.gwas.deposition.dto.summarystats.SummaryStatsResponseDto;
 import uk.ac.ebi.spot.gwas.deposition.dto.summarystats.SummaryStatsStatusDto;
@@ -55,6 +52,9 @@ public class SSCallbackTask {
 
     @Autowired
     private PublicationService publicationService;
+
+    @Autowired
+    private BodyOfWorkService bodyOfWorkService;
 
     @Autowired
     private AuditProxy auditProxy;
@@ -108,11 +108,24 @@ public class SSCallbackTask {
                     Submission submission = submissionService.getSubmission(callbackId.getSubmissionId(),
                             new User(gwasDepositionBackendConfig.getAutoCuratorServiceAccount(),
                                     gwasDepositionBackendConfig.getAutoCuratorServiceAccount()));
-                    Publication publication = publicationService.retrievePublication(submission.getPublicationId(), true);
+
                     Map<String, Object> metadata = new HashMap<>();
-                    metadata.put(MailConstants.PUBLICATION_TITLE, publication.getTitle());
-                    metadata.put(MailConstants.PMID, publication.getPmid());
-                    metadata.put(MailConstants.FIRST_AUTHOR, publication.getFirstAuthor());
+                    String workId;
+                    if (submission.getProvenanceType().equalsIgnoreCase(SubmissionProvenanceType.PUBLICATION.name())) {
+                        Publication publication = publicationService.retrievePublication(submission.getPublicationId(), true);
+                        metadata.put(MailConstants.PUBLICATION_TITLE, publication.getTitle());
+                        metadata.put(MailConstants.PMID, publication.getPmid());
+                        metadata.put(MailConstants.FIRST_AUTHOR, publication.getFirstAuthor());
+                        workId = publication.getPmid();
+                    } else {
+                        BodyOfWork bodyOfWork = bodyOfWorkService.retrieveBodyOfWork(submission.getBodyOfWorks().get(0),
+                                submission.getCreated().getUserId());
+                        metadata.put(MailConstants.PUBLICATION_TITLE, bodyOfWork.getTitle());
+                        metadata.put(MailConstants.PMID, bodyOfWork.getBowId());
+                        metadata.put(MailConstants.FIRST_AUTHOR, bodyOfWork.getFirstAuthor());
+                        workId = bodyOfWork.getBowId();
+                    }
+
                     metadata.put(MailConstants.SUBMISSION_ID, backendMailConfig.getSubmissionsBaseURL() + submission.getId());
 
                     String userId = submission.getLastUpdated() != null ? submission.getLastUpdated().getUserId() :
@@ -128,12 +141,12 @@ public class SSCallbackTask {
                             auditProxy.addAuditEntry(AuditHelper.fileValidate(submission.getCreated().getUserId(), fileUpload, submission, true, true, null));
                         }
 
-                        backendEmailService.sendSuccessEmail(userId, publication.getPmid(), metadata);
+                        backendEmailService.sendSuccessEmail(userId, workId, metadata);
                         auditProxy.addAuditEntry(AuditHelper.submissionValidate(submission.getCreated().getUserId(), submission, true, null));
                     } else {
                         submission.setOverallStatus(Status.INVALID.name());
                         submission.setSummaryStatsStatus(Status.INVALID.name());
-                        backendEmailService.sendFailEmail(userId, publication.getPmid(), metadata, errors);
+                        backendEmailService.sendFailEmail(userId, workId, metadata, errors);
                         auditProxy.addAuditEntry(AuditHelper.submissionValidate(submission.getCreated().getUserId(), submission, false, errors));
                     }
                     submissionService.saveSubmission(submission);

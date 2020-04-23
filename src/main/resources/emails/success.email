@@ -350,8 +350,8 @@
                       <td>
                         <p>Dear <span th:text="${USER_NAME}"></span>,</p>
 
-                        <p>The summary statistics for the publication <i><span th:text="${PUBLICATION_TITLE}"></span></i>
-                        by <span th:text="${FIRST_AUTHOR}"></span> et al., PMID <span th:text="${PMID}"></span> were successfully validated.</p>
+                        <p>The summary statistics for <i><span th:text="${PUBLICATION_TITLE}"></span></i>
+                        by <span th:text="${FIRST_AUTHOR}"></span> et al., ID <span th:text="${PMID}"></span> were successfully validated.</p>
 
                         <p>Please review the <a th:href="${SUBMISSION_ID}">submission report</a> to confirm the submission details. To finalise the submission process, click "Submit".</p>
 

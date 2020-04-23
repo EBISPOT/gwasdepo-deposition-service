@@ -41,7 +41,7 @@ gwas-deposition:
   solr:
     enabled: false
   email-config:
-    subject: GWAS Catalog submission for publication %PMID%
+    subject: GWAS Catalog submission for %PMID%
     base-url: https://www.ebi.ac.uk/gwas/deposition/submission/
     emails:
       success: emails/success.email
