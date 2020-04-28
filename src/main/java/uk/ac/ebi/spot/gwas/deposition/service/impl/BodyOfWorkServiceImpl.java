@@ -9,9 +9,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import uk.ac.ebi.spot.gwas.deposition.domain.BodyOfWork;
 import uk.ac.ebi.spot.gwas.deposition.domain.Provenance;
+import uk.ac.ebi.spot.gwas.deposition.domain.User;
 import uk.ac.ebi.spot.gwas.deposition.exception.EntityNotFoundException;
 import uk.ac.ebi.spot.gwas.deposition.repository.BodyOfWorkRepository;
 import uk.ac.ebi.spot.gwas.deposition.service.BodyOfWorkService;
+import uk.ac.ebi.spot.gwas.deposition.service.CuratorAuthService;
 import uk.ac.ebi.spot.gwas.deposition.util.GCPCounter;
 
 import java.util.Optional;
@@ -26,6 +28,9 @@ public class BodyOfWorkServiceImpl implements BodyOfWorkService {
 
     @Autowired
     private GCPCounter gcpCounter;
+
+    @Autowired
+    private CuratorAuthService curatorAuthService;
 
     @Override
     public BodyOfWork createBodyOfWork(BodyOfWork bodyOfWork) {
@@ -50,10 +55,19 @@ public class BodyOfWorkServiceImpl implements BodyOfWorkService {
     }
 
     @Override
-    public Page<BodyOfWork> retrieveBodyOfWorks(String userId, Pageable pageable) {
-        log.info("[{}] Retrieving body of works.", userId);
-        Page<BodyOfWork> bodyOfWorks = bodyOfWorkRepository.findByArchivedAndCreated_UserId(false, userId, pageable);
-        return bodyOfWorks;
+    public Page<BodyOfWork> retrieveBodyOfWorks(User user, String status, Pageable pageable) {
+        log.info("[{}] Retrieving body of works.", user.getId());
+        if (curatorAuthService.isCurator(user)) {
+            if (status != null) {
+                return bodyOfWorkRepository.findByStatusAndArchived(status, false, pageable);
+            }
+            return bodyOfWorkRepository.findByArchived(false, pageable);
+        }
+        if (status != null) {
+            return bodyOfWorkRepository.findByStatusAndArchivedAndCreated_UserId(status, false, user.getId(), pageable);
+        }
+
+        return bodyOfWorkRepository.findByArchivedAndCreated_UserId(false, user.getId(), pageable);
     }
 
     @Override

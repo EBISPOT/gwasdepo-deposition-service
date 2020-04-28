@@ -13,4 +13,9 @@ public interface BodyOfWorkRepository extends MongoRepository<BodyOfWork, String
 
     Page<BodyOfWork> findByArchivedAndCreated_UserId(boolean archived, String userId, Pageable page);
 
+    Page<BodyOfWork> findByStatusAndArchived(String status, boolean archived, Pageable page);
+
+    Page<BodyOfWork> findByArchived(boolean archived, Pageable pageable);
+
+    Page<BodyOfWork> findByStatusAndArchivedAndCreated_UserId(String status, boolean archived, String userId, Pageable pageable);
 }

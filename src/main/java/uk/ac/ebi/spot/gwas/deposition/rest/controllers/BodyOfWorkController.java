@@ -100,15 +100,18 @@ public class BodyOfWorkController {
     @GetMapping(produces = "application/hal+json")
     @ResponseStatus(HttpStatus.OK)
     public PagedResources<BodyOfWorkDto> getBodyOfWorks(@PageableDefault(size = 20, page = 0) Pageable pageable,
+                                                        @RequestParam(value = GWASDepositionBackendConstants.PARAM_STATUS,
+                                                                required = false)
+                                                                String status,
                                                         PagedResourcesAssembler assembler,
                                                         HttpServletRequest request) {
         User user = userService.findUser(jwtService.extractUser(HeadersUtil.extractJWT(request)), false);
         log.info("[{}] Request to retrieve body of works.", user.getId());
-        Page<BodyOfWork> facetedBodyOfWorks = bodyOfWorkService.retrieveBodyOfWorks(user.getId(), pageable);
+        Page<BodyOfWork> facetedBodyOfWorks = bodyOfWorkService.retrieveBodyOfWorks(user, status, pageable);
         auditProxy.addAuditEntry(AuditHelper.bowRetrieve(user.getId(), null));
 
         final ControllerLinkBuilder lb = ControllerLinkBuilder.linkTo(
-                ControllerLinkBuilder.methodOn(BodyOfWorkController.class).getBodyOfWorks(pageable, assembler, null));
+                ControllerLinkBuilder.methodOn(BodyOfWorkController.class).getBodyOfWorks(pageable, status, assembler, null));
 
         return assembler.toResource(facetedBodyOfWorks, bodyOfWorkDtoAssembler,
                 new Link(BackendUtil.underBasePath(lb, gwasDepositionBackendConfig.getProxyPrefix()).toUri().toString()));

@@ -124,7 +124,7 @@ public class SubmissionsController {
             }
 
             submission = submissionService.createSubmission(submission);
-            bodyOfWork.setStatus(BodyOfWorkStatus.SUBMISSION_EXISTS.name());
+            bodyOfWork.setStatus(BodyOfWorkStatus.UNDER_SUBMISSION.name());
             bodyOfWorkService.save(bodyOfWork);
             auditProxy.addAuditEntry(AuditHelper.submissionCreateBOW(user.getId(), submission, bodyOfWork, false, true));
             return submissionAssemblyService.toResource(submission);
@@ -141,24 +141,25 @@ public class SubmissionsController {
             submission.setGlobusFolderId(globusFolder);
             submission.setGlobusOriginId(outcome.getOutcome());
             auditProxy.addAuditEntry(AuditHelper.submissionCreatePub(user.getId(),
-                    submission, submissionCreationDto.getPublication(), true, true, null));
+                    submission, publication, true, true, null));
 
             if (publication.getStatus().equals(PublicationStatus.ELIGIBLE.name())) {
                 publication.setStatus(PublicationStatus.UNDER_SUBMISSION.name());
                 submission.setType(SubmissionType.METADATA.name());
                 submission = submissionService.createSubmission(submission);
                 auditProxy.addAuditEntry(AuditHelper.submissionCreatePub(user.getId(),
-                        submission, submissionCreationDto.getPublication(), false, true, null));
+                        submission, publication, false, true, null));
+                publicationService.savePublication(publication);
             }
             if (publication.getStatus().equals(PublicationStatus.PUBLISHED.name())) {
                 publication.setStatus(PublicationStatus.UNDER_SUMMARY_STATS_SUBMISSION.name());
                 submission.setType(SubmissionType.SUMMARY_STATS.name());
                 submission = submissionService.createSubmission(submission);
                 auditProxy.addAuditEntry(AuditHelper.submissionCreatePub(user.getId(),
-                        submission, submissionCreationDto.getPublication(), false, true, null));
+                        submission, publication, false, true, null));
+                publicationService.savePublication(publication);
                 fileHandlerService.handleSummaryStatsTemplate(submission, publication);
             }
-            publicationService.savePublication(publication);
             log.info("Returning new submission: {}", submission.getId());
             return submissionAssemblyService.toResource(submission);
         }
