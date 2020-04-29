@@ -9,13 +9,18 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import uk.ac.ebi.spot.gwas.deposition.domain.BodyOfWork;
 import uk.ac.ebi.spot.gwas.deposition.domain.Provenance;
+import uk.ac.ebi.spot.gwas.deposition.domain.Study;
 import uk.ac.ebi.spot.gwas.deposition.domain.User;
 import uk.ac.ebi.spot.gwas.deposition.exception.EntityNotFoundException;
 import uk.ac.ebi.spot.gwas.deposition.repository.BodyOfWorkRepository;
+import uk.ac.ebi.spot.gwas.deposition.repository.StudyRepository;
 import uk.ac.ebi.spot.gwas.deposition.service.BodyOfWorkService;
 import uk.ac.ebi.spot.gwas.deposition.service.CuratorAuthService;
+import uk.ac.ebi.spot.gwas.deposition.service.UserService;
 import uk.ac.ebi.spot.gwas.deposition.util.GCPCounter;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -32,6 +37,12 @@ public class BodyOfWorkServiceImpl implements BodyOfWorkService {
     @Autowired
     private CuratorAuthService curatorAuthService;
 
+    @Autowired
+    private UserService userService;
+
+    @Autowired
+    private StudyRepository studyRepository;
+
     @Override
     public BodyOfWork createBodyOfWork(BodyOfWork bodyOfWork) {
         log.info("Creating body of work: {}", bodyOfWork.getTitle());
@@ -42,9 +53,14 @@ public class BodyOfWorkServiceImpl implements BodyOfWorkService {
     }
 
     @Override
-    public BodyOfWork retrieveBodyOfWork(String bodyOfWorkId, String userId) {
-        log.info("[{}] Retrieving body of work: {}", userId, bodyOfWorkId);
-        Optional<BodyOfWork> optionalBodyOfWork = bodyOfWorkRepository.findByBowIdAndArchivedAndCreated_UserId(bodyOfWorkId, false, userId);
+    public BodyOfWork retrieveBodyOfWork(String bodyOfWorkId, User user) {
+        log.info("[{}] Retrieving body of work: {}", user.getId(), bodyOfWorkId);
+        Optional<BodyOfWork> optionalBodyOfWork;
+        if (curatorAuthService.isCurator(user)) {
+            optionalBodyOfWork = bodyOfWorkRepository.findByBowIdAndArchived(bodyOfWorkId, false);
+        } else {
+            optionalBodyOfWork = bodyOfWorkRepository.findByBowIdAndArchivedAndCreated_UserId(bodyOfWorkId, false, user.getId());
+        }
         if (!optionalBodyOfWork.isPresent()) {
             log.error("Unable to find body of work with ID: {}", bodyOfWorkId);
             throw new EntityNotFoundException("Unable to find body of work with ID: " + bodyOfWorkId);
@@ -52,6 +68,12 @@ public class BodyOfWorkServiceImpl implements BodyOfWorkService {
 
         log.info("Returning body of work: {}", optionalBodyOfWork.get().getBowId());
         return optionalBodyOfWork.get();
+    }
+
+    @Override
+    public BodyOfWork retrieveBodyOfWork(String bodyOfWorkId, String userId) {
+        User user = userService.getUser(userId);
+        return this.retrieveBodyOfWork(bodyOfWorkId, user);
     }
 
     @Override
@@ -71,15 +93,20 @@ public class BodyOfWorkServiceImpl implements BodyOfWorkService {
     }
 
     @Override
-    public void deleteBodyOfWork(String bodyofworkId, String userId) {
-        log.info("[{}] Deleting body of work: {}", userId, bodyofworkId);
-        Optional<BodyOfWork> optionalBodyOfWork = bodyOfWorkRepository.findByBowIdAndArchivedAndCreated_UserId(bodyofworkId, false, userId);
+    public void deleteBodyOfWork(String bodyofworkId, User user) {
+        log.info("[{}] Deleting body of work: {}", user.getId(), bodyofworkId);
+        Optional<BodyOfWork> optionalBodyOfWork;
+        if (curatorAuthService.isCurator(user)) {
+            optionalBodyOfWork = bodyOfWorkRepository.findByBowIdAndArchived(bodyofworkId, false);
+        } else {
+            optionalBodyOfWork = bodyOfWorkRepository.findByBowIdAndArchivedAndCreated_UserId(bodyofworkId, false, user.getId());
+        }
         if (!optionalBodyOfWork.isPresent()) {
             log.error("Unable to find body of work with ID: {}", bodyofworkId);
             throw new EntityNotFoundException("Unable to find body of work with ID: " + bodyofworkId);
         }
         BodyOfWork bodyOfWork = optionalBodyOfWork.get();
-        bodyOfWork.setLastUpdated(new Provenance(DateTime.now(), userId));
+        bodyOfWork.setLastUpdated(new Provenance(DateTime.now(), user.getId()));
         bodyOfWork.setArchived(true);
         bodyOfWorkRepository.save(bodyOfWork);
         log.info("Body of work successfully deleted: {}", bodyOfWork.getBowId());
@@ -89,5 +116,54 @@ public class BodyOfWorkServiceImpl implements BodyOfWorkService {
     public void save(BodyOfWork bodyOfWork) {
         log.info("Saving: {}", bodyOfWork.getBowId());
         bodyOfWorkRepository.save(bodyOfWork);
+    }
+
+    @Override
+    public BodyOfWork updateBodyOfWork(String bodyofworkId, BodyOfWork bodyOfWork, User user) {
+        log.info("[{}] Retrieving body of work: {}", user.getId(), bodyofworkId);
+        Optional<BodyOfWork> optionalBodyOfWork;
+        if (curatorAuthService.isCurator(user)) {
+            optionalBodyOfWork = bodyOfWorkRepository.findByBowIdAndArchived(bodyofworkId, false);
+        } else {
+            optionalBodyOfWork = bodyOfWorkRepository.findByBowIdAndArchivedAndCreated_UserId(bodyofworkId, false, user.getId());
+        }
+        if (!optionalBodyOfWork.isPresent()) {
+            log.error("Unable to find body of work with ID: {}", bodyofworkId);
+            throw new EntityNotFoundException("Unable to find body of work with ID: " + bodyofworkId);
+        }
+        BodyOfWork existing = optionalBodyOfWork.get();
+        existing.setCorrespondingAuthors(bodyOfWork.getCorrespondingAuthors());
+        existing.setDescription(bodyOfWork.getDescription());
+        existing.setDoi(bodyOfWork.getDoi());
+        existing.setEmbargoDate(bodyOfWork.getEmbargoDate());
+        existing.setEmbargoUntilPublished(bodyOfWork.getEmbargoUntilPublished());
+        existing.setFirstAuthor(bodyOfWork.getFirstAuthor());
+        existing.setJournal(bodyOfWork.getJournal());
+        existing.setLastAuthor(bodyOfWork.getLastAuthor());
+        existing.setPmids(bodyOfWork.getPmids() != null ? bodyOfWork.getPmids() : existing.getPmids());
+        existing.setPrePrintServer(bodyOfWork.getPrePrintServer());
+        existing.setPreprintServerDOI(bodyOfWork.getPreprintServerDOI());
+        existing.setTitle(bodyOfWork.getTitle());
+        existing.setUrl(bodyOfWork.getUrl());
+
+        if (existing.getPmids() != null) {
+            if (!existing.getPmids().isEmpty()) {
+                List<Study> studyList = studyRepository.findByBodyOfWorkListContains(bodyofworkId);
+                for (Study study : studyList) {
+                    List<String> pmids = study.getPmids() != null ? study.getPmids() : new ArrayList<>();
+                    for (String pmid : existing.getPmids()) {
+                        if (!pmids.contains(pmid)) {
+                            pmids.add(pmid);
+                        }
+                    }
+
+                    study.setPmids(pmids);
+                    studyRepository.save(study);
+                }
+            }
+        }
+
+        existing = bodyOfWorkRepository.save(existing);
+        return existing;
     }
 }

@@ -106,7 +106,7 @@ public class SubmissionsController {
             log.info("Received submission based on body of work: {}", submissionCreationDto.getBodyOfWork().getTitle());
             BodyOfWork bodyOfWork = BodyOfWorkDtoDisassembler.disassemble(submissionCreationDto.getBodyOfWork(),
                     new Provenance(DateTime.now(), user.getId()));
-            bodyOfWork = bodyOfWorkService.retrieveBodyOfWork(bodyOfWork.getBowId(), user.getId());
+            bodyOfWork = bodyOfWorkService.retrieveBodyOfWork(bodyOfWork.getBowId(), user);
 
             Submission submission = new Submission(bodyOfWork.getBowId(),
                     SubmissionProvenanceType.BODY_OF_WORK.name(),

@@ -88,7 +88,7 @@ public class BodyOfWorkController {
                                                  HttpServletRequest request) {
         User user = userService.findUser(jwtService.extractUser(HeadersUtil.extractJWT(request)), false);
         log.info("[{}] Request to get body of work: {}", user.getId(), bodyofworkId);
-        BodyOfWork bodyOfWork = bodyOfWorkService.retrieveBodyOfWork(bodyofworkId, user.getId());
+        BodyOfWork bodyOfWork = bodyOfWorkService.retrieveBodyOfWork(bodyofworkId, user);
         auditProxy.addAuditEntry(AuditHelper.bowRetrieve(user.getId(), bodyOfWork));
         log.info("Returning body of work: {}", bodyOfWork.getId());
         return bodyOfWorkDtoAssembler.toResource(bodyOfWork);
@@ -119,6 +119,23 @@ public class BodyOfWorkController {
     }
 
     /**
+     * PUT /v1/bodyofwork/{bodyofworkId}
+     */
+    @PutMapping(value = "/{bodyofworkId}", produces = "application/hal+json")
+    @ResponseStatus(HttpStatus.OK)
+    public Resource<BodyOfWorkDto> updateBodyOfWork(@PathVariable String bodyofworkId,
+                                                    @RequestBody BodyOfWorkDto bodyOfWorkDto,
+                                                    HttpServletRequest request) {
+        User user = userService.findUser(jwtService.extractUser(HeadersUtil.extractJWT(request)), false);
+        log.info("[{}] Request to update body of work: {}", user.getId(), bodyofworkId);
+        BodyOfWork bodyOfWork = BodyOfWorkDtoDisassembler.disassemble(bodyOfWorkDto, new Provenance(DateTime.now(), user.getId()));
+        BodyOfWork updated = bodyOfWorkService.updateBodyOfWork(bodyofworkId, bodyOfWork, user);
+        auditProxy.addAuditEntry(AuditHelper.bowUpdate(user.getId(), updated));
+        log.info("Returning body of work: {}", updated.getId());
+        return bodyOfWorkDtoAssembler.toResource(updated);
+    }
+
+    /**
      * DELETE /v1/bodyofwork/{bodyofworkId}
      */
     @DeleteMapping(value = "/{bodyofworkId}")
@@ -127,14 +144,14 @@ public class BodyOfWorkController {
                                  HttpServletRequest request) {
         User user = userService.findUser(jwtService.extractUser(HeadersUtil.extractJWT(request)), false);
         log.info("[{}] Request to delete body of work: {}", user.getId(), bodyofworkId);
-        BodyOfWork bodyOfWork = bodyOfWorkService.retrieveBodyOfWork(bodyofworkId, user.getId());
+        BodyOfWork bodyOfWork = bodyOfWorkService.retrieveBodyOfWork(bodyofworkId, user);
         Submission submission = submissionService.findByBodyOfWork(bodyofworkId, user.getId());
         if (submission != null) {
             auditProxy.addAuditEntry(AuditHelper.bowDelete(user.getId(), bodyOfWork, false));
             log.error("Unable to delete body of work {} because a submission already exists on it: {}", bodyofworkId, submission.getId());
             throw new CannotDeleteBodyOfWorkException("Unable to delete body of work: " + bodyofworkId + ". A submission was created using this artefact.");
         }
-        bodyOfWorkService.deleteBodyOfWork(bodyofworkId, user.getId());
+        bodyOfWorkService.deleteBodyOfWork(bodyofworkId, user);
         auditProxy.addAuditEntry(AuditHelper.bowDelete(user.getId(), bodyOfWork, true));
     }
 }

@@ -8,11 +8,15 @@ import uk.ac.ebi.spot.gwas.deposition.domain.User;
 public interface BodyOfWorkService {
     BodyOfWork createBodyOfWork(BodyOfWork bodyOfWork);
 
+    BodyOfWork retrieveBodyOfWork(String bodyOfWork, User user);
+
     BodyOfWork retrieveBodyOfWork(String bodyOfWork, String userId);
 
     Page<BodyOfWork> retrieveBodyOfWorks(User user, String status, Pageable pageable);
 
-    void deleteBodyOfWork(String bodyofworkId, String userId);
+    void deleteBodyOfWork(String bodyofworkId, User user);
 
     void save(BodyOfWork bodyOfWork);
+
+    BodyOfWork updateBodyOfWork(String bodyofworkId, BodyOfWork bodyOfWork, User user);
 }

@@ -13,10 +13,12 @@ import org.springframework.test.context.ContextConfiguration;
 import uk.ac.ebi.spot.gwas.deposition.constants.GWASDepositionBackendConstants;
 import uk.ac.ebi.spot.gwas.deposition.constants.GeneralCommon;
 import uk.ac.ebi.spot.gwas.deposition.domain.SSGlobusResponse;
+import uk.ac.ebi.spot.gwas.deposition.dto.AuthorDto;
 import uk.ac.ebi.spot.gwas.deposition.dto.BodyOfWorkDto;
 import uk.ac.ebi.spot.gwas.deposition.rest.dto.BodyOfWorkDtoAssembler;
 import uk.ac.ebi.spot.gwas.deposition.service.SumStatsService;
 
+import java.util.Arrays;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
@@ -98,6 +100,70 @@ public class BodyOfWorkControllerTest extends IntegrationTest {
         assertEquals(bodyOfWork.getJournal(), actual.getJournal());
         assertEquals(bodyOfWork.getFirstAuthor().getFirstName(), actual.getFirstAuthor().getFirstName());
         assertEquals(bodyOfWork.getLastAuthor().getFirstName(), actual.getLastAuthor().getFirstName());
+    }
+
+    /**
+     * GET /v1/bodyofwork/{bodyofworkId}
+     */
+    @Test
+    public void shouldPutBodyOfWork() throws Exception {
+        BodyOfWorkDto bodyOfWorkDto = create();
+        String endpoint = GeneralCommon.API_V1 +
+                GWASDepositionBackendConstants.API_BODY_OF_WORK +
+                "/" + bodyOfWorkDto.getBodyOfWorkId();
+
+        String response = mockMvc.perform(get(endpoint)
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        Resource<BodyOfWorkDto> actualResource = mapper.readValue(response, new TypeReference<Resource<BodyOfWorkDto>>() {
+        });
+        BodyOfWorkDto actual = actualResource.getContent();
+
+        assertEquals(bodyOfWork.getTitle(), actual.getTitle());
+        assertEquals(bodyOfWork.getJournal(), actual.getJournal());
+        assertEquals(bodyOfWork.getFirstAuthor().getFirstName(), actual.getFirstAuthor().getFirstName());
+        assertEquals(bodyOfWork.getLastAuthor().getFirstName(), actual.getLastAuthor().getFirstName());
+
+        BodyOfWorkDto updated = new BodyOfWorkDto(actual.getBodyOfWorkId(),
+                "Updated title",
+                actual.getDescription(),
+                new AuthorDto("1", "2", "group", "email"),
+                actual.getLastAuthor(),
+                actual.getJournal(),
+                actual.getDoi(),
+                actual.getUrl(),
+                actual.getCorrespondingAuthors(),
+                actual.getPrePrintServer(),
+                actual.getPreprintServerDOI(),
+                actual.getEmbargoDate(),
+                actual.getEmbargoUntilPublished(),
+                Arrays.asList(new String[]{
+                        "1",
+                        "2"
+                }),
+                actual.getStatus());
+
+        response = mockMvc.perform(put(endpoint)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(mapper.writeValueAsString(updated)))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        actualResource = mapper.readValue(response, new TypeReference<Resource<BodyOfWorkDto>>() {
+        });
+        actual = actualResource.getContent();
+
+        assertEquals(updated.getTitle(), actual.getTitle());
+        assertEquals(updated.getJournal(), actual.getJournal());
+        assertEquals(updated.getPmids(), actual.getPmids());
+        assertEquals(updated.getFirstAuthor().getFirstName(), actual.getFirstAuthor().getFirstName());
+        assertEquals(updated.getLastAuthor().getFirstName(), actual.getLastAuthor().getFirstName());
     }
 
     /**
