@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import uk.ac.ebi.spot.gwas.deposition.components.BodyOfWorkListener;
 import uk.ac.ebi.spot.gwas.deposition.domain.BodyOfWork;
 import uk.ac.ebi.spot.gwas.deposition.domain.Provenance;
 import uk.ac.ebi.spot.gwas.deposition.domain.Study;
@@ -42,6 +43,9 @@ public class BodyOfWorkServiceImpl implements BodyOfWorkService {
 
     @Autowired
     private StudyRepository studyRepository;
+
+    @Autowired
+    private BodyOfWorkListener bodyOfWorkListener;
 
     @Override
     public BodyOfWork createBodyOfWork(BodyOfWork bodyOfWork) {
@@ -164,6 +168,7 @@ public class BodyOfWorkServiceImpl implements BodyOfWorkService {
         }
 
         existing = bodyOfWorkRepository.save(existing);
+        bodyOfWorkListener.update(bodyOfWork);
         return existing;
     }
 }

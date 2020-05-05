@@ -8,7 +8,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import uk.ac.ebi.spot.gwas.deposition.components.BodyOfWorkListener;
 import uk.ac.ebi.spot.gwas.deposition.constants.Status;
+import uk.ac.ebi.spot.gwas.deposition.constants.SubmissionProvenanceType;
 import uk.ac.ebi.spot.gwas.deposition.domain.*;
 import uk.ac.ebi.spot.gwas.deposition.exception.EntityNotFoundException;
 import uk.ac.ebi.spot.gwas.deposition.repository.ArchivedSubmissionRepository;
@@ -45,6 +47,9 @@ public class SubmissionServiceImpl implements SubmissionService {
 
     @Autowired
     private SummaryStatsEntryRepository summaryStatsEntryRepository;
+
+    @Autowired
+    private BodyOfWorkListener bodyOfWorkListener;
 
     @Override
     public Submission createSubmission(Submission submission) {
@@ -118,6 +123,9 @@ public class SubmissionServiceImpl implements SubmissionService {
         submission.setOverallStatus(status);
         if (status.equals(Status.SUBMITTED)) {
             submission.setDateSubmitted(LocalDate.now());
+            if (submission.getProvenanceType().equalsIgnoreCase(SubmissionProvenanceType.BODY_OF_WORK.name())) {
+                bodyOfWorkListener.update(submission);
+            }
         }
         submission.setLastUpdated(new Provenance(DateTime.now(), user.getId()));
         submission = submissionRepository.save(submission);
