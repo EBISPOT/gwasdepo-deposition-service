@@ -20,7 +20,9 @@ import uk.ac.ebi.spot.gwas.deposition.domain.Study;
 import uk.ac.ebi.spot.gwas.deposition.domain.Submission;
 import uk.ac.ebi.spot.gwas.deposition.domain.User;
 import uk.ac.ebi.spot.gwas.deposition.dto.StudyDto;
+import uk.ac.ebi.spot.gwas.deposition.dto.StudyEnvelopeDto;
 import uk.ac.ebi.spot.gwas.deposition.rest.dto.StudyDtoAssembler;
+import uk.ac.ebi.spot.gwas.deposition.rest.dto.StudyEnvelopeDtoAssembler;
 import uk.ac.ebi.spot.gwas.deposition.service.JWTService;
 import uk.ac.ebi.spot.gwas.deposition.service.StudiesService;
 import uk.ac.ebi.spot.gwas.deposition.service.SubmissionService;
@@ -54,6 +56,9 @@ public class StudiesController {
     @Autowired
     private StudyDtoAssembler studyDtoAssembler;
 
+    @Autowired
+    private StudyEnvelopeDtoAssembler studyEnvelopeDtoAssembler;
+
     /**
      * GET /v1/submissions/{submissionId}/studies
      */
@@ -77,4 +82,26 @@ public class StudiesController {
 
     }
 
+    /**
+     * GET /v1/submissions/{submissionId}/study-envelopes
+     */
+    @GetMapping(value = "/{submissionId}" + GWASDepositionBackendConstants.API_STUDY_ENVELOPES,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseStatus(HttpStatus.OK)
+    public PagedResources<StudyEnvelopeDto> getStudyEnvelopes(@PathVariable String submissionId, HttpServletRequest request,
+                                                              @PageableDefault(size = 20, page = 0) Pageable pageable,
+                                                              PagedResourcesAssembler assembler) {
+        User user = userService.findUser(jwtService.extractUser(HeadersUtil.extractJWT(request)), false);
+        log.info("[{}] Request to retrieve studies for submission: {}", user.getName(), submissionId);
+        Submission submission = submissionService.getSubmission(submissionId, user);
+
+        Page<Study> facetedSearchStudies = studiesService.getStudies(submission, pageable);
+        log.info("Returning {} studies.", facetedSearchStudies.getTotalElements());
+
+        final ControllerLinkBuilder lb = ControllerLinkBuilder.linkTo(
+                ControllerLinkBuilder.methodOn(StudiesController.class).getStudyEnvelopes(submissionId, null, pageable, assembler));
+        return assembler.toResource(facetedSearchStudies, studyEnvelopeDtoAssembler,
+                new Link(BackendUtil.underBasePath(lb, gwasDepositionBackendConfig.getProxyPrefix()).toUri().toString()));
+
+    }
 }

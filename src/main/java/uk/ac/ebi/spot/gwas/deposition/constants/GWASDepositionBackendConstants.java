@@ -12,6 +12,8 @@ public class GWASDepositionBackendConstants {
 
     public static final String API_STUDIES = "/studies";
 
+    public static final String API_STUDY_ENVELOPES = "/study-envelopes";
+
     public static final String API_SAMPLES = "/samples";
 
     public static final String API_ASSOCIATIONS = "/associations";
