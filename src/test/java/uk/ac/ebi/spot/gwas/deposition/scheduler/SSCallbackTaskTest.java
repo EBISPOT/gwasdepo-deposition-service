@@ -8,17 +8,14 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
-import uk.ac.ebi.spot.gwas.deposition.constants.FileUploadStatus;
-import uk.ac.ebi.spot.gwas.deposition.constants.FileUploadType;
-import uk.ac.ebi.spot.gwas.deposition.constants.Status;
-import uk.ac.ebi.spot.gwas.deposition.constants.SummaryStatsEntryStatus;
+import uk.ac.ebi.spot.gwas.deposition.constants.*;
 import uk.ac.ebi.spot.gwas.deposition.domain.*;
 import uk.ac.ebi.spot.gwas.deposition.dto.summarystats.SummaryStatsResponseDto;
 import uk.ac.ebi.spot.gwas.deposition.dto.summarystats.SummaryStatsStatusDto;
 import uk.ac.ebi.spot.gwas.deposition.repository.*;
 import uk.ac.ebi.spot.gwas.deposition.rest.IntegrationTest;
 import uk.ac.ebi.spot.gwas.deposition.scheduler.tasks.SSCallbackTask;
-import uk.ac.ebi.spot.gwas.deposition.service.EmailService;
+import uk.ac.ebi.spot.gwas.deposition.service.BackendEmailService;
 import uk.ac.ebi.spot.gwas.deposition.service.SumStatsService;
 
 import java.util.ArrayList;
@@ -34,7 +31,7 @@ import static org.mockito.Mockito.when;
 @ContextConfiguration(classes = {IntegrationTest.MockJWTServiceConfig.class,
         IntegrationTest.MockTaskExecutorConfig.class,
         IntegrationTest.MockSumStatsServiceConfig.class,
-        IntegrationTest.MockEmailServiceConfig.class})
+        IntegrationTest.MockBackendEmailServiceConfig.class})
 public class SSCallbackTaskTest extends IntegrationTest {
 
     @Autowired
@@ -62,7 +59,7 @@ public class SSCallbackTaskTest extends IntegrationTest {
     private SummaryStatsEntryRepository summaryStatsEntryRepository;
 
     @Autowired
-    private EmailService emailService;
+    private BackendEmailService backendEmailService;
 
     @Autowired
     private PublicationRepository publicationRepository;
@@ -100,6 +97,7 @@ public class SSCallbackTaskTest extends IntegrationTest {
         submission.setSamples(new ArrayList<>());
         submission.setAssociations(new ArrayList<>());
         submission.setNotes(new ArrayList<>());
+        submission.setProvenanceType(SubmissionProvenanceType.PUBLICATION.name());
         submission = submissionRepository.insert(submission);
 
         callbackId = new CallbackId(RandomStringUtils.randomAlphanumeric(10), submission.getId());
@@ -119,8 +117,8 @@ public class SSCallbackTaskTest extends IntegrationTest {
                 RandomStringUtils.randomAlphanumeric(10),
                 RandomStringUtils.randomAlphanumeric(10));
         summaryStatsEntry = summaryStatsEntryRepository.insert(summaryStatsEntry);
-        doNothing().when(emailService).sendSuccessEmail(any(), any(), any());
-        doNothing().when(emailService).sendFailEmail(any(), any(), any(), any());
+        doNothing().when(backendEmailService).sendSuccessEmail(any(), any(), any());
+        doNothing().when(backendEmailService).sendFailEmail(any(), any(), any(), any());
     }
 
     @Test

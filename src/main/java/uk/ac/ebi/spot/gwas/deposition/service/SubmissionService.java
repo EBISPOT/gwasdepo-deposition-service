@@ -15,7 +15,9 @@ public interface SubmissionService {
 
     Submission saveSubmission(Submission submission);
 
-    Page<Submission> getSubmissions(String pmid, Pageable page, User user);
+    Page<Submission> getSubmissions(String pmid, String bowId, Pageable page, User user);
+
+    Submission findByBodyOfWork(String bodyOfWorkId, String userId);
 
     void deleteSubmission(String submissionId, User user);
 

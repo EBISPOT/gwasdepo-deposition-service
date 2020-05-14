@@ -5,15 +5,15 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import uk.ac.ebi.spot.gwas.deposition.audit.AuditHelper;
+import uk.ac.ebi.spot.gwas.deposition.audit.AuditProxy;
 import uk.ac.ebi.spot.gwas.deposition.constants.FileUploadStatus;
 import uk.ac.ebi.spot.gwas.deposition.constants.Status;
+import uk.ac.ebi.spot.gwas.deposition.constants.SubmissionProvenanceType;
 import uk.ac.ebi.spot.gwas.deposition.domain.*;
 import uk.ac.ebi.spot.gwas.deposition.dto.*;
 import uk.ac.ebi.spot.gwas.deposition.dto.templateschema.TemplateSchemaDto;
-import uk.ac.ebi.spot.gwas.deposition.repository.AssociationRepository;
-import uk.ac.ebi.spot.gwas.deposition.repository.NoteRepository;
-import uk.ac.ebi.spot.gwas.deposition.repository.SampleRepository;
-import uk.ac.ebi.spot.gwas.deposition.repository.StudyRepository;
+import uk.ac.ebi.spot.gwas.deposition.repository.*;
 import uk.ac.ebi.spot.gwas.deposition.rest.dto.AssociationDtoAssembler;
 import uk.ac.ebi.spot.gwas.deposition.rest.dto.NoteDtoAssembler;
 import uk.ac.ebi.spot.gwas.deposition.rest.dto.SampleDtoAssembler;
@@ -23,12 +23,14 @@ import uk.ac.ebi.spot.gwas.deposition.service.FileUploadsService;
 import uk.ac.ebi.spot.gwas.deposition.service.SubmissionService;
 import uk.ac.ebi.spot.gwas.deposition.service.SummaryStatsProcessingService;
 import uk.ac.ebi.spot.gwas.deposition.util.BackendUtil;
+import uk.ac.ebi.spot.gwas.deposition.util.GCSTCounter;
 import uk.ac.ebi.spot.gwas.template.validator.service.TemplateConverterService;
 import uk.ac.ebi.spot.gwas.template.validator.util.StreamSubmissionTemplateReader;
 import uk.ac.ebi.spot.gwas.template.validator.util.SubmissionConverter;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class ConversionServiceImpl implements ConversionService {
@@ -59,6 +61,18 @@ public class ConversionServiceImpl implements ConversionService {
     @Autowired
     private SummaryStatsProcessingService summaryStatsProcessingService;
 
+    @Autowired
+    private GCSTCounter gcstCounter;
+
+    @Autowired
+    private PublicationRepository publicationRepository;
+
+    @Autowired
+    private BodyOfWorkRepository bodyOfWorkRepository;
+
+    @Autowired
+    private AuditProxy auditProxy;
+
     @Async
     @Override
     public void convertData(Submission submission, FileUpload fileUpload,
@@ -73,7 +87,29 @@ public class ConversionServiceImpl implements ConversionService {
         log.info("Found {} studies.", submissionDataDto.getStudies().size());
         for (StudyDto studyDto : submissionDataDto.getStudies()) {
             Study study = StudyDtoAssembler.disassemble(studyDto);
+            if (study.getAccession() == null) {
+                study.setAccession(gcstCounter.getNext());
+            }
             study.setSubmissionId(submission.getId());
+            if (submission.getProvenanceType().equalsIgnoreCase(SubmissionProvenanceType.BODY_OF_WORK.name())) {
+                if (!submission.getBodyOfWorks().isEmpty()) {
+                    study.setBodyOfWorkList(submission.getBodyOfWorks());
+
+                    Optional<BodyOfWork> bodyOfWorkOptional = bodyOfWorkRepository.findByBowIdAndArchived(submission.getBodyOfWorks().get(0), false);
+                    if (bodyOfWorkOptional.isPresent()) {
+                        if (bodyOfWorkOptional.get().getPmids() != null) {
+                            study.setPmids(bodyOfWorkOptional.get().getPmids());
+                        }
+                    }
+                }
+            } else {
+                Optional<Publication> publicationOptional = publicationRepository.findById(submission.getPublicationId());
+                if (publicationOptional.isPresent()) {
+                    List<String> pmids = new ArrayList<>();
+                    pmids.add(publicationOptional.get().getPmid());
+                    study.setPmids(pmids);
+                }
+            }
             study = studyRepository.insert(study);
             submission.addStudy(study.getId());
 
@@ -116,6 +152,7 @@ public class ConversionServiceImpl implements ConversionService {
         submission.setOverallStatus(Status.VALIDATING.name());
         submission.setMetadataStatus(Status.VALID.name());
         submissionService.saveSubmission(submission);
+        auditProxy.addAuditEntry(AuditHelper.submissionValidate(submission.getCreated().getUserId(), submission, true, null));
 
         fileUpload.setStatus(FileUploadStatus.VALID.name());
         fileUploadsService.save(fileUpload);

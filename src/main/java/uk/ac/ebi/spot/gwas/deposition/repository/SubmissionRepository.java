@@ -22,6 +22,12 @@ public interface SubmissionRepository extends MongoRepository<Submission, String
 
     Optional<Submission> findByPublicationIdAndArchived(String publicationId, boolean archived);
 
+    Optional<Submission> findByBodyOfWorksContainsAndCreated_UserIdAndArchived(String bodyOfWorkId, String userId, boolean archived);
+
+    Page<Submission> findByBodyOfWorksContainsAndCreated_UserIdAndArchived(String bodyOfWorkId, String userId, boolean archived, Pageable page);
+
+    Page<Submission> findByBodyOfWorksContainsAndArchived(String bodyOfWorkId, boolean archived, Pageable page);
+
     Page<Submission> findByPublicationIdAndArchived(String publicationId, boolean archived, Pageable page);
 
     Page<Submission> findByPublicationIdAndArchivedAndCreated_UserId(String publicationId, boolean b, String userId, Pageable page);

@@ -22,6 +22,8 @@ quartz:
       schedule: 0 0 0 0 * ?
     solr-check:
       schedule: 0 */1 * * * ?
+    complete-submissions:
+      schedule: 0 */10 * * * ?
 
 gwas-deposition:
   auth:
@@ -39,11 +41,7 @@ gwas-deposition:
   solr:
     enabled: false
   email-config:
-    email-enabled: false
-    from-address: no-reply@ebi.ac.uk
-    from-name: GWAS Curation
-    retries: 3
-    subject: GWAS Catalog submission for publication %PMID%
+    subject: GWAS Catalog submission for %PMID%
     base-url: https://www.ebi.ac.uk/gwas/deposition/submission/
     emails:
       success: emails/success.email
@@ -52,6 +50,19 @@ gwas-deposition:
 solr:
   enable:
     alias: false
+
+email:
+  enabled: false
+  config:
+    from-address: no-reply@ebi.ac.uk
+    from-name: GWAS Curation
+    retries: 3
+
+audit:
+  enabled: false
+  url: http://gwas-audit-service:8080
+  endpoints:
+    audit-entries: /v1/audit-entries
 
 gwas-sumstats-service:
   enabled: true

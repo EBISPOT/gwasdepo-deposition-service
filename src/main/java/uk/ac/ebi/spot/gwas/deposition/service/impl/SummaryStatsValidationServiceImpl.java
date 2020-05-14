@@ -6,6 +6,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import uk.ac.ebi.spot.gwas.deposition.audit.AuditHelper;
+import uk.ac.ebi.spot.gwas.deposition.audit.AuditProxy;
 import uk.ac.ebi.spot.gwas.deposition.constants.FileUploadStatus;
 import uk.ac.ebi.spot.gwas.deposition.constants.FileUploadType;
 import uk.ac.ebi.spot.gwas.deposition.constants.Status;
@@ -54,6 +56,9 @@ public class SummaryStatsValidationServiceImpl implements SummaryStatsValidation
 
     @Autowired
     private ValidatorConfig validatorConfig;
+
+    @Autowired
+    private AuditProxy auditProxy;
 
     @Async
     @Override
@@ -152,18 +157,22 @@ public class SummaryStatsValidationServiceImpl implements SummaryStatsValidation
                             this.markInvalidFile(dataFile, submission, ErrorType.INVALID_FILE, dataFile.getFileName(), dataReader, schemaReader);
                         }
                         if (validationOutcome.getErrorMessages().isEmpty()) {
+                            auditProxy.addAuditEntry(AuditHelper.fileValidate(submission.getCreated().getUserId(), dataFile, submission, true, true, null));
                             conversionService.convertData(submission, dataFile, dataReader, schema);
                         } else {
                             submission.setOverallStatus(Status.INVALID.name());
                             submission.setSummaryStatsStatus(Status.INVALID.name());
                             submissionService.saveSubmission(submission);
 
-                            dataFile.setErrors(errorMessageTemplateProcessor.processGenericError(ErrorType.STUDY_DATA_MISMATCH,
-                                    StringUtils.join(validationOutcome.getErrorMessages().get(validatorConfig.getSsContentValidationSheet()), ",")));
+                            List<String> errors = errorMessageTemplateProcessor.processGenericError(ErrorType.STUDY_DATA_MISMATCH,
+                                    StringUtils.join(validationOutcome.getErrorMessages().get(validatorConfig.getSsContentValidationSheet()), ","));
+                            dataFile.setErrors(errors);
                             dataFile.setStatus(FileUploadStatus.INVALID.name());
                             fileUploadsService.save(dataFile);
+                            auditProxy.addAuditEntry(AuditHelper.fileValidate(submission.getCreated().getUserId(), dataFile, submission, true, false, errors));
                         }
                     } else {
+                        auditProxy.addAuditEntry(AuditHelper.fileValidate(submission.getCreated().getUserId(), dataFile, submission, true, true, null));
                         conversionService.convertData(submission, dataFile, dataReader, schema);
                     }
                 } else {
@@ -171,11 +180,14 @@ public class SummaryStatsValidationServiceImpl implements SummaryStatsValidation
                     submission.setSummaryStatsStatus(Status.INVALID.name());
                     submissionService.saveSubmission(submission);
 
-                    dataFile.setErrors(ErrorUtil.transform(validationOutcome.getErrorMessages(), errorMessageTemplateProcessor));
+                    List<String> errors = ErrorUtil.transform(validationOutcome.getErrorMessages(), errorMessageTemplateProcessor);
+                    dataFile.setErrors(errors);
                     dataFile.setStatus(FileUploadStatus.INVALID.name());
                     fileUploadsService.save(dataFile);
                     dataReader.close();
                     schemaReader.close();
+                    auditProxy.addAuditEntry(AuditHelper.fileValidate(submission.getCreated().getUserId(), dataFile, submission, true, false, errors));
+                    auditProxy.addAuditEntry(AuditHelper.submissionValidate(submission.getCreated().getUserId(), submission, false, errors));
                 }
             }
 
@@ -188,12 +200,15 @@ public class SummaryStatsValidationServiceImpl implements SummaryStatsValidation
     private void markInvalidFile(FileUpload fileUpload, Submission submission, String errorType, String context,
                                  StreamSubmissionTemplateReader dataReader,
                                  StreamSubmissionTemplateReader schemaReader) {
-        fileUpload.setErrors(errorMessageTemplateProcessor.processGenericError(errorType, context));
+        List<String> errors = errorMessageTemplateProcessor.processGenericError(errorType, context);
+        fileUpload.setErrors(errors);
         fileUpload.setStatus(FileUploadStatus.INVALID.name());
         fileUploadsService.save(fileUpload);
+        auditProxy.addAuditEntry(AuditHelper.fileValidate(submission.getCreated().getUserId(), fileUpload, submission, true, false, errors));
 
         submission.setSummaryStatsStatus(Status.INVALID.name());
         submission.setOverallStatus(Status.INVALID.name());
+        auditProxy.addAuditEntry(AuditHelper.submissionValidate(submission.getCreated().getUserId(), submission, false, errors));
         submissionService.saveSubmission(submission);
         if (dataReader != null) {
             dataReader.close();

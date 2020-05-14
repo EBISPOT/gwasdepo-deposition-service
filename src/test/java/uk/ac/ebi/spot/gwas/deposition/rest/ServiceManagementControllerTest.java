@@ -5,6 +5,7 @@ import org.junit.Test;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
 import uk.ac.ebi.spot.gwas.deposition.constants.GWASDepositionBackendConstants;
+import uk.ac.ebi.spot.gwas.deposition.constants.GeneralCommon;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -19,11 +20,11 @@ public class ServiceManagementControllerTest extends IntegrationTest {
     @Ignore
     @Test
     public void shouldGetPublicationById() throws Exception {
-        mockMvc.perform(delete(GWASDepositionBackendConstants.API_V1 +
+        mockMvc.perform(delete(GeneralCommon.API_V1 +
                 GWASDepositionBackendConstants.API_PUBLICATIONS + "/" + eligiblePublication.getPmid()))
                 .andExpect(status().isOk());
 
-        mockMvc.perform(get(GWASDepositionBackendConstants.API_V1 +
+        mockMvc.perform(get(GeneralCommon.API_V1 +
                 GWASDepositionBackendConstants.API_PUBLICATIONS + "/" + eligiblePublication.getPmid() +
                 "?" + GWASDepositionBackendConstants.PARAM_PMID + "=true")
                 .contentType(MediaType.APPLICATION_JSON))

@@ -30,11 +30,11 @@ public class GWASDepositionBackendConfig {
     @Value("${gwas-deposition.proxy-prefix:#{NULL}}")
     private String proxyPrefix;
 
-    @Value("${gwas-deposition.email-config.base-url}")
-    private String submissionsBaseURL;
+    @Value("${gwas-deposition.db:#{NULL}}")
+    private String dbName;
 
-    public String getSubmissionsBaseURL() {
-        return submissionsBaseURL;
+    public String getDbName() {
+        return dbName;
     }
 
     public boolean isAuthEnabled() {

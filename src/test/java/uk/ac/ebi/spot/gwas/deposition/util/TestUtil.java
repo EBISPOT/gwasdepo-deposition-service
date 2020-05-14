@@ -1,17 +1,17 @@
 package uk.ac.ebi.spot.gwas.deposition.util;
 
 import org.apache.commons.lang3.RandomStringUtils;
+import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 import uk.ac.ebi.spot.gwas.deposition.constants.PublicationStatus;
-import uk.ac.ebi.spot.gwas.deposition.domain.CorrespondingAuthor;
-import uk.ac.ebi.spot.gwas.deposition.domain.Publication;
-import uk.ac.ebi.spot.gwas.deposition.domain.User;
+import uk.ac.ebi.spot.gwas.deposition.domain.*;
 import uk.ac.ebi.spot.gwas.deposition.dto.summarystats.SummaryStatsRequestDto;
 import uk.ac.ebi.spot.gwas.deposition.dto.summarystats.SummaryStatsRequestEntryDto;
 import uk.ac.ebi.spot.gwas.deposition.dto.summarystats.SummaryStatsResponseDto;
 import uk.ac.ebi.spot.gwas.deposition.dto.summarystats.SummaryStatsStatusDto;
 import uk.ac.ebi.spot.gwas.deposition.dto.templateschema.*;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -21,6 +21,28 @@ public class TestUtil {
     public static User user() {
         return new User(RandomStringUtils.randomAlphanumeric(10),
                 RandomStringUtils.randomAlphanumeric(10));
+    }
+
+    public static BodyOfWork bodyOfWork(String userId) {
+        Author author = new Author(RandomStringUtils.randomAlphanumeric(10),
+                RandomStringUtils.randomAlphanumeric(10),
+                RandomStringUtils.randomAlphanumeric(10),
+                RandomStringUtils.randomAlphanumeric(10));
+
+        return new BodyOfWork(RandomStringUtils.randomAlphanumeric(10),
+                RandomStringUtils.randomAlphanumeric(10),
+                RandomStringUtils.randomAlphanumeric(10),
+                RandomStringUtils.randomAlphanumeric(10),
+                RandomStringUtils.randomAlphanumeric(10),
+                author,
+                author,
+                new ArrayList<>(),
+                new ArrayList<>(),
+                RandomStringUtils.randomAlphanumeric(10),
+                RandomStringUtils.randomAlphanumeric(10),
+                LocalDate.now(),
+                true,
+                new Provenance(DateTime.now(), userId));
     }
 
     public static Publication eligiblePublication() {

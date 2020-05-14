@@ -5,6 +5,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import uk.ac.ebi.spot.gwas.deposition.audit.AuditHelper;
+import uk.ac.ebi.spot.gwas.deposition.audit.AuditProxy;
 import uk.ac.ebi.spot.gwas.deposition.constants.FileUploadStatus;
 import uk.ac.ebi.spot.gwas.deposition.constants.Status;
 import uk.ac.ebi.spot.gwas.deposition.constants.SubmissionType;
@@ -20,6 +22,8 @@ import uk.ac.ebi.spot.gwas.template.validator.domain.ValidationOutcome;
 import uk.ac.ebi.spot.gwas.template.validator.service.TemplateValidatorService;
 import uk.ac.ebi.spot.gwas.template.validator.util.ErrorMessageTemplateProcessor;
 import uk.ac.ebi.spot.gwas.template.validator.util.StreamSubmissionTemplateReader;
+
+import java.util.List;
 
 @Service
 public class MetadataValidationServiceImpl implements MetadataValidationService {
@@ -43,6 +47,9 @@ public class MetadataValidationServiceImpl implements MetadataValidationService 
 
     @Autowired
     private ConversionService conversionService;
+
+    @Autowired
+    private AuditProxy auditProxy;
 
     @Override
     @Async
@@ -99,16 +106,21 @@ public class MetadataValidationServiceImpl implements MetadataValidationService 
             } else {
                 log.info("Validation outcome: {}", validationOutcome.getErrorMessages());
                 if (validationOutcome.getErrorMessages().isEmpty()) {
+                    auditProxy.addAuditEntry(AuditHelper.fileValidate(submission.getCreated().getUserId(), fileUpload, submission,
+                            false, true, null));
                     conversionService.convertData(submission, fileUpload, streamSubmissionTemplateReader, schema);
                 } else {
                     submission.setOverallStatus(Status.INVALID.name());
                     submission.setMetadataStatus(Status.INVALID.name());
                     submissionService.saveSubmission(submission);
 
-                    fileUpload.setErrors(ErrorUtil.transform(validationOutcome.getErrorMessages(), errorMessageTemplateProcessor));
+                    List<String> errors = ErrorUtil.transform(validationOutcome.getErrorMessages(), errorMessageTemplateProcessor);
+                    fileUpload.setErrors(errors);
                     fileUpload.setStatus(FileUploadStatus.INVALID.name());
                     fileUploadsService.save(fileUpload);
                     streamSubmissionTemplateReader.close();
+                    auditProxy.addAuditEntry(AuditHelper.fileValidate(submission.getCreated().getUserId(), fileUpload, submission, false, false, errors));
+                    auditProxy.addAuditEntry(AuditHelper.submissionValidate(submission.getCreated().getUserId(), submission, false, errors));
                 }
             }
 
@@ -123,9 +135,12 @@ public class MetadataValidationServiceImpl implements MetadataValidationService 
         submission.setMetadataStatus(Status.INVALID.name());
         submissionService.saveSubmission(submission);
 
-        fileUpload.setErrors(errorMessageTemplateProcessor.processGenericError(errorType, context));
+        List<String> errors = errorMessageTemplateProcessor.processGenericError(errorType, context);
+        fileUpload.setErrors(errors);
         fileUpload.setStatus(FileUploadStatus.INVALID.name());
         fileUploadsService.save(fileUpload);
         streamSubmissionTemplateReader.close();
+        auditProxy.addAuditEntry(AuditHelper.submissionValidate(submission.getCreated().getUserId(), submission, false, errors));
+        auditProxy.addAuditEntry(AuditHelper.fileValidate(submission.getCreated().getUserId(), fileUpload, submission, false, false, errors));
     }
 }

@@ -8,7 +8,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import uk.ac.ebi.spot.gwas.deposition.components.BodyOfWorkListener;
 import uk.ac.ebi.spot.gwas.deposition.constants.Status;
+import uk.ac.ebi.spot.gwas.deposition.constants.SubmissionProvenanceType;
 import uk.ac.ebi.spot.gwas.deposition.domain.*;
 import uk.ac.ebi.spot.gwas.deposition.exception.EntityNotFoundException;
 import uk.ac.ebi.spot.gwas.deposition.repository.ArchivedSubmissionRepository;
@@ -45,6 +47,9 @@ public class SubmissionServiceImpl implements SubmissionService {
 
     @Autowired
     private SummaryStatsEntryRepository summaryStatsEntryRepository;
+
+    @Autowired
+    private BodyOfWorkListener bodyOfWorkListener;
 
     @Override
     public Submission createSubmission(Submission submission) {
@@ -90,17 +95,25 @@ public class SubmissionServiceImpl implements SubmissionService {
     }
 
     @Override
-    public Page<Submission> getSubmissions(String publicationId, Pageable page, User user) {
+    public Page<Submission> getSubmissions(String publicationId, String bowId, Pageable page, User user) {
         log.info("Retrieving submissions: {} - {} - {}", page.getPageNumber(), page.getPageSize(), page.getSort().toString());
         if (curatorAuthService.isCurator(user)) {
-            return publicationId != null ?
-                    submissionRepository.findByPublicationIdAndArchived(publicationId, false, page) :
-                    submissionRepository.findByArchived(false, page);
+            if (publicationId != null) {
+                return submissionRepository.findByPublicationIdAndArchived(publicationId, false, page);
+            }
+            if (bowId != null) {
+                return submissionRepository.findByBodyOfWorksContainsAndArchived(bowId, false, page);
+            }
+            return submissionRepository.findByArchived(false, page);
         }
 
-        return publicationId != null ?
-                submissionRepository.findByPublicationIdAndArchivedAndCreated_UserId(publicationId, false, user.getId(), page) :
-                submissionRepository.findByArchivedAndCreated_UserId(false, user.getId(), page);
+        if (publicationId != null) {
+            return submissionRepository.findByPublicationIdAndArchivedAndCreated_UserId(publicationId, false, user.getId(), page);
+        }
+        if (bowId != null) {
+            return submissionRepository.findByBodyOfWorksContainsAndCreated_UserIdAndArchived(bowId, user.getId(), false, page);
+        }
+        return submissionRepository.findByArchivedAndCreated_UserId(false, user.getId(), page);
     }
 
     @Override
@@ -110,10 +123,26 @@ public class SubmissionServiceImpl implements SubmissionService {
         submission.setOverallStatus(status);
         if (status.equals(Status.SUBMITTED)) {
             submission.setDateSubmitted(LocalDate.now());
+            if (submission.getProvenanceType().equalsIgnoreCase(SubmissionProvenanceType.BODY_OF_WORK.name())) {
+                bodyOfWorkListener.update(submission);
+            }
         }
         submission.setLastUpdated(new Provenance(DateTime.now(), user.getId()));
         submission = submissionRepository.save(submission);
         return submission;
+    }
+
+    @Override
+    public Submission findByBodyOfWork(String bodyOfWorkId, String userId) {
+        log.info("Retrieving submission for: {} | {}", bodyOfWorkId, userId);
+        Optional<Submission> submissionOptional = submissionRepository.findByBodyOfWorksContainsAndCreated_UserIdAndArchived(bodyOfWorkId, userId, false);
+        if (submissionOptional.isPresent()) {
+            log.info("Found submission {} for: {} | {}", submissionOptional.get().getId(), bodyOfWorkId, userId);
+            return submissionOptional.get();
+        }
+
+        log.info("No submission found for: {} | {}", bodyOfWorkId, userId);
+        return null;
     }
 
     @Override
@@ -138,6 +167,7 @@ public class SubmissionServiceImpl implements SubmissionService {
         submission.setSamples(new ArrayList<>());
         submission.setNotes(new ArrayList<>());
         submission.setFileUploads(new ArrayList<>());
+        submission.setLastUpdated(new Provenance(DateTime.now(), user.getId()));
         submissionRepository.save(submission);
     }
 

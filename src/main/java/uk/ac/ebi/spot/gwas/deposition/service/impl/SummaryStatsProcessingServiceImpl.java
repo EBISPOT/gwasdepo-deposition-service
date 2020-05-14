@@ -5,8 +5,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import uk.ac.ebi.spot.gwas.deposition.audit.AuditHelper;
+import uk.ac.ebi.spot.gwas.deposition.audit.AuditProxy;
 import uk.ac.ebi.spot.gwas.deposition.constants.FileUploadStatus;
-import uk.ac.ebi.spot.gwas.deposition.constants.PublicationStatus;
 import uk.ac.ebi.spot.gwas.deposition.constants.Status;
 import uk.ac.ebi.spot.gwas.deposition.domain.*;
 import uk.ac.ebi.spot.gwas.deposition.dto.summarystats.SSWrapUpRequestDto;
@@ -47,6 +48,9 @@ public class SummaryStatsProcessingServiceImpl implements SummaryStatsProcessing
     @Autowired
     private SSTemplateEntryPlaceholderRepository ssTemplateEntryPlaceholderRepository;
 
+    @Autowired
+    private AuditProxy auditProxy;
+
     @Override
     @Async
     public void processSummaryStats(Submission submission, String fileUploadId, List<SummaryStatsEntry> summaryStatsEntries) {
@@ -80,9 +84,13 @@ public class SummaryStatsProcessingServiceImpl implements SummaryStatsProcessing
             submission.setSummaryStatsStatus(Status.INVALID.name());
             submissionService.saveSubmission(submission);
 
+            List<String> errors = Arrays.asList(new String[]{"Sorry! There is a fault on our end. Please contact gwas-info@ebi.ac.uk for help."});
             fileUpload.setStatus(FileUploadStatus.INVALID.name());
-            fileUpload.setErrors(Arrays.asList(new String[]{"Sorry! There is a fault on our end. Please contact gwas-info@ebi.ac.uk for help."}));
+            fileUpload.setErrors(errors);
             fileUploadsService.save(fileUpload);
+
+            auditProxy.addAuditEntry(AuditHelper.fileValidate(submission.getCreated().getUserId(), fileUpload, submission, true, false, errors));
+            auditProxy.addAuditEntry(AuditHelper.submissionValidate(submission.getCreated().getUserId(), submission, false, errors));
         } else {
             log.info("Successfully registered {} summary stats with callback ID: {}",
                     summaryStatsEntries.size(), callbackId);

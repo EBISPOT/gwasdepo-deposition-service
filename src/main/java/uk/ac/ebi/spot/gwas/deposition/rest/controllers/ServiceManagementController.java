@@ -9,10 +9,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import uk.ac.ebi.spot.gwas.deposition.constants.GWASDepositionBackendConstants;
+import uk.ac.ebi.spot.gwas.deposition.constants.GeneralCommon;
 import uk.ac.ebi.spot.gwas.deposition.service.SOLRService;
 
 @RestController
-@RequestMapping(value = GWASDepositionBackendConstants.API_V1)
+@RequestMapping(value = GeneralCommon.API_V1)
 public class ServiceManagementController {
 
     private static final Logger log = LoggerFactory.getLogger(ServiceManagementController.class);

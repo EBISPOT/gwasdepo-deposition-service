@@ -102,7 +102,7 @@ public class FileUploadsControllerTest extends IntegrationTest {
         SubmissionDto submissionDto = createSubmissionFromEligible();
         FileUploadDto fileUploadDto = createMetadataFileUpload(submissionDto);
 
-        String endpoint = GWASDepositionBackendConstants.API_V1 +
+        String endpoint = GeneralCommon.API_V1 +
                 GWASDepositionBackendConstants.API_SUBMISSIONS +
                 "/" + submissionDto.getSubmissionId() +
                 GWASDepositionBackendConstants.API_UPLOADS +
@@ -132,7 +132,7 @@ public class FileUploadsControllerTest extends IntegrationTest {
         SubmissionDto submissionDto = createSubmissionFromEligible();
         FileUploadDto fileUploadDto = createMetadataFileUpload(submissionDto);
 
-        String endpoint = GWASDepositionBackendConstants.API_V1 +
+        String endpoint = GeneralCommon.API_V1 +
                 GWASDepositionBackendConstants.API_SUBMISSIONS +
                 "/" + submissionDto.getSubmissionId() +
                 GWASDepositionBackendConstants.API_UPLOADS;
@@ -161,7 +161,7 @@ public class FileUploadsControllerTest extends IntegrationTest {
         SubmissionDto submissionDto = createSubmissionFromEligible();
         FileUploadDto fileUploadDto = createMetadataFileUpload(submissionDto);
 
-        String endpoint = GWASDepositionBackendConstants.API_V1 +
+        String endpoint = GeneralCommon.API_V1 +
                 GWASDepositionBackendConstants.API_SUBMISSIONS +
                 "/" + submissionDto.getSubmissionId() +
                 GWASDepositionBackendConstants.API_UPLOADS +
@@ -191,7 +191,7 @@ public class FileUploadsControllerTest extends IntegrationTest {
         SubmissionDto submissionDto = createSubmissionFromEligible();
         FileUploadDto fileUploadDto = createMetadataFileUpload(submissionDto);
 
-        String endpoint = GWASDepositionBackendConstants.API_V1 +
+        String endpoint = GeneralCommon.API_V1 +
                 GWASDepositionBackendConstants.API_SUBMISSIONS +
                 "/" + submissionDto.getSubmissionId() +
                 GWASDepositionBackendConstants.API_UPLOADS +
@@ -220,7 +220,7 @@ public class FileUploadsControllerTest extends IntegrationTest {
     }
 
     private FileUploadDto createMetadataFileUpload(SubmissionDto submissionDto) throws Exception {
-        String endpoint = GWASDepositionBackendConstants.API_V1 +
+        String endpoint = GeneralCommon.API_V1 +
                 GWASDepositionBackendConstants.API_SUBMISSIONS +
                 "/" + submissionDto.getSubmissionId() +
                 GWASDepositionBackendConstants.API_UPLOADS;

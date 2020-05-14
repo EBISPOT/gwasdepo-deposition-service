@@ -9,6 +9,7 @@ import org.springframework.hateoas.Resource;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
 import uk.ac.ebi.spot.gwas.deposition.constants.GWASDepositionBackendConstants;
+import uk.ac.ebi.spot.gwas.deposition.constants.GeneralCommon;
 import uk.ac.ebi.spot.gwas.deposition.dto.PublicationDto;
 import uk.ac.ebi.spot.gwas.deposition.rest.dto.PublicationDtoAssembler;
 
@@ -26,7 +27,7 @@ public class PublicationsControllerTest extends IntegrationTest {
      */
     @Test
     public void shouldGetPublicationById() throws Exception {
-        String response = mockMvc.perform(get(GWASDepositionBackendConstants.API_V1 +
+        String response = mockMvc.perform(get(GeneralCommon.API_V1 +
                 GWASDepositionBackendConstants.API_PUBLICATIONS + "/" + eligiblePublication.getId())
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
@@ -45,7 +46,7 @@ public class PublicationsControllerTest extends IntegrationTest {
      */
     @Test
     public void shouldGetPublicationByPMID() throws Exception {
-        String response = mockMvc.perform(get(GWASDepositionBackendConstants.API_V1 +
+        String response = mockMvc.perform(get(GeneralCommon.API_V1 +
                 GWASDepositionBackendConstants.API_PUBLICATIONS + "/" + eligiblePublication.getPmid() +
                 "?" + GWASDepositionBackendConstants.PARAM_PMID + "=true")
                 .contentType(MediaType.APPLICATION_JSON))
@@ -65,7 +66,7 @@ public class PublicationsControllerTest extends IntegrationTest {
      */
     @Test
     public void shouldNotFindGetPublicationById() throws Exception {
-        mockMvc.perform(get(GWASDepositionBackendConstants.API_V1 +
+        mockMvc.perform(get(GeneralCommon.API_V1 +
                 GWASDepositionBackendConstants.API_PUBLICATIONS + "/" + RandomStringUtils.randomAlphanumeric(10))
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound());
@@ -76,7 +77,7 @@ public class PublicationsControllerTest extends IntegrationTest {
      */
     @Test
     public void shouldAllPublications() throws Exception {
-        String response = mockMvc.perform(get(GWASDepositionBackendConstants.API_V1 +
+        String response = mockMvc.perform(get(GeneralCommon.API_V1 +
                 GWASDepositionBackendConstants.API_PUBLICATIONS)
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
@@ -106,7 +107,7 @@ public class PublicationsControllerTest extends IntegrationTest {
         String[] parts = authorName.split(" ");
         String value = parts[1].toUpperCase();
 
-        String response = mockMvc.perform(get(GWASDepositionBackendConstants.API_V1 +
+        String response = mockMvc.perform(get(GeneralCommon.API_V1 +
                 GWASDepositionBackendConstants.API_PUBLICATIONS + "?author=" + value)
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())

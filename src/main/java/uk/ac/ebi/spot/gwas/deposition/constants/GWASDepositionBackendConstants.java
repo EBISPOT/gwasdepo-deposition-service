@@ -2,15 +2,17 @@ package uk.ac.ebi.spot.gwas.deposition.constants;
 
 public class GWASDepositionBackendConstants {
 
-    public static final String API_V1 = "/v1";
-
     public static final String API_DAILYSTATS = "/daily-stats";
 
     public static final String API_PUBLICATIONS = "/publications";
 
+    public static final String API_BODY_OF_WORK = "/bodyofwork";
+
     public static final String API_SUBMISSIONS = "/submissions";
 
     public static final String API_STUDIES = "/studies";
+
+    public static final String API_STUDY_ENVELOPES = "/study-envelopes";
 
     public static final String API_SAMPLES = "/samples";
 
@@ -26,13 +28,11 @@ public class GWASDepositionBackendConstants {
 
     public static final String API_CLEAR_PUBLICATIONS = "/clear-publications";
 
-    public static final String LOG_FILE_NAME = "LOG_FILE_NAME";
-
-    public static final String DB_USER = "DB_USER";
-
-    public static final String DB_PASSWORD = "DB_PASSWORD";
-
     public static final String PARAM_PMID = "pmid";
+
+    public static final String PARAM_STATUS = "status";
+
+    public static final String PARAM_BOWID = "bowId";
 
     public static final String PARAM_AUTHOR = "author";
 
@@ -49,6 +49,10 @@ public class GWASDepositionBackendConstants {
     public static final String LINKS_PARENT = "parent";
 
     public static final String FILE_TEMPLATE_EXAMPLE = "template_example.xlsx";
+
+    public static final String PREFIX_GCST = "GCST";
+
+    public static final String PREFIX_GCP = "GCP";
 
     public static final String PREFIX_LABEL = "LABEL";
 

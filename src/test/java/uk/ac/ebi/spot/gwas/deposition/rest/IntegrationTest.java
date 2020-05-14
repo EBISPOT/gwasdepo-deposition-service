@@ -3,6 +3,8 @@ package uk.ac.ebi.spot.gwas.deposition.rest;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.joda.time.DateTime;
+import org.joda.time.LocalDate;
 import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +24,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 import uk.ac.ebi.spot.gwas.deposition.Application;
 import uk.ac.ebi.spot.gwas.deposition.constants.GWASDepositionBackendConstants;
+import uk.ac.ebi.spot.gwas.deposition.constants.GeneralCommon;
 import uk.ac.ebi.spot.gwas.deposition.domain.*;
 import uk.ac.ebi.spot.gwas.deposition.dto.SubmissionCreationDto;
 import uk.ac.ebi.spot.gwas.deposition.dto.SubmissionDto;
@@ -30,6 +33,8 @@ import uk.ac.ebi.spot.gwas.deposition.rest.dto.PublicationDtoAssembler;
 import uk.ac.ebi.spot.gwas.deposition.scheduler.tasks.SSCallbackTask;
 import uk.ac.ebi.spot.gwas.deposition.service.*;
 import uk.ac.ebi.spot.gwas.deposition.util.TestUtil;
+
+import java.util.ArrayList;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -88,11 +93,11 @@ public abstract class IntegrationTest {
     }
 
     @Configuration
-    public static class MockEmailServiceConfig {
+    public static class MockBackendEmailServiceConfig {
 
         @Bean
-        public EmailService emailService() {
-            return mock(EmailService.class);
+        public BackendEmailService backendEmailService() {
+            return mock(BackendEmailService.class);
         }
     }
 
@@ -132,6 +137,9 @@ public abstract class IntegrationTest {
     @Autowired
     protected NoteRepository noteRepository;
 
+    @Autowired
+    protected BodyOfWorkRepository bodyOfWorkRepository;
+
     protected MockMvc mockMvc;
 
     protected ObjectMapper mapper;
@@ -141,6 +149,8 @@ public abstract class IntegrationTest {
     protected Publication eligiblePublication;
 
     protected Publication publishedPublication;
+
+    protected BodyOfWork bodyOfWork;
 
     protected Study study;
 
@@ -165,6 +175,25 @@ public abstract class IntegrationTest {
         publishedPublication = publicationRepository.insert(TestUtil.publishedPublication());
 
         when(jwtService.extractUser(any())).thenReturn(user);
+
+        Author author = new Author(RandomStringUtils.randomAlphanumeric(10),
+                RandomStringUtils.randomAlphanumeric(10),
+                RandomStringUtils.randomAlphanumeric(10),
+                RandomStringUtils.randomAlphanumeric(10));
+        bodyOfWork = new BodyOfWork(RandomStringUtils.randomAlphanumeric(10),
+                RandomStringUtils.randomAlphanumeric(10),
+                RandomStringUtils.randomAlphanumeric(10),
+                RandomStringUtils.randomAlphanumeric(10),
+                RandomStringUtils.randomAlphanumeric(10),
+                author,
+                author,
+                new ArrayList<>(),
+                new ArrayList<>(),
+                RandomStringUtils.randomAlphanumeric(10),
+                RandomStringUtils.randomAlphanumeric(10),
+                LocalDate.now(),
+                true,
+                new Provenance(DateTime.now(), user.getId()));
 
         createPrerequisites();
     }
@@ -228,8 +257,9 @@ public abstract class IntegrationTest {
 
     protected SubmissionDto createSubmissionFromEligible() throws Exception {
         SubmissionCreationDto submissionCreationDto = new SubmissionCreationDto(PublicationDtoAssembler.assemble(eligiblePublication),
+                null,
                 RandomStringUtils.randomAlphanumeric(10));
-        String response = mockMvc.perform(post(GWASDepositionBackendConstants.API_V1 +
+        String response = mockMvc.perform(post(GeneralCommon.API_V1 +
                 GWASDepositionBackendConstants.API_SUBMISSIONS)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(mapper.writeValueAsString(submissionCreationDto)))
