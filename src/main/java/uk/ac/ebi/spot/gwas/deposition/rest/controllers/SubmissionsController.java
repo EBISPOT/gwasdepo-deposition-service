@@ -68,6 +68,9 @@ public class SubmissionsController {
     private BodyOfWorkService bodyOfWorkService;
 
     @Autowired
+    private TemplatePrefillService templatePrefillService;
+
+    @Autowired
     private AuditProxy auditProxy;
 
     /**
@@ -181,6 +184,20 @@ public class SubmissionsController {
         log.info("Returning submission: {}", submission.getId());
         return submissionAssemblyService.toResource(submission);
     }
+
+    /**
+     * GET /v1/submissions/{submissionId}/prefill
+     */
+    /*
+    @GetMapping(value = "/{submissionId}/prefill",
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseStatus(HttpStatus.OK)
+    public void prefill(@PathVariable String submissionId, HttpServletRequest request) {
+        User user = userService.findUser(jwtService.extractUser(HeadersUtil.extractJWT(request)), false);
+        log.info("[{}] Request to prefill submission: {}", user.getName(), submissionId);
+        templatePrefillService.prefill(submissionId, user);
+    }
+    */
 
     /**
      * DELETE /v1/submissions/{submissionId}

@@ -5,6 +5,7 @@ import com.jayway.jsonpath.JsonPath;
 import net.minidev.json.JSONArray;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.Resource;
@@ -124,6 +125,7 @@ public class StudiesControllerTest extends IntegrationTest {
      * GET /v1/submissions/{submissionId}/study-envelopes
      */
     @Test
+    @Ignore
     public void shouldGetStudyEnvelopes() throws Exception {
         SubmissionCreationDto submissionCreationDto = new SubmissionCreationDto(PublicationDtoAssembler.assemble(eligiblePublication),
                 null,

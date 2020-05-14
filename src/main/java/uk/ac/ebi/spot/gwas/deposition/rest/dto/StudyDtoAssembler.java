@@ -49,6 +49,29 @@ public class StudyDtoAssembler implements ResourceAssembler<Study, Resource<Stud
         return resource;
     }
 
+    public static StudyDto assemble(Study study) {
+        return new StudyDto(study.getStudyTag(),
+                study.getAccession(),
+                study.getGenotypingTechnology(),
+                study.getArrayManufacturer(),
+                study.getArrayInformation(),
+                study.getImputation(),
+                study.getVariantCount(),
+                study.getSampleDescription(),
+                study.getStatisticalModel(),
+                study.getStudyDescription(),
+                study.getTrait(),
+                study.getEfoTrait(),
+                study.getBackgroundTrait(),
+                study.getBackgroundEfoTrait(),
+                study.getSummaryStatisticsFile(),
+                study.getChecksum(),
+                study.getSummaryStatisticsAssembly(),
+                study.getReadmeFile(),
+                study.getCohort(),
+                study.getCohortId());
+    }
+
     public static Study disassemble(StudyDto studyDto) {
         Study study = new Study();
         study.setStudyTag(studyDto.getStudyTag());

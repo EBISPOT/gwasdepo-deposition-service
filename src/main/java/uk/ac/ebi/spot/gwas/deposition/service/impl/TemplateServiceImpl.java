@@ -12,8 +12,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import uk.ac.ebi.spot.gwas.deposition.domain.FileObject;
 import uk.ac.ebi.spot.gwas.deposition.dto.summarystats.SSTemplateRequestDto;
+import uk.ac.ebi.spot.gwas.deposition.dto.templateschema.SSTemplateCuratorRequestDto;
 import uk.ac.ebi.spot.gwas.deposition.dto.templateschema.TemplateSchemaDto;
 import uk.ac.ebi.spot.gwas.deposition.dto.templateschema.TemplateSchemaResponseDto;
+import uk.ac.ebi.spot.gwas.deposition.dto.templateschema.gcst.SSTemplateGCSTRequestDto;
 import uk.ac.ebi.spot.gwas.deposition.service.TemplateService;
 
 @Service
@@ -80,6 +82,74 @@ public class TemplateServiceImpl extends GatewayService implements TemplateServi
 
         HttpEntity httpEntity = restRequestUtil.httpEntity()
                 .withJsonBodyNoContentType(ssTemplateRequestDto)
+                .build();
+        try {
+            ResponseEntity<byte[]> response =
+                    restTemplate.exchange(endpoint,
+                            HttpMethod.POST, httpEntity,
+                            new ParameterizedTypeReference<byte[]>() {
+                            });
+            if (response.getStatusCode().equals(HttpStatus.OK)) {
+                String fileName = response.getHeaders().getContentDisposition().getFilename();
+                byte[] payload = response.getBody();
+                log.info("Pre-filled template [{}] successfully retrieved: {}", fileName, payload.length);
+                return new FileObject(fileName, payload);
+            }
+            log.error("Unable to call gwas-template-service: {}", response.getStatusCode());
+            return null;
+        } catch (Exception e) {
+            log.error("Unable to call gwas-template-service: {}", e.getMessage(), e);
+            return null;
+        }
+    }
+
+    @Override
+    public FileObject retrieveCuratorPrefilledTemplate(SSTemplateCuratorRequestDto ssTemplateCuratorRequestDto) {
+        try {
+            log.info("[{}] Retrieving pre-filled template for {} studies: {}",
+                    restInteractionConfig.getPrefilledTemplateEndpoint(),
+                    ssTemplateCuratorRequestDto.getPrefillData().getStudy().size(),
+                    new ObjectMapper().writeValueAsString(ssTemplateCuratorRequestDto));
+        } catch (Exception e) {
+        }
+        String endpoint = restInteractionConfig.getPrefilledTemplateEndpoint();
+
+        HttpEntity httpEntity = restRequestUtil.httpEntity()
+                .withJsonBodyNoContentType(ssTemplateCuratorRequestDto)
+                .build();
+        try {
+            ResponseEntity<byte[]> response =
+                    restTemplate.exchange(endpoint,
+                            HttpMethod.POST, httpEntity,
+                            new ParameterizedTypeReference<byte[]>() {
+                            });
+            if (response.getStatusCode().equals(HttpStatus.OK)) {
+                String fileName = response.getHeaders().getContentDisposition().getFilename();
+                byte[] payload = response.getBody();
+                log.info("Pre-filled template [{}] successfully retrieved: {}", fileName, payload.length);
+                return new FileObject(fileName, payload);
+            }
+            log.error("Unable to call gwas-template-service: {}", response.getStatusCode());
+            return null;
+        } catch (Exception e) {
+            log.error("Unable to call gwas-template-service: {}", e.getMessage(), e);
+            return null;
+        }
+    }
+
+    @Override
+    public FileObject retrieveGCSTPrefilledTemplate(SSTemplateGCSTRequestDto ssTemplateGCSTRequestDto) {
+        try {
+            log.info("[{}] Retrieving GCST template for {} studies: {}",
+                    restInteractionConfig.getPrefilledTemplateEndpoint(),
+                    ssTemplateGCSTRequestDto.getPrefillData().getStudy().size(),
+                    new ObjectMapper().writeValueAsString(ssTemplateGCSTRequestDto));
+        } catch (Exception e) {
+        }
+        String endpoint = restInteractionConfig.getPrefilledTemplateEndpoint();
+
+        HttpEntity httpEntity = restRequestUtil.httpEntity()
+                .withJsonBodyNoContentType(ssTemplateGCSTRequestDto)
                 .build();
         try {
             ResponseEntity<byte[]> response =

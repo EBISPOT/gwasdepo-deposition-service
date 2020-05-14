@@ -52,9 +52,8 @@ spec:
               key: {{.Values.image.env.secretsKey}}
       volumes:
       - name: log
-        nfs:
-          server: 10.100.0.3
-          path: "/var/nfs"
+        persistentVolumeClaim:
+           claimName: {{ .Values.image.volume.claimName }}
 ---
 kind: Service
 apiVersion: v1
