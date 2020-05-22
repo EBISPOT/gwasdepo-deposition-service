@@ -350,10 +350,12 @@
                       <td>
                         <p>Dear <span th:text="${USER_NAME}"></span>,</p>
 
-                        <p>The summary statistics for <i><span th:text="${PUBLICATION_TITLE}"></span></i>
-                        by <span th:text="${FIRST_AUTHOR}"></span> et al., ID <span th:text="${PMID}"></span> were successfully validated.</p>
+                        <p>The summary statistics for <span th:text="${PMID}"></span> - <i><span th:text="${PUBLICATION_TITLE}"></span></i>
+                        by <span th:text="${FIRST_AUTHOR}"></span> et al., were successfully validated.</p>
 
                         <p>Please review the <a th:href="${SUBMISSION_ID}">submission report</a> to confirm the submission details. To finalise the submission process, click "Submit".</p>
+
+                       <p>Following submission the accession ID(s) for your submission will be available to download from this <a th:href="${SUBMISSION_STUDIES}">link</a>.</p>
 
                         <p>Thanks for sharing your data with us.</p>
 

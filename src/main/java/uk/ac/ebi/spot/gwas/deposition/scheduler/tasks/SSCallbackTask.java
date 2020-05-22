@@ -122,11 +122,12 @@ public class SSCallbackTask {
                                 submission.getCreated().getUserId());
                         metadata.put(MailConstants.PUBLICATION_TITLE, bodyOfWork.getTitle());
                         metadata.put(MailConstants.PMID, bodyOfWork.getBowId());
-                        metadata.put(MailConstants.FIRST_AUTHOR, bodyOfWork.getFirstAuthor());
+                        metadata.put(MailConstants.FIRST_AUTHOR, bodyOfWork.getFirstAuthor().getLastName());
                         workId = bodyOfWork.getBowId();
                     }
 
                     metadata.put(MailConstants.SUBMISSION_ID, backendMailConfig.getSubmissionsBaseURL() + submission.getId());
+                    metadata.put(MailConstants.SUBMISSION_STUDIES, backendMailConfig.getSubmissionsBaseURL() + submission.getId() + GWASDepositionBackendConstants.API_STUDY_ENVELOPES);
 
                     String userId = submission.getLastUpdated() != null ? submission.getLastUpdated().getUserId() :
                             submission.getCreated().getUserId();
