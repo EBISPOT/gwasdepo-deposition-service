@@ -11,7 +11,8 @@ public class SSTemplateGCSTStudyDtoAssembler {
                 study.getTrait(),
                 study.getEfoTrait(),
                 study.getBackgroundTrait(),
-                study.getBackgroundEfoTrait());
+                study.getBackgroundEfoTrait(),
+                study.getSummaryStatisticsFile());
     }
 
 }

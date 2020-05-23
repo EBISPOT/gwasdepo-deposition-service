@@ -84,7 +84,6 @@ public class StudiesController {
     /**
      * GET /v1/submissions/{submissionId}/study-envelopes
      */
-    /*
     @GetMapping(value = "/{submissionId}" + GWASDepositionBackendConstants.API_STUDY_ENVELOPES,
             produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
     @ResponseStatus(HttpStatus.OK)
@@ -106,6 +105,7 @@ public class StudiesController {
         return new HttpEntity<>(fileObject.getContent(), responseHeaders);
     }
 
+    /*
     @GetMapping(value = "/{submissionId}" + GWASDepositionBackendConstants.API_STUDY_ENVELOPES,
             produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.OK)
