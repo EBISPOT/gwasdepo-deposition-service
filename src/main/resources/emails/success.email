@@ -355,6 +355,8 @@
 
                         <p>Please review the <a th:href="${SUBMISSION_ID}">submission report</a> to confirm the submission details. To finalise the submission process, click "Submit".</p>
 
+                        <p>Following submission the accession ID(s) for your submission will be available to download from this <a th:href="${SUBMISSION_STUDIES}">link</a>.</p>
+
                         <p>Thanks for sharing your data with us.</p>
 
                         <p>Best wishes,<br/>
