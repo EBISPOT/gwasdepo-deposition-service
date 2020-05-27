@@ -78,7 +78,8 @@ public class TemplatePrefillServiceImpl implements TemplatePrefillService {
         log.info("Pre-filling GCST list: {}", submissionId);
         Submission submission = submissionService.getSubmission(submissionId, user);
         StudyCollector studyCollector = new StudyCollector();
-        Stream<Study> studyStream = studyRepository.readBySubmissionId(submission.getId());
+        Stream<Study> studyStream = studyRepository.readByIdIn(submission.getStudies());
+//        Stream<Study> studyStream = studyRepository.readBySubmissionId(submission.getId());
         studyStream.forEach(study -> studyCollector.add(study));
         studyStream.close();
 

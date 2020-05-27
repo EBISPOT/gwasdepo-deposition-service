@@ -8,12 +8,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import uk.ac.ebi.spot.gwas.deposition.components.BodyOfWorkListener;
-import uk.ac.ebi.spot.gwas.deposition.domain.BodyOfWork;
-import uk.ac.ebi.spot.gwas.deposition.domain.Provenance;
-import uk.ac.ebi.spot.gwas.deposition.domain.Study;
-import uk.ac.ebi.spot.gwas.deposition.domain.User;
+import uk.ac.ebi.spot.gwas.deposition.domain.*;
 import uk.ac.ebi.spot.gwas.deposition.exception.EntityNotFoundException;
 import uk.ac.ebi.spot.gwas.deposition.repository.BodyOfWorkRepository;
+import uk.ac.ebi.spot.gwas.deposition.repository.PublicationRepository;
 import uk.ac.ebi.spot.gwas.deposition.repository.StudyRepository;
 import uk.ac.ebi.spot.gwas.deposition.service.BodyOfWorkService;
 import uk.ac.ebi.spot.gwas.deposition.service.CuratorAuthService;
@@ -46,6 +44,9 @@ public class BodyOfWorkServiceImpl implements BodyOfWorkService {
 
     @Autowired
     private BodyOfWorkListener bodyOfWorkListener;
+
+    @Autowired
+    private PublicationRepository publicationRepository;
 
     @Override
     public BodyOfWork createBodyOfWork(BodyOfWork bodyOfWork) {
@@ -150,6 +151,7 @@ public class BodyOfWorkServiceImpl implements BodyOfWorkService {
         existing.setTitle(bodyOfWork.getTitle());
         existing.setUrl(bodyOfWork.getUrl());
 
+        String publicationId = null;
         if (existing.getPmids() != null) {
             if (!existing.getPmids().isEmpty()) {
                 List<Study> studyList = studyRepository.findByBodyOfWorkListContains(bodyofworkId);
@@ -164,11 +166,16 @@ public class BodyOfWorkServiceImpl implements BodyOfWorkService {
                     study.setPmids(pmids);
                     studyRepository.save(study);
                 }
+
+                Optional<Publication> publicationOptional = publicationRepository.findByPmid(existing.getPmids().get(0));
+                if (publicationOptional.isPresent()) {
+                    publicationId = publicationOptional.get().getId();
+                }
             }
         }
 
         existing = bodyOfWorkRepository.save(existing);
-        bodyOfWorkListener.update(bodyOfWork);
+        bodyOfWorkListener.update(bodyOfWork, publicationId);
         return existing;
     }
 }

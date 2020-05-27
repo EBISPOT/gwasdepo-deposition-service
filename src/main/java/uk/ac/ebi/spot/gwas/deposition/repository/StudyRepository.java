@@ -12,6 +12,8 @@ public interface StudyRepository extends MongoRepository<Study, String> {
 
     Page<Study> findBySubmissionId(String submissionId, Pageable page);
 
+    Stream<Study> readByIdIn(List<String> ids);
+
     Stream<Study> readBySubmissionId(String submissionId);
 
     List<Study> findByIdIn(List<String> ids);
