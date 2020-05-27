@@ -25,6 +25,9 @@ spring:
           starttls:
             enable: true
 
+audit:
+  enabled: true
+
 quartz:
   scheduler:
     dbName: gwasdepo
