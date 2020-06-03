@@ -217,13 +217,22 @@ public class SubmissionsController {
         auditProxy.addAuditEntry(AuditHelper.submissionDelete(user.getId(), submission, true));
         submissionService.deleteSubmission(submissionId, user);
 
-        Publication publication = publicationService.retrievePublication(submission.getPublicationId(), true);
-        if (publication.getStatus().equalsIgnoreCase(PublicationStatus.UNDER_SUMMARY_STATS_SUBMISSION.name())) {
-            publication.setStatus(PublicationStatus.PUBLISHED.name());
-        } else {
-            publication.setStatus(PublicationStatus.ELIGIBLE.name());
+        if (submission.getPublicationId() != null) {
+            Publication publication = publicationService.retrievePublication(submission.getPublicationId(), true);
+            if (publication.getStatus().equalsIgnoreCase(PublicationStatus.UNDER_SUMMARY_STATS_SUBMISSION.name())) {
+                publication.setStatus(PublicationStatus.PUBLISHED.name());
+            } else {
+                publication.setStatus(PublicationStatus.ELIGIBLE.name());
+            }
+            publicationService.savePublication(publication);
         }
-        publicationService.savePublication(publication);
+        if (submission.getBodyOfWorks() != null) {
+            for (String bowId : submission.getBodyOfWorks()) {
+                BodyOfWork bodyOfWork = bodyOfWorkService.retrieveBodyOfWork(bowId, user);
+                bodyOfWork.setStatus(BodyOfWorkStatus.NEW.name());
+                bodyOfWorkService.save(bodyOfWork);
+            }
+        }
         log.info("Submissions successfully deleted.");
     }
 

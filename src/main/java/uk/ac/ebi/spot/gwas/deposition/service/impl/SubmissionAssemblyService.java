@@ -57,6 +57,9 @@ public class SubmissionAssemblyService implements ResourceAssembler<Submission, 
             if (!submission.getBodyOfWorks().isEmpty()) {
                 bodyOfWork = bodyOfWorkService.retrieveBodyOfWork(submission.getBodyOfWorks().get(0), submission.getCreated().getUserId());
             }
+            if (submission.getPublicationId() != null) {
+                publication = publicationService.retrievePublication(submission.getPublicationId(), true);
+            }
         }
         List<FileUpload> fileUploads = fileUploadsService.getFileUploads(submission.getFileUploads());
 
