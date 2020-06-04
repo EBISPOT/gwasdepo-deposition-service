@@ -191,7 +191,7 @@ public class FileUploadsControllerMetadataTest extends IntegrationTest {
         assertEquals(Status.INVALID.name(), submission.getOverallStatus());
         assertEquals(Status.INVALID.name(), submission.getMetadataStatus());
         assertEquals(Status.INVALID.name(), fileUploadDtoActual.getStatus());
-        assertTrue(fileUploadDtoActual.getErrors().get(0).startsWith("Sorry! There is a fault on our end. Please contact gwas-info@ebi.ac.uk for help."));
+        assertTrue(fileUploadDtoActual.getErrors().get(0).startsWith("Sorry! There is a fault on our end. Please contact gwas-subs@ebi.ac.uk for help."));
     }
 
     /**

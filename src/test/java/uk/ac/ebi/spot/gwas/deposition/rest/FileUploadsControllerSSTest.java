@@ -265,7 +265,7 @@ public class FileUploadsControllerSSTest extends IntegrationTest {
 
         FileUpload fileUpload = fileUploadsService.getFileUpload(fileUploadDtoActual.getFileUploadId());
         assertEquals(Status.INVALID.name(), fileUpload.getStatus());
-        assertTrue(fileUpload.getErrors().get(0).startsWith("Sorry! There is a fault on our end. Please contact gwas-info@ebi.ac.uk for help."));
+        assertTrue(fileUpload.getErrors().get(0).startsWith("Sorry! There is a fault on our end. Please contact gwas-subs@ebi.ac.uk for help."));
     }
 
     /**
