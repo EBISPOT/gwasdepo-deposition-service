@@ -104,58 +104,85 @@ public class SSCallbackTask {
             }
 
             if (summaryStatsResponseDto.getCompleted() != null) {
-                if (summaryStatsResponseDto.getCompleted().booleanValue()) {
-                    Submission submission = submissionService.getSubmission(callbackId.getSubmissionId(),
-                            new User(gwasDepositionBackendConfig.getAutoCuratorServiceAccount(),
-                                    gwasDepositionBackendConfig.getAutoCuratorServiceAccount()));
+                try {
+                    if (summaryStatsResponseDto.getCompleted().booleanValue()) {
+                        Submission submission = submissionService.getSubmission(callbackId.getSubmissionId(),
+                                new User(gwasDepositionBackendConfig.getAutoCuratorServiceAccount(),
+                                        gwasDepositionBackendConfig.getAutoCuratorServiceAccount()));
 
-                    Map<String, Object> metadata = new HashMap<>();
-                    String workId;
-                    if (submission.getProvenanceType().equalsIgnoreCase(SubmissionProvenanceType.PUBLICATION.name())) {
-                        Publication publication = publicationService.retrievePublication(submission.getPublicationId(), true);
-                        metadata.put(MailConstants.PUBLICATION_TITLE, publication.getTitle());
-                        metadata.put(MailConstants.PMID, publication.getPmid());
-                        metadata.put(MailConstants.FIRST_AUTHOR, publication.getFirstAuthor());
-                        workId = publication.getPmid();
-                    } else {
-                        BodyOfWork bodyOfWork = bodyOfWorkService.retrieveBodyOfWork(submission.getBodyOfWorks().get(0),
-                                submission.getCreated().getUserId());
-                        metadata.put(MailConstants.PUBLICATION_TITLE, bodyOfWork.getTitle());
-                        metadata.put(MailConstants.PMID, bodyOfWork.getBowId());
-                        metadata.put(MailConstants.FIRST_AUTHOR, bodyOfWork.getFirstAuthor().getLastName());
-                        workId = bodyOfWork.getBowId();
-                    }
-
-                    metadata.put(MailConstants.SUBMISSION_ID, backendMailConfig.getSubmissionsBaseURL() + submission.getId());
-                    metadata.put(MailConstants.SUBMISSION_STUDIES, backendMailConfig.getSubmissionsBaseURL() + submission.getId());
-
-                    String userId = submission.getCreated().getUserId();
-                    if (callbackId.isValid()) {
-                        submission.setOverallStatus(Status.VALID.name());
-                        submission.setSummaryStatsStatus(Status.VALID.name());
-
-                        FileUpload fileUpload = fileUploadsService.getFileUploadByCallbackId(callbackId.getCallbackId());
-                        if (fileUpload != null) {
-                            fileUpload.setStatus(FileUploadStatus.VALID.name());
-                            fileUploadsService.save(fileUpload);
-                            auditProxy.addAuditEntry(AuditHelper.fileValidate(submission.getCreated().getUserId(), fileUpload, submission, true, true, null));
+                        Map<String, Object> metadata = new HashMap<>();
+                        String workId;
+                        if (submission.getProvenanceType().equalsIgnoreCase(SubmissionProvenanceType.PUBLICATION.name())) {
+                            Publication publication = publicationService.retrievePublication(submission.getPublicationId(), true);
+                            metadata.put(MailConstants.PUBLICATION_TITLE, publication.getTitle());
+                            metadata.put(MailConstants.PMID, publication.getPmid());
+                            metadata.put(MailConstants.FIRST_AUTHOR, publication.getFirstAuthor());
+                            workId = publication.getPmid();
+                        } else {
+                            BodyOfWork bodyOfWork = bodyOfWorkService.retrieveBodyOfWork(submission.getBodyOfWorks().get(0),
+                                    submission.getCreated().getUserId());
+                            metadata.put(MailConstants.PUBLICATION_TITLE, bodyOfWork.getTitle());
+                            metadata.put(MailConstants.PMID, bodyOfWork.getBowId());
+                            metadata.put(MailConstants.FIRST_AUTHOR, "N/A");
+                            if (bodyOfWork.getFirstAuthor() == null) {
+                                if (bodyOfWork.getCorrespondingAuthors() != null) {
+                                    if (!bodyOfWork.getCorrespondingAuthors().isEmpty()) {
+                                        metadata.put(MailConstants.FIRST_AUTHOR, extracName(bodyOfWork.getCorrespondingAuthors().get(0)));
+                                    }
+                                }
+                            } else {
+                                metadata.put(MailConstants.FIRST_AUTHOR, extracName(bodyOfWork.getFirstAuthor()));
+                            }
+                            workId = bodyOfWork.getBowId();
                         }
 
-                        backendEmailService.sendSuccessEmail(userId, workId, metadata);
-                        auditProxy.addAuditEntry(AuditHelper.submissionValidate(submission.getCreated().getUserId(), submission, true, null));
-                    } else {
-                        submission.setOverallStatus(Status.INVALID.name());
-                        submission.setSummaryStatsStatus(Status.INVALID.name());
-                        backendEmailService.sendFailEmail(userId, workId, metadata, errors);
-                        auditProxy.addAuditEntry(AuditHelper.submissionValidate(submission.getCreated().getUserId(), submission, false, errors));
-                    }
-                    submissionService.saveSubmission(submission);
+                        metadata.put(MailConstants.SUBMISSION_ID, backendMailConfig.getSubmissionsBaseURL() + submission.getId());
+                        metadata.put(MailConstants.SUBMISSION_STUDIES, backendMailConfig.getSubmissionsBaseURL() + submission.getId());
 
-                    log.info("Callback ID completed: {}", callbackId.getCallbackId());
-                    callbackId.setCompleted(true);
-                    callbackIdRepository.save(callbackId);
+                        String userId = submission.getCreated().getUserId();
+                        if (callbackId.isValid()) {
+                            submission.setOverallStatus(Status.VALID.name());
+                            submission.setSummaryStatsStatus(Status.VALID.name());
+
+                            FileUpload fileUpload = fileUploadsService.getFileUploadByCallbackId(callbackId.getCallbackId());
+                            if (fileUpload != null) {
+                                fileUpload.setStatus(FileUploadStatus.VALID.name());
+                                fileUploadsService.save(fileUpload);
+                                auditProxy.addAuditEntry(AuditHelper.fileValidate(submission.getCreated().getUserId(), fileUpload, submission, true, true, null));
+                            }
+
+                            backendEmailService.sendSuccessEmail(userId, workId, metadata);
+                            auditProxy.addAuditEntry(AuditHelper.submissionValidate(submission.getCreated().getUserId(), submission, true, null));
+                        } else {
+                            submission.setOverallStatus(Status.INVALID.name());
+                            submission.setSummaryStatsStatus(Status.INVALID.name());
+                            backendEmailService.sendFailEmail(userId, workId, metadata, errors);
+                            auditProxy.addAuditEntry(AuditHelper.submissionValidate(submission.getCreated().getUserId(), submission, false, errors));
+                        }
+                        submissionService.saveSubmission(submission);
+
+                        log.info("Callback ID completed: {}", callbackId.getCallbackId());
+                        callbackId.setCompleted(true);
+                        callbackIdRepository.save(callbackId);
+                    }
+                } catch (Exception e) {
+                    log.error("ERROR: {}", e.getMessage(), e);
                 }
             }
         }
+    }
+
+    private String extracName(Author author) {
+        if (author.getLastName() != null) {
+            return author.getLastName();
+        }
+        if (author.getFirstName() != null) {
+            return author.getFirstName();
+        }
+        if (author.getGroup() != null) {
+            return author.getGroup();
+        }
+
+        return "N/A";
     }
 }
