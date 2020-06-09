@@ -127,10 +127,9 @@ public class SSCallbackTask {
                     }
 
                     metadata.put(MailConstants.SUBMISSION_ID, backendMailConfig.getSubmissionsBaseURL() + submission.getId());
-                    metadata.put(MailConstants.SUBMISSION_STUDIES, backendMailConfig.getSubmissionsBaseURL() + submission.getId() + GWASDepositionBackendConstants.API_STUDY_ENVELOPES);
+                    metadata.put(MailConstants.SUBMISSION_STUDIES, backendMailConfig.getSubmissionsBaseURL() + submission.getId());
 
-                    String userId = submission.getLastUpdated() != null ? submission.getLastUpdated().getUserId() :
-                            submission.getCreated().getUserId();
+                    String userId = submission.getCreated().getUserId();
                     if (callbackId.isValid()) {
                         submission.setOverallStatus(Status.VALID.name());
                         submission.setSummaryStatsStatus(Status.VALID.name());
