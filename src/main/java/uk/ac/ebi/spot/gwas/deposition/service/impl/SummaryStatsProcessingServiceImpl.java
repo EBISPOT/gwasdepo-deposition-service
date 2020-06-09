@@ -84,7 +84,7 @@ public class SummaryStatsProcessingServiceImpl implements SummaryStatsProcessing
             submission.setSummaryStatsStatus(Status.INVALID.name());
             submissionService.saveSubmission(submission);
 
-            List<String> errors = Arrays.asList(new String[]{"Sorry! There is a fault on our end. Please contact gwas-info@ebi.ac.uk for help."});
+            List<String> errors = Arrays.asList(new String[]{"Sorry! There is a fault on our end. Please contact gwas-subs@ebi.ac.uk for help."});
             fileUpload.setStatus(FileUploadStatus.INVALID.name());
             fileUpload.setErrors(errors);
             fileUploadsService.save(fileUpload);

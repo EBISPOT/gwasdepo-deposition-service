@@ -102,7 +102,7 @@ public class SubmissionsController {
             }
         } else {
             auditProxy.addAuditEntry(AuditHelper.globusCreate(user.getId(), false, null));
-            throw new SSGlobusFolderCreatioException("Sorry! There is a fault on our end. Please contact gwas-info@ebi.ac.uk for help.");
+            throw new SSGlobusFolderCreatioException("Sorry! There is a fault on our end. Please contact gwas-subs@ebi.ac.uk for help.");
         }
 
         if (submissionCreationDto.getBodyOfWork() != null) {
