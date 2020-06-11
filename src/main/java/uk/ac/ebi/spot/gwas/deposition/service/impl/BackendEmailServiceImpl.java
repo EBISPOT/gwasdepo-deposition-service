@@ -33,7 +33,7 @@ public class BackendEmailServiceImpl implements BackendEmailService {
 
         if (emailService != null) {
             EmailBuilder successBuilder = new SuccessEmailBuilder(backendMailConfig.getSuccessEmail());
-            emailService.sendMessage(user.getEmail(), getSubject(pubmedId), successBuilder.getEmailContent(metadata));
+            emailService.sendMessage(user.getEmail(), getSubject(pubmedId), successBuilder.getEmailContent(metadata), false);
         }
     }
 
@@ -43,7 +43,7 @@ public class BackendEmailServiceImpl implements BackendEmailService {
 
         if (emailService != null) {
             EmailBuilder failBuilder = new FailEmailBuilder(backendMailConfig.getFailEmail(), errors);
-            emailService.sendMessage(user.getEmail(), getSubject(pubmedId), failBuilder.getEmailContent(metadata));
+            emailService.sendMessage(user.getEmail(), getSubject(pubmedId), failBuilder.getEmailContent(metadata), false);
         }
     }
 
