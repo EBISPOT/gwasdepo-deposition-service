@@ -88,8 +88,6 @@ public class SumStatsServiceTest {
         String callbackId = RandomStringUtils.randomAlphanumeric(5);
         String endpoint = sumStatsServiceUrl + sumStatsEndpoint + "/" + callbackId;
         SSWrapUpRequestDto ssWrapUpRequestDto = new SSWrapUpRequestDto(
-                RandomStringUtils.randomAlphanumeric(10),
-                RandomStringUtils.randomAlphanumeric(10),
                 Arrays.asList(new SSWrapUpRequestEntryDto[]{
                         new SSWrapUpRequestEntryDto(RandomStringUtils.randomAlphanumeric(10),
                                 RandomStringUtils.randomAlphanumeric(10))

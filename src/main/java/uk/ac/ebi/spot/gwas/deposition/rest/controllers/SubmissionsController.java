@@ -68,7 +68,7 @@ public class SubmissionsController {
     private BodyOfWorkService bodyOfWorkService;
 
     @Autowired
-    private TemplatePrefillService templatePrefillService;
+    private SummaryStatsProcessingService summaryStatsProcessingService;
 
     @Autowired
     private AuditProxy auditProxy;
@@ -248,6 +248,7 @@ public class SubmissionsController {
         Submission submission = submissionService.updateSubmissionStatus(submissionId, Status.SUBMITTED.name(), user);
         auditProxy.addAuditEntry(AuditHelper.submissionSubmit(user.getId(), submission));
         log.info("Submissions successfully updated.");
+        summaryStatsProcessingService.callGlobusWrapUp(submissionId);
         return submissionAssemblyService.toResource(submission);
     }
 

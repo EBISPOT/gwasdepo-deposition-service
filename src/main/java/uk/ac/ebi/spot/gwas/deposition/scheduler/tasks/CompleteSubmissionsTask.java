@@ -34,7 +34,7 @@ public class CompleteSubmissionsTask {
             Publication publication = publicationService.retrievePublication(completedSubmission.getPublicationId(), true);
             if (publication != null) {
                 log.info("Calling SS Service to wrap up Globus for publication: {}", publication.getPmid());
-                summaryStatsProcessingService.callGlobusWrapUp(publication);
+                summaryStatsProcessingService.callGlobusWrapUp(completedSubmission.getSubmissionId());
             }
             completedSubmissionRepository.delete(completedSubmission);
         }

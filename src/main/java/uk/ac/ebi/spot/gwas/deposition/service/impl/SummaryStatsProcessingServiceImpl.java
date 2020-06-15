@@ -15,15 +15,17 @@ import uk.ac.ebi.spot.gwas.deposition.dto.summarystats.SSWrapUpRequestEntryDto;
 import uk.ac.ebi.spot.gwas.deposition.dto.summarystats.SummaryStatsRequestDto;
 import uk.ac.ebi.spot.gwas.deposition.dto.summarystats.SummaryStatsRequestEntryDto;
 import uk.ac.ebi.spot.gwas.deposition.repository.CallbackIdRepository;
-import uk.ac.ebi.spot.gwas.deposition.repository.SSTemplateEntryPlaceholderRepository;
+import uk.ac.ebi.spot.gwas.deposition.repository.StudyRepository;
 import uk.ac.ebi.spot.gwas.deposition.repository.SummaryStatsEntryRepository;
 import uk.ac.ebi.spot.gwas.deposition.rest.dto.SummaryStatsRequestEntryDtoAssembler;
 import uk.ac.ebi.spot.gwas.deposition.service.FileUploadsService;
 import uk.ac.ebi.spot.gwas.deposition.service.SubmissionService;
 import uk.ac.ebi.spot.gwas.deposition.service.SumStatsService;
 import uk.ac.ebi.spot.gwas.deposition.service.SummaryStatsProcessingService;
+import uk.ac.ebi.spot.gwas.deposition.util.AccessionMapUtil;
 
 import java.util.*;
+import java.util.stream.Stream;
 
 @Service
 public class SummaryStatsProcessingServiceImpl implements SummaryStatsProcessingService {
@@ -46,10 +48,10 @@ public class SummaryStatsProcessingServiceImpl implements SummaryStatsProcessing
     private FileUploadsService fileUploadsService;
 
     @Autowired
-    private SSTemplateEntryPlaceholderRepository ssTemplateEntryPlaceholderRepository;
+    private AuditProxy auditProxy;
 
     @Autowired
-    private AuditProxy auditProxy;
+    private StudyRepository studyRepository;
 
     @Override
     @Async
@@ -109,27 +111,28 @@ public class SummaryStatsProcessingServiceImpl implements SummaryStatsProcessing
         }
     }
 
-    public void callGlobusWrapUp(Publication publication) {
+    @Override
+    @Async
+    public void callGlobusWrapUp(String submissionId) {
+        log.info("Wrapping up Globus folder for submission: {}", submissionId);
+        AccessionMapUtil accessionMapUtil = new AccessionMapUtil();
+        Stream<Study> studyStream = studyRepository.readBySubmissionId(submissionId);
+        studyStream.forEach(study -> accessionMapUtil.addStudy(study.getStudyTag(), study.getAccession()));
+        studyStream.close();
+        Map<String, String> accessionMap = accessionMapUtil.getAccessionMap();
+
+        Optional<CallbackId> callbackIdOptional = callbackIdRepository.findBySubmissionIdAndCompleted(submissionId, true);
+        if (!callbackIdOptional.isPresent()) {
+            log.error("Unable to perform Globus wrap up operation. Cannot find callback ID for submission: {}", submissionId);
+            return;
+        }
+
+        /*
         log.info("Performing Globus wrap up operation for: {} | {}", publication.getId(), publication.getPmid());
         if (sumStatsService == null) {
             log.info("Summary Stats Service is not active.");
             return;
         }
-        Submission submission = submissionService.getSubmission(publication.getId());
-        if (submission == null) {
-            log.error("Unable to perform Globus wrap up operation. Submission not found for publication: {}", publication.getId());
-            return;
-        }
-        log.info("Found submission: {}", submission.getId());
-        Optional<CallbackId> callbackIdOptional = callbackIdRepository.findBySubmissionIdAndCompleted(submission.getId(), true);
-        if (!callbackIdOptional.isPresent()) {
-            log.error("Unable to perform Globus wrap up operation. Cannot find callback ID for submission: {}", submission.getId());
-            return;
-        }
-
-        /**
-         * Might not work if there are multiple summary stats entries with the same study tag
-         */
 
         Optional<SSTemplateEntryPlaceholder> ssTemplateEntryPlaceholderOptional = ssTemplateEntryPlaceholderRepository.findByPmid(publication.getPmid());
         if (!ssTemplateEntryPlaceholderOptional.isPresent()) {
@@ -145,6 +148,7 @@ public class SummaryStatsProcessingServiceImpl implements SummaryStatsProcessing
         for (SSTemplateEntry ssTemplateEntry : ssTemplateEntryPlaceholderOptional.get().getSsTemplateEntries()) {
             accessionMap.put(ssTemplateEntry.getStudyTag(), ssTemplateEntry.getStudyAccession());
         }
+        */
 
         log.info("Accession map [{}]: {}", callbackIdOptional.get().getCallbackId(), accessionMap);
 
@@ -165,8 +169,7 @@ public class SummaryStatsProcessingServiceImpl implements SummaryStatsProcessing
             return;
         }
 
-        SSWrapUpRequestDto ssWrapUpRequestDto = new SSWrapUpRequestDto(publication.getPmid(),
-                publication.getFirstAuthor(), ssWrapUpRequestEntryDtos);
+        SSWrapUpRequestDto ssWrapUpRequestDto = new SSWrapUpRequestDto(ssWrapUpRequestEntryDtos);
         sumStatsService.wrapUpGlobusSubmission(callbackIdOptional.get().getCallbackId(), ssWrapUpRequestDto);
     }
 }

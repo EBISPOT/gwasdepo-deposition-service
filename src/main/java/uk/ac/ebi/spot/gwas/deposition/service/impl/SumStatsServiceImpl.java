@@ -51,7 +51,7 @@ public class SumStatsServiceImpl extends GatewayService implements SumStatsServi
     @Override
     @Async
     public void wrapUpGlobusSubmission(String callbackId, SSWrapUpRequestDto ssWrapUpRequestDto) {
-        log.info("Calling SS service to wrap-up Globus submission: {} | {}", callbackId, ssWrapUpRequestDto.getPmid());
+        log.info("Calling SS service to wrap-up Globus submission: {}", callbackId);
         String endpoint = restInteractionConfig.getSumStatsEndpoint() + "/" + callbackId;
 
         try {
