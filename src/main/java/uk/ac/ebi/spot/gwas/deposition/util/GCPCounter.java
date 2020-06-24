@@ -1,15 +1,20 @@
 package uk.ac.ebi.spot.gwas.deposition.util;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import uk.ac.ebi.spot.gwas.deposition.constants.GWASDepositionBackendConstants;
 import uk.ac.ebi.spot.gwas.deposition.domain.GCPCounterItem;
 import uk.ac.ebi.spot.gwas.deposition.repository.GCPCounterItemRepository;
+import uk.ac.ebi.spot.gwas.deposition.service.BodyOfWorkService;
 
 import java.util.List;
 
-@Component
+@Service
 public class GCPCounter {
+
+    private static final Logger log = LoggerFactory.getLogger(GCPCounter.class);
 
     private static final int PADDING_LENGTH = 6;
 
@@ -22,10 +27,13 @@ public class GCPCounter {
         if (!gcpCounterItemList.isEmpty()) {
             counter = gcpCounterItemList.get(0).getCurrentValue();
         }
+        log.info("Current counter: {}", counter);
+
         counter++;
         gcpCounterItemRepository.deleteAll();
-        gcpCounterItemRepository.insert(new GCPCounterItem(counter));
-        return GWASDepositionBackendConstants.PREFIX_GCP + padCounter(counter);
+        GCPCounterItem gcpCounterItem = gcpCounterItemRepository.insert(new GCPCounterItem(counter));
+        log.info("Inserted new counter: {} | {}", gcpCounterItem.getId(), gcpCounterItem.getCurrentValue());
+        return GWASDepositionBackendConstants.PREFIX_GCP + padCounter(gcpCounterItem.getCurrentValue());
     }
 
     private String padCounter(int value) {

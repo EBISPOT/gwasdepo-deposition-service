@@ -43,6 +43,9 @@ public class SumStatsServiceTest {
     @Mock
     private RestTemplate restTemplate;
 
+    @Mock
+    private BackendEmailService backendEmailService;
+
     private String sumStatsServiceUrl;
 
     private String sumStatsEndpoint;
@@ -63,6 +66,7 @@ public class SumStatsServiceTest {
         when(restInteractionConfig.getSumStatsEndpoint()).thenReturn(sumStatsServiceUrl + sumStatsEndpoint);
         when(restInteractionConfig.getGlobusMkdirEndpoint()).thenReturn(sumStatsServiceUrl + globusMkdirEndpoint);
         when(restRequestUtil.httpEntity()).thenReturn(new HttpEntityBuilder(mockRequest, ""));
+        doNothing().when(backendEmailService).sendErrorsEmail(any(), any());
     }
 
     @Test
@@ -88,8 +92,6 @@ public class SumStatsServiceTest {
         String callbackId = RandomStringUtils.randomAlphanumeric(5);
         String endpoint = sumStatsServiceUrl + sumStatsEndpoint + "/" + callbackId;
         SSWrapUpRequestDto ssWrapUpRequestDto = new SSWrapUpRequestDto(
-                RandomStringUtils.randomAlphanumeric(10),
-                RandomStringUtils.randomAlphanumeric(10),
                 Arrays.asList(new SSWrapUpRequestEntryDto[]{
                         new SSWrapUpRequestEntryDto(RandomStringUtils.randomAlphanumeric(10),
                                 RandomStringUtils.randomAlphanumeric(10))

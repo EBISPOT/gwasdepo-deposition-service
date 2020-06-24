@@ -15,6 +15,7 @@ import uk.ac.ebi.spot.gwas.deposition.constants.GeneralCommon;
 import uk.ac.ebi.spot.gwas.deposition.domain.SSGlobusResponse;
 import uk.ac.ebi.spot.gwas.deposition.dto.AuthorDto;
 import uk.ac.ebi.spot.gwas.deposition.dto.BodyOfWorkDto;
+import uk.ac.ebi.spot.gwas.deposition.repository.GCPCounterItemRepository;
 import uk.ac.ebi.spot.gwas.deposition.rest.dto.BodyOfWorkDtoAssembler;
 import uk.ac.ebi.spot.gwas.deposition.service.SumStatsService;
 
@@ -38,6 +39,9 @@ public class BodyOfWorkControllerTest extends IntegrationTest {
     @Autowired
     private SumStatsService sumStatsService;
 
+    @Autowired
+    private GCPCounterItemRepository gcpCounterItemRepository;
+
     @Before
     public void setup() {
         super.setup();
@@ -59,6 +63,10 @@ public class BodyOfWorkControllerTest extends IntegrationTest {
         Resource<BodyOfWorkDto> actualResource = mapper.readValue(response, new TypeReference<Resource<BodyOfWorkDto>>() {
         });
         BodyOfWorkDto actual = actualResource.getContent();
+
+        assertEquals("GCP000002", actual.getBodyOfWorkId());
+        assertEquals(1, gcpCounterItemRepository.findAll().size());
+        assertEquals(2, gcpCounterItemRepository.findAll().get(0).getCurrentValue());
 
         assertEquals(bodyOfWork.getTitle(), actual.getTitle());
         assertEquals(bodyOfWork.getJournal(), actual.getJournal());

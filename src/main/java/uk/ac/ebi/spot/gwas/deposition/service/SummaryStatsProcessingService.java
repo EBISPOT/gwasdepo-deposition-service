@@ -1,6 +1,5 @@
 package uk.ac.ebi.spot.gwas.deposition.service;
 
-import uk.ac.ebi.spot.gwas.deposition.domain.Publication;
 import uk.ac.ebi.spot.gwas.deposition.domain.Submission;
 import uk.ac.ebi.spot.gwas.deposition.domain.SummaryStatsEntry;
 
@@ -10,5 +9,5 @@ public interface SummaryStatsProcessingService {
 
     void processSummaryStats(Submission submission, String fileUploadId, List<SummaryStatsEntry> summaryStatsEntries);
 
-    void callGlobusWrapUp(Publication publication);
+    void callGlobusWrapUp(String submissionId);
 }

@@ -18,6 +18,7 @@ import uk.ac.ebi.spot.gwas.deposition.dto.SubmissionCreationDto;
 import uk.ac.ebi.spot.gwas.deposition.dto.SubmissionDto;
 import uk.ac.ebi.spot.gwas.deposition.dto.summarystats.SSTemplateEntryDto;
 import uk.ac.ebi.spot.gwas.deposition.repository.BodyOfWorkRepository;
+import uk.ac.ebi.spot.gwas.deposition.repository.GCPCounterItemRepository;
 import uk.ac.ebi.spot.gwas.deposition.rest.dto.BodyOfWorkDtoAssembler;
 import uk.ac.ebi.spot.gwas.deposition.rest.dto.PublicationDtoAssembler;
 import uk.ac.ebi.spot.gwas.deposition.service.*;
@@ -67,6 +68,9 @@ public class SubmissionsControllerTest extends IntegrationTest {
 
     @Autowired
     private GCPCounter gcpCounter;
+
+    @Autowired
+    private GCPCounterItemRepository gcpCounterItemRepository;
 
     @Before
     public void setup() {
@@ -167,6 +171,9 @@ public class SubmissionsControllerTest extends IntegrationTest {
         when(sumStatsService.createGlobusFolder(any())).thenReturn(new SSGlobusResponse(true, RandomStringUtils.randomAlphanumeric(10)));
         bodyOfWork.setBowId(gcpCounter.getNext());
         bodyOfWorkRepository.insert(bodyOfWork);
+        assertEquals("GCP000002", bodyOfWork.getBowId());
+        assertEquals(1, gcpCounterItemRepository.findAll().size());
+        assertEquals(2, gcpCounterItemRepository.findAll().get(0).getCurrentValue());
 
         SubmissionCreationDto submissionCreationDto = new SubmissionCreationDto(null,
                 BodyOfWorkDtoAssembler.assemble(bodyOfWork),
