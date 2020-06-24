@@ -9,9 +9,11 @@ import uk.ac.ebi.spot.gwas.deposition.messaging.email.EmailBuilder;
 import uk.ac.ebi.spot.gwas.deposition.messaging.email.EmailService;
 import uk.ac.ebi.spot.gwas.deposition.service.BackendEmailService;
 import uk.ac.ebi.spot.gwas.deposition.service.UserService;
+import uk.ac.ebi.spot.gwas.deposition.service.impl.email.ErrorsEmailBuilder;
 import uk.ac.ebi.spot.gwas.deposition.service.impl.email.FailEmailBuilder;
 import uk.ac.ebi.spot.gwas.deposition.service.impl.email.SuccessEmailBuilder;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -44,6 +46,19 @@ public class BackendEmailServiceImpl implements BackendEmailService {
         if (emailService != null) {
             EmailBuilder failBuilder = new FailEmailBuilder(backendMailConfig.getFailEmail(), errors);
             emailService.sendMessage(user.getEmail(), getSubject(pubmedId), failBuilder.getEmailContent(metadata), false);
+        }
+    }
+
+    public void sendErrorsEmail(String location, String error) {
+        Map<String, Object> metadata = new HashMap<>();
+        metadata.put(MailConstants.ERROR_LOCATION, location);
+        metadata.put(MailConstants.ERROR_CONTENT, error);
+
+        if (emailService != null && backendMailConfig.isErrorsActive()) {
+            EmailBuilder errorsBuilder = new ErrorsEmailBuilder(backendMailConfig.getErrorsEmail());
+            for (String receiver : backendMailConfig.getErrorsReceiver()) {
+                emailService.sendMessage(receiver, backendMailConfig.getErrorsSubject(), errorsBuilder.getEmailContent(metadata), false);
+            }
         }
     }
 

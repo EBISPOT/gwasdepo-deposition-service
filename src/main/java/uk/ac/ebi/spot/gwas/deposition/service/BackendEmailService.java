@@ -9,4 +9,5 @@ public interface BackendEmailService {
 
     void sendFailEmail(String userId, String pubmedId, Map<String, Object> metadata, List<String> errors);
 
+    void sendErrorsEmail(String location, String error);
 }

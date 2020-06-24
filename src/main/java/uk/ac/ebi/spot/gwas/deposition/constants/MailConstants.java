@@ -15,4 +15,8 @@ public class MailConstants {
     public static final String USER_NAME = "USER_NAME";
 
     public static final String ERRORS = "ERRORS";
+
+    public static final String ERROR_LOCATION = "ERROR_LOCATION";
+
+    public static final String ERROR_CONTENT = "ERROR_CONTENT";
 }

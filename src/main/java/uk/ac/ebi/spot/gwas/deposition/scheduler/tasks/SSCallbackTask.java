@@ -59,6 +59,12 @@ public class SSCallbackTask {
     @Autowired
     private AuditProxy auditProxy;
 
+    @Autowired
+    private UserService userService;
+
+    @Autowired
+    private SummaryStatsProcessingService summaryStatsProcessingService;
+
     public void checkCallbackIds() {
         log.info("Running callback ID checks.");
         if (sumStatsService == null) {
@@ -153,13 +159,22 @@ public class SSCallbackTask {
 
                             backendEmailService.sendSuccessEmail(userId, workId, metadata);
                             auditProxy.addAuditEntry(AuditHelper.submissionValidate(submission.getCreated().getUserId(), submission, true, null));
+                            submissionService.saveSubmission(submission);
+
+                            /*
+                            User user = userService.getUser(submission.getCreated().getUserId());
+                            submission = submissionService.updateSubmissionStatus(submission.getId(), Status.SUBMITTED.name(), user);
+                            auditProxy.addAuditEntry(AuditHelper.submissionSubmit(user.getId(), submission));
+                            log.info("Submission [{}] successfully submitted.", submission.getId());
+                            summaryStatsProcessingService.callGlobusWrapUp(submission.getId());
+                            */
                         } else {
                             submission.setOverallStatus(Status.INVALID.name());
                             submission.setSummaryStatsStatus(Status.INVALID.name());
                             backendEmailService.sendFailEmail(userId, workId, metadata, errors);
                             auditProxy.addAuditEntry(AuditHelper.submissionValidate(submission.getCreated().getUserId(), submission, false, errors));
+                            submissionService.saveSubmission(submission);
                         }
-                        submissionService.saveSubmission(submission);
 
                         log.info("Callback ID completed: {}", callbackId.getCallbackId());
                         callbackId.setCompleted(true);

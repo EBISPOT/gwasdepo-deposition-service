@@ -1,5 +1,6 @@
 package uk.ac.ebi.spot.gwas.deposition.service.impl;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,10 +19,7 @@ import uk.ac.ebi.spot.gwas.deposition.repository.CallbackIdRepository;
 import uk.ac.ebi.spot.gwas.deposition.repository.StudyRepository;
 import uk.ac.ebi.spot.gwas.deposition.repository.SummaryStatsEntryRepository;
 import uk.ac.ebi.spot.gwas.deposition.rest.dto.SummaryStatsRequestEntryDtoAssembler;
-import uk.ac.ebi.spot.gwas.deposition.service.FileUploadsService;
-import uk.ac.ebi.spot.gwas.deposition.service.SubmissionService;
-import uk.ac.ebi.spot.gwas.deposition.service.SumStatsService;
-import uk.ac.ebi.spot.gwas.deposition.service.SummaryStatsProcessingService;
+import uk.ac.ebi.spot.gwas.deposition.service.*;
 import uk.ac.ebi.spot.gwas.deposition.util.AccessionMapUtil;
 
 import java.util.*;
@@ -52,6 +50,9 @@ public class SummaryStatsProcessingServiceImpl implements SummaryStatsProcessing
 
     @Autowired
     private StudyRepository studyRepository;
+
+    @Autowired
+    private BackendEmailService backendEmailService;
 
     @Override
     @Async
@@ -124,6 +125,8 @@ public class SummaryStatsProcessingServiceImpl implements SummaryStatsProcessing
         Optional<CallbackId> callbackIdOptional = callbackIdRepository.findBySubmissionIdAndCompleted(submissionId, true);
         if (!callbackIdOptional.isPresent()) {
             log.error("Unable to perform Globus wrap up operation. Cannot find callback ID for submission: {}", submissionId);
+            backendEmailService.sendErrorsEmail("Pre-Globus wrap up",
+                    "Unable to perform Globus wrap up operation. Cannot find callback ID for submission: " + submissionId);
             return;
         }
 
@@ -154,17 +157,24 @@ public class SummaryStatsProcessingServiceImpl implements SummaryStatsProcessing
 
         List<SSWrapUpRequestEntryDto> ssWrapUpRequestEntryDtos = new ArrayList<>();
         List<SummaryStatsEntry> summaryStatsEntries = summaryStatsEntryRepository.findByCallbackId(callbackIdOptional.get().getCallbackId());
+        List<String> errors = new ArrayList<>();
         for (SummaryStatsEntry summaryStatsEntry : summaryStatsEntries) {
             log.info("Verifying: {}", summaryStatsEntry.getStudyTag());
             String gcst = accessionMap.get(summaryStatsEntry.getStudyTag());
             if (gcst == null) {
                 log.error("Unable to add ss data for [{}]. GCST is missing.", summaryStatsEntry.getStudyTag());
+                errors.add("Unable to add ss data for [" + summaryStatsEntry.getStudyTag() + "]. GCST is missing.");
                 continue;
             }
             ssWrapUpRequestEntryDtos.add(new SSWrapUpRequestEntryDto(summaryStatsEntry.getId(), gcst));
         }
 
+        if (!errors.isEmpty()) {
+            backendEmailService.sendErrorsEmail("Pre-Globus wrap up", StringUtils.join(errors, "; "));
+        }
         if (ssWrapUpRequestEntryDtos.isEmpty()) {
+            backendEmailService.sendErrorsEmail("Pre-Globus wrap up",
+                    "Unable to perform Globus wrap up operation. No data entry items were populated.");
             log.error("Unable to perform Globus wrap up operation. No data entry items were populated.");
             return;
         }

@@ -46,6 +46,11 @@ gwas-deposition:
     emails:
       success: emails/success.email
       fail: emails/fail.email
+    errors:
+      active: false
+      receiver: gwas-dev-logs@ebi.ac.uk, tudor.groza@gmail.com
+      subject: GWAS Deposition App - Error encountered
+      email: emails/errors.email
 
 solr:
   enable:

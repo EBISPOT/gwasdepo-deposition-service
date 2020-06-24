@@ -3,6 +3,7 @@ package uk.ac.ebi.spot.gwas.deposition.service.impl;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
@@ -13,6 +14,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import uk.ac.ebi.spot.gwas.deposition.domain.SSGlobusResponse;
 import uk.ac.ebi.spot.gwas.deposition.dto.summarystats.*;
+import uk.ac.ebi.spot.gwas.deposition.service.BackendEmailService;
 import uk.ac.ebi.spot.gwas.deposition.service.SumStatsService;
 
 @Service
@@ -20,6 +22,9 @@ import uk.ac.ebi.spot.gwas.deposition.service.SumStatsService;
 public class SumStatsServiceImpl extends GatewayService implements SumStatsService {
 
     private static final Logger log = LoggerFactory.getLogger(SumStatsService.class);
+
+    @Autowired
+    private BackendEmailService backendEmailService;
 
     @Override
     public SummaryStatsResponseDto retrieveSummaryStatsStatus(String callbackId) {
@@ -137,12 +142,16 @@ public class SumStatsServiceImpl extends GatewayService implements SumStatsServi
             }
             if (response.getStatusCode().equals(HttpStatus.OK)) {
                 if (responseDto.getError() != null) {
+                    backendEmailService.sendErrorsEmail("SummaryStats Service",
+                            "[" + ssGlobusFolderDto.getUniqueId() + " | " + ssGlobusFolderDto.getEmail() + "]: " + responseDto.getError());
                     return new SSGlobusResponse(false, responseDto.getError());
                 }
             }
             log.info("SS Service returned an unexpected code: {}", response.getStatusCode());
+            backendEmailService.sendErrorsEmail("SummaryStats Service", response.getStatusCode().toString());
             return null;
         } catch (Exception e) {
+            backendEmailService.sendErrorsEmail("SummaryStats Service", e.getMessage());
             log.error("Unable to call gwas-sumstats-service: {}", e.getMessage(), e);
             return null;
         }
