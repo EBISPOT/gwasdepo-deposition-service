@@ -55,6 +55,9 @@ public class FileHandlerServiceImpl implements FileHandlerService {
     @Autowired
     private AuditProxy auditProxy;
 
+    @Autowired
+    private BackendEmailService backendEmailService;
+
     @Override
     @Async
     public void handleSummaryStatsTemplate(Submission submission, Publication publication) {
@@ -74,6 +77,7 @@ public class FileHandlerServiceImpl implements FileHandlerService {
         FileUpload fileUpload;
         if (summaryStatsEntries.isEmpty()) {
             log.error("No summary stats data available for publication: {}", publication.getPmid());
+            backendEmailService.sendErrorsEmail("SS File Handler", "No summary stats data available for publication: " + publication.getPmid());
             fileUpload = fileUploadsService.storeFile(null, null, null, 0, FileUploadType.SUMMARY_STATS_TEMPLATE.name());
             submission.addFileUpload(fileUpload.getId());
             auditProxy.addAuditEntry(AuditHelper.fileCreate(submission.getCreated().getUserId(), fileUpload, submission, false,
@@ -95,6 +99,7 @@ public class FileHandlerServiceImpl implements FileHandlerService {
                     new SSTemplateRequestStudyDto(summaryStatsEntries)));
             if (fileObject == null) {
                 log.error("No file object received from the template service!");
+                backendEmailService.sendErrorsEmail("SS File Handler", "[" + publication.getPmid() + "] No file object received from the template service!");
                 fileUpload = fileUploadsService.storeFile(null, null, null, 0, FileUploadType.SUMMARY_STATS_TEMPLATE.name());
                 submission.addFileUpload(fileUpload.getId());
                 auditProxy.addAuditEntry(AuditHelper.fileCreate(submission.getCreated().getUserId(), fileUpload, submission, false, "No file object received from the template service!"));
