@@ -4,13 +4,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import uk.ac.ebi.spot.gwas.deposition.constants.GWASDepositionBackendConstants;
 import uk.ac.ebi.spot.gwas.deposition.constants.GeneralCommon;
+import uk.ac.ebi.spot.gwas.deposition.domain.Publication;
+import uk.ac.ebi.spot.gwas.deposition.domain.Submission;
+import uk.ac.ebi.spot.gwas.deposition.service.FileHandlerService;
+import uk.ac.ebi.spot.gwas.deposition.service.PublicationService;
 import uk.ac.ebi.spot.gwas.deposition.service.SOLRService;
+import uk.ac.ebi.spot.gwas.deposition.service.SubmissionService;
 
 @RestController
 @RequestMapping(value = GeneralCommon.API_V1)
@@ -20,6 +22,27 @@ public class ServiceManagementController {
 
     @Autowired(required = false)
     private SOLRService solrService;
+
+    @Autowired
+    private FileHandlerService fileHandlerService;
+
+    @Autowired
+    private SubmissionService submissionService;
+
+    @Autowired
+    private PublicationService publicationService;
+
+    /**
+     * GET /v1/recreate-ss-template
+     */
+    @GetMapping(value = GWASDepositionBackendConstants.API_RECREATE_TEMPLATE + "/{pmid}")
+    @ResponseStatus(HttpStatus.OK)
+    public void reindexPublications(@PathVariable String pmid) {
+        log.info("Request to recreate SS template for submission on publication: {}", pmid);
+        Publication publication = publicationService.retrievePublication(pmid, false);
+        Submission submission = submissionService.getSubmission(publication.getId());
+        fileHandlerService.handleSummaryStatsTemplate(submission, publication);
+    }
 
     /**
      * GET /v1/reindex-publications

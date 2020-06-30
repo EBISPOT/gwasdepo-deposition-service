@@ -26,6 +26,8 @@ public class GWASDepositionBackendConstants {
 
     public static final String API_REINDEX_PUBLICATIONS = "/reindex-publications";
 
+    public static final String API_RECREATE_TEMPLATE = "/recreate-ss-template";
+
     public static final String API_CLEAR_PUBLICATIONS = "/clear-publications";
 
     public static final String PARAM_PMID = "pmid";
