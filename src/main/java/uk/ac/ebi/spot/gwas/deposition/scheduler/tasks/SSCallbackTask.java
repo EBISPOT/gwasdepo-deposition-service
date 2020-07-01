@@ -161,13 +161,11 @@ public class SSCallbackTask {
                             auditProxy.addAuditEntry(AuditHelper.submissionValidate(submission.getCreated().getUserId(), submission, true, null));
                             submissionService.saveSubmission(submission);
 
-                            /*
                             User user = userService.getUser(submission.getCreated().getUserId());
                             submission = submissionService.updateSubmissionStatus(submission.getId(), Status.SUBMITTED.name(), user);
                             auditProxy.addAuditEntry(AuditHelper.submissionSubmit(user.getId(), submission));
                             log.info("Submission [{}] successfully submitted.", submission.getId());
                             summaryStatsProcessingService.callGlobusWrapUp(submission.getId());
-                            */
                         } else {
                             submission.setOverallStatus(Status.INVALID.name());
                             submission.setSummaryStatsStatus(Status.INVALID.name());
