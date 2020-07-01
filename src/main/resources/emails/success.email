@@ -351,9 +351,7 @@
                         <p>Dear <span th:text="${USER_NAME}"></span>,</p>
 
                         <p>The summary statistics for <span th:text="${PMID}"></span> - <i><span th:text="${PUBLICATION_TITLE}"></span></i>
-                        by <span th:text="${FIRST_AUTHOR}"></span> et al., were successfully validated.</p>
-
-                        <p>Please review the <a th:href="${SUBMISSION_ID}">submission report</a> to confirm the submission details. To finalise the submission process, click "Submit".</p>
+                        by <span th:text="${FIRST_AUTHOR}"></span> et al., were successfully validated and submitted to the GWAS Catalog.</p>
 
                         <p>Following submission the accession ID(s) for your submission will be available to download by pressing on the 'Download Study Accessions' button on the <a th:href="${SUBMISSION_STUDIES}">studies</a> page.</p>
 

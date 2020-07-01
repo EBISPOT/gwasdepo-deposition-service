@@ -136,7 +136,7 @@ public class SSCallbackTaskTest extends IntegrationTest {
         Optional<Submission> submissionOptional = submissionRepository.findByIdAndArchived(callbackId.getSubmissionId(), false);
 
         assertTrue(submissionOptional.isPresent());
-        assertEquals(Status.VALID.name(), submissionOptional.get().getOverallStatus());
+        assertEquals(Status.SUBMITTED.name(), submissionOptional.get().getOverallStatus());
         assertEquals(Status.VALID.name(), submissionOptional.get().getSummaryStatsStatus());
 
         Optional<CallbackId> callbackIdOptional = callbackIdRepository.findById(callbackId.getId());
