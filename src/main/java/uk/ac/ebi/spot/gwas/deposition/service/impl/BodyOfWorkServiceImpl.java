@@ -8,6 +8,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import uk.ac.ebi.spot.gwas.deposition.components.BodyOfWorkListener;
+import uk.ac.ebi.spot.gwas.deposition.constants.PublicationStatus;
 import uk.ac.ebi.spot.gwas.deposition.domain.*;
 import uk.ac.ebi.spot.gwas.deposition.exception.EntityNotFoundException;
 import uk.ac.ebi.spot.gwas.deposition.repository.BodyOfWorkRepository;
@@ -169,7 +170,10 @@ public class BodyOfWorkServiceImpl implements BodyOfWorkService {
 
                 Optional<Publication> publicationOptional = publicationRepository.findByPmid(existing.getPmids().get(0));
                 if (publicationOptional.isPresent()) {
-                    publicationId = publicationOptional.get().getId();
+                    Publication publication = publicationOptional.get();
+                    publicationId = publication.getId();
+                    publication.setStatus(PublicationStatus.UNDER_SUBMISSION.name());
+                    publicationRepository.save(publication);
                 }
             }
         }
