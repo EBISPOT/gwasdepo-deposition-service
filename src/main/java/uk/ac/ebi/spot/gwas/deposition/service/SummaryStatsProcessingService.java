@@ -7,7 +7,7 @@ import java.util.List;
 
 public interface SummaryStatsProcessingService {
 
-    void processSummaryStats(Submission submission, String fileUploadId, List<SummaryStatsEntry> summaryStatsEntries);
+    void processSummaryStats(Submission submission, String fileUploadId, List<SummaryStatsEntry> summaryStatsEntries, String userId);
 
     void callGlobusWrapUp(String submissionId);
 }

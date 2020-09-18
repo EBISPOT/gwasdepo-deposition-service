@@ -5,7 +5,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
-import uk.ac.ebi.spot.gwas.deposition.audit.AuditHelper;
 import uk.ac.ebi.spot.gwas.deposition.audit.AuditProxy;
 import uk.ac.ebi.spot.gwas.deposition.constants.FileUploadStatus;
 import uk.ac.ebi.spot.gwas.deposition.constants.Status;
@@ -76,7 +75,8 @@ public class ConversionServiceImpl implements ConversionService {
     @Async
     @Override
     public void convertData(Submission submission, FileUpload fileUpload,
-                            StreamSubmissionTemplateReader streamSubmissionTemplateReader, TemplateSchemaDto schema) {
+                            StreamSubmissionTemplateReader streamSubmissionTemplateReader,
+                            TemplateSchemaDto schema, String userId) {
         log.info("Converting data ...");
         SubmissionDataDto submissionDataDto = SubmissionConverter.fromSubmissionDocument(
                 templateConverterService.convert(streamSubmissionTemplateReader, schema)
@@ -122,7 +122,7 @@ public class ConversionServiceImpl implements ConversionService {
         }
         if (!summaryStatsEntries.isEmpty()) {
             submission.setSummaryStatsStatus(Status.VALIDATING.name());
-            submissionService.saveSubmission(submission);
+            submissionService.saveSubmission(submission, userId);
         }
 
         log.info("Found {} associations.", submissionDataDto.getAssociations().size());
@@ -151,12 +151,12 @@ public class ConversionServiceImpl implements ConversionService {
         log.info("Data conversion finalised.");
         submission.setOverallStatus(Status.VALIDATING.name());
         submission.setMetadataStatus(Status.VALID.name());
-        submissionService.saveSubmission(submission);
+        submissionService.saveSubmission(submission, userId);
 
         fileUpload.setStatus(FileUploadStatus.VALID.name());
         fileUploadsService.save(fileUpload);
 
-        summaryStatsProcessingService.processSummaryStats(submission, fileUpload.getId(), summaryStatsEntries);
+        summaryStatsProcessingService.processSummaryStats(submission, fileUpload.getId(), summaryStatsEntries, userId);
     }
 
 }

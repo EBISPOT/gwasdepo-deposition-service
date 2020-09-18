@@ -80,7 +80,7 @@ public class FileUploadsController {
         Submission submission = submissionService.getSubmission(submissionId, user);
         FileUpload fileUpload;
         if (submission.getType().equals(SubmissionType.SUMMARY_STATS.name())) {
-            fileUpload = fileHandlerService.handleSummaryStatsFile(submission, file);
+            fileUpload = fileHandlerService.handleSummaryStatsFile(submission, file, user);
         } else {
             fileUpload = fileHandlerService.handleMetadataFile(submission, file, user);
         }

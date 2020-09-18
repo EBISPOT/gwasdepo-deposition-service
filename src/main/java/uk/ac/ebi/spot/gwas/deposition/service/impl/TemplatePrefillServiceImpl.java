@@ -67,7 +67,7 @@ public class TemplatePrefillServiceImpl implements TemplatePrefillService {
             fileUploadsService.save(fileUpload);
 
             submission.addFileUpload(fileUpload.getId());
-            submissionService.saveSubmission(submission);
+            submissionService.saveSubmission(submission, user.getId());
         } catch (Exception e) {
             log.error("ERROR: {}", e.getMessage(), e);
         }

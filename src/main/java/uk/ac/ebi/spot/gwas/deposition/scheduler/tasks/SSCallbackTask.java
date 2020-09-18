@@ -159,7 +159,7 @@ public class SSCallbackTask {
 
                             backendEmailService.sendSuccessEmail(userId, workId, metadata);
                             auditProxy.addAuditEntry(AuditHelper.submissionValidate(submission.getCreated().getUserId(), submission, true, null));
-                            submissionService.saveSubmission(submission);
+                            submissionService.saveSubmission(submission, userId);
 
                             log.info("Callback ID completed: {}", callbackId.getCallbackId());
                             callbackId.setCompleted(true);
@@ -175,7 +175,7 @@ public class SSCallbackTask {
                             submission.setSummaryStatsStatus(Status.INVALID.name());
                             backendEmailService.sendFailEmail(userId, workId, metadata, errors);
                             auditProxy.addAuditEntry(AuditHelper.submissionValidate(submission.getCreated().getUserId(), submission, false, errors));
-                            submissionService.saveSubmission(submission);
+                            submissionService.saveSubmission(submission, userId);
 
                             log.info("Callback ID completed: {}", callbackId.getCallbackId());
                             callbackId.setCompleted(true);

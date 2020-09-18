@@ -61,7 +61,7 @@ public class MetadataValidationServiceImpl implements MetadataValidationService 
         fileUploadsService.save(fileUpload);
         submission.setMetadataStatus(Status.VALIDATING.name());
         submission.setOverallStatus(Status.VALIDATING.name());
-        submissionService.saveSubmission(submission);
+        submissionService.saveSubmission(submission, user.getId());
 
         StreamSubmissionTemplateReader streamSubmissionTemplateReader = new StreamSubmissionTemplateReader(fileContent, fileUpload.getId());
         TemplateSchemaDto schema;
@@ -75,44 +75,44 @@ public class MetadataValidationServiceImpl implements MetadataValidationService 
                     TemplateSchemaResponseDto templateSchemaResponseDto = templateService.retrieveTemplateSchemaInfo(streamSubmissionTemplateReader.getSchemaVersion());
                     if (templateSchemaResponseDto == null) {
                         log.error("Template service does not have a schema for the provided version: {}", streamSubmissionTemplateReader.getSchemaVersion());
-                        materializeError(submission, fileUpload, ErrorType.NO_SCHEMA_VERSION, streamSubmissionTemplateReader.getSchemaVersion(), streamSubmissionTemplateReader);
+                        materializeError(submission, fileUpload, ErrorType.NO_SCHEMA_VERSION, streamSubmissionTemplateReader.getSchemaVersion(), streamSubmissionTemplateReader, user);
                         return;
                     }
                     if (templateSchemaResponseDto.getSubmissionTypes().containsKey(SubmissionType.METADATA.name())) {
                         schema = templateService.retrieveTemplateSchema(streamSubmissionTemplateReader.getSchemaVersion(), SubmissionType.METADATA.name());
                         if (schema == null) {
                             log.error("Schema received from service is not usable.");
-                            materializeError(submission, fileUpload, ErrorType.UNUSABLE_SCHEMA, null, streamSubmissionTemplateReader);
+                            materializeError(submission, fileUpload, ErrorType.UNUSABLE_SCHEMA, null, streamSubmissionTemplateReader, user);
                             return;
                         }
                     } else {
                         log.error("Template service does not have a schema for the provided version: {}", streamSubmissionTemplateReader.getSchemaVersion());
-                        materializeError(submission, fileUpload, ErrorType.NO_SCHEMA_VERSION, streamSubmissionTemplateReader.getSchemaVersion(), streamSubmissionTemplateReader);
+                        materializeError(submission, fileUpload, ErrorType.NO_SCHEMA_VERSION, streamSubmissionTemplateReader.getSchemaVersion(), streamSubmissionTemplateReader, user);
                         return;
                     }
                 } else {
-                    materializeError(submission, fileUpload, ErrorType.NO_TEMPLATE_SERVICE, null, streamSubmissionTemplateReader);
+                    materializeError(submission, fileUpload, ErrorType.NO_TEMPLATE_SERVICE, null, streamSubmissionTemplateReader, user);
                     return;
                 }
             } else {
-                this.materializeError(submission, fileUpload, ErrorType.NO_SCHEMA_PRESENT, null, streamSubmissionTemplateReader);
+                this.materializeError(submission, fileUpload, ErrorType.NO_SCHEMA_PRESENT, null, streamSubmissionTemplateReader, user);
                 return;
             }
 
             log.info("Validating metadata ...");
             ValidationOutcome validationOutcome = templateValidatorService.validate(streamSubmissionTemplateReader, schema, true);
             if (validationOutcome == null) {
-                this.materializeError(submission, fileUpload, ErrorType.INVALID_TEMPLATE_DATA, null, streamSubmissionTemplateReader);
+                this.materializeError(submission, fileUpload, ErrorType.INVALID_TEMPLATE_DATA, null, streamSubmissionTemplateReader, user);
             } else {
                 log.info("Validation outcome: {}", validationOutcome.getErrorMessages());
                 if (validationOutcome.getErrorMessages().isEmpty()) {
                     auditProxy.addAuditEntry(AuditHelper.fileValidate(submission.getCreated().getUserId(), fileUpload, submission,
                             false, true, null));
-                    conversionService.convertData(submission, fileUpload, streamSubmissionTemplateReader, schema);
+                    conversionService.convertData(submission, fileUpload, streamSubmissionTemplateReader, schema, user.getId());
                 } else {
                     submission.setOverallStatus(Status.INVALID.name());
                     submission.setMetadataStatus(Status.INVALID.name());
-                    submissionService.saveSubmission(submission);
+                    submissionService.saveSubmission(submission, user.getId());
 
                     List<String> errors = ErrorUtil.transform(validationOutcome.getErrorMessages(), errorMessageTemplateProcessor);
                     fileUpload.setErrors(errors);
@@ -127,13 +127,14 @@ public class MetadataValidationServiceImpl implements MetadataValidationService 
             return;
         }
 
-        this.materializeError(submission, fileUpload, ErrorType.INVALID_FILE, fileUpload.getFileName(), streamSubmissionTemplateReader);
+        this.materializeError(submission, fileUpload, ErrorType.INVALID_FILE, fileUpload.getFileName(), streamSubmissionTemplateReader, user);
     }
 
-    private void materializeError(Submission submission, FileUpload fileUpload, String errorType, String context, StreamSubmissionTemplateReader streamSubmissionTemplateReader) {
+    private void materializeError(Submission submission, FileUpload fileUpload, String errorType, String context,
+                                  StreamSubmissionTemplateReader streamSubmissionTemplateReader, User user) {
         submission.setOverallStatus(Status.INVALID.name());
         submission.setMetadataStatus(Status.INVALID.name());
-        submissionService.saveSubmission(submission);
+        submissionService.saveSubmission(submission, user.getId());
 
         List<String> errors = errorMessageTemplateProcessor.processGenericError(errorType, context);
         fileUpload.setErrors(errors);

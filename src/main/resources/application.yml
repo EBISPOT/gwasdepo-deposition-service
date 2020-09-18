@@ -24,6 +24,8 @@ quartz:
       schedule: 0 */1 * * * ?
     complete-submissions:
       schedule: 0 */10 * * * ?
+    stalled-submissions:
+      schedule: 0 0 0 * * ?
 
 gwas-deposition:
   auth:
@@ -40,6 +42,13 @@ gwas-deposition:
     enabled: false
   solr:
     enabled: false
+  stalled-submissions:
+    first-check: 10
+    second-check: 7
+    last-check: 13
+    first-email: stall_first.email
+    second-email: stall_second.email
+    last-email: stall_last.email
   email-config:
     subject: GWAS Catalog submission for %PMID%
     base-url: https://www.ebi.ac.uk/gwas/deposition/submission/

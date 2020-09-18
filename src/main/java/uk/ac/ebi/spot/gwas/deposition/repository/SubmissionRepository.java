@@ -20,6 +20,8 @@ public interface SubmissionRepository extends MongoRepository<Submission, String
 
     List<Submission> findByArchived(boolean archived);
 
+    Stream<Submission> readByOverallStatusAndArchivedOrderByLastUpdatedDesc(String overallStatus, boolean archived);
+
     Optional<Submission> findByPublicationIdAndArchived(String publicationId, boolean archived);
 
     Optional<Submission> findByBodyOfWorksContainsAndCreated_UserIdAndArchived(String bodyOfWorkId, String userId, boolean archived);

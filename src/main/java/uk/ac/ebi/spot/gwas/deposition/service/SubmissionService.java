@@ -13,7 +13,7 @@ public interface SubmissionService {
 
     Submission getSubmission(String publicationId);
 
-    Submission saveSubmission(Submission submission);
+    Submission saveSubmission(Submission submission, String userId);
 
     Page<Submission> getSubmissions(String pmid, String bowId, Pageable page, User user);
 
