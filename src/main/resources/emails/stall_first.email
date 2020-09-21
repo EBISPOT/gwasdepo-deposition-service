@@ -350,11 +350,18 @@
                       <td>
                         <p>Dear <span th:text="${USER_NAME}"></span>,</p>
 
-                        <p>This is a kind reminder that you've started a submission entitled
-                        <a th:href="${SUBMISSION_ID}"><span th:text="${PUBLICATION_TITLE}"></span></a>. You should come back and finish it.
-                        </p>
-                        
-                        <p>Best wishes,<br/>
+                        <p>Thanks for choosing the GWAS Catalog as the repository for your Summary Statistics.</p>
+
+                        <p>We noticed you haven't completed your submission (<a th:href="${SUBMISSION_ID}"><span th:text="${PUBLICATION_TITLE}"></span></a>) and
+                        would like to know if you had a problem during the process that we can help you solve?</p>
+
+                        <p>To get in contact with us, email <strong>gwas-subs@ebi.ac.uk</strong> and quote the GCP or PMID.</p>
+
+                        <p>Please note that if the submission is not updated within 30 days of creation, then it will be removed from the system.</p>
+
+                        <p>Thanks in advance for your time.</p>
+
+                        <p>Regards,<br/>
                         GWAS Catalog team</p>
                       </td>
                     </tr>

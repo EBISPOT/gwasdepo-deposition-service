@@ -68,7 +68,7 @@ public class BackendEmailServiceImpl implements BackendEmailService {
         metadata.put(MailConstants.SUBMISSION_ID, backendMailConfig.getSubmissionsBaseURL() + metadata.get(MailConstants.SUBMISSION_ID));
         if (emailService != null) {
             EmailBuilder successBuilder = new SuccessEmailBuilder(emailFile);
-            emailService.sendMessage(user.getEmail(), "GWAS Deposition App - Submission reminder", successBuilder.getEmailContent(metadata), false);
+            emailService.sendMessage(user.getEmail(), "GWAS Catalog submission (" + metadata.get(MailConstants.SUBMISSION_ID) + ")", successBuilder.getEmailContent(metadata), false);
         }
     }
 
