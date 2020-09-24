@@ -8,6 +8,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import uk.ac.ebi.spot.gwas.deposition.audit.AuditHelper;
 import uk.ac.ebi.spot.gwas.deposition.audit.AuditProxy;
+import uk.ac.ebi.spot.gwas.deposition.config.GWASDepositionBackendConfig;
 import uk.ac.ebi.spot.gwas.deposition.constants.FileUploadStatus;
 import uk.ac.ebi.spot.gwas.deposition.constants.Status;
 import uk.ac.ebi.spot.gwas.deposition.domain.*;
@@ -23,7 +24,6 @@ import uk.ac.ebi.spot.gwas.deposition.service.*;
 import uk.ac.ebi.spot.gwas.deposition.util.AccessionMapUtil;
 
 import java.util.*;
-import java.util.stream.Stream;
 
 @Service
 public class SummaryStatsProcessingServiceImpl implements SummaryStatsProcessingService {
@@ -53,6 +53,9 @@ public class SummaryStatsProcessingServiceImpl implements SummaryStatsProcessing
 
     @Autowired
     private BackendEmailService backendEmailService;
+
+    @Autowired
+    private GWASDepositionBackendConfig gwasDepositionBackendConfig;
 
     @Override
     @Async
@@ -117,9 +120,17 @@ public class SummaryStatsProcessingServiceImpl implements SummaryStatsProcessing
     public void callGlobusWrapUp(String submissionId) {
         log.info("Wrapping up Globus folder for submission: {}", submissionId);
         AccessionMapUtil accessionMapUtil = new AccessionMapUtil();
-        Stream<Study> studyStream = studyRepository.readBySubmissionId(submissionId);
-        studyStream.forEach(study -> accessionMapUtil.addStudy(study.getStudyTag(), study.getAccession()));
-        studyStream.close();
+        User user = new User("Auto Curator", gwasDepositionBackendConfig.getAutoCuratorServiceAccount());
+        user.setDomains(gwasDepositionBackendConfig.getCuratorDomains());
+        Submission submission = submissionService.getSubmission(submissionId, user);
+        for (String studyId : submission.getStudies()) {
+            Optional<Study> studyOptional = studyRepository.findById(studyId);
+            if (!studyOptional.isPresent()) {
+                log.error("Unable to find study [{}] for submission: {}", studyId, submissionId);
+            } else {
+                accessionMapUtil.addStudy(studyOptional.get().getStudyTag(), studyOptional.get().getAccession());
+            }
+        }
         Map<String, String> accessionMap = accessionMapUtil.getAccessionMap();
 
         Optional<CallbackId> callbackIdOptional = callbackIdRepository.findBySubmissionIdAndCompleted(submissionId, true);
