@@ -44,8 +44,8 @@ gwas-deposition:
     enabled: false
   stalled-submissions:
     first-check: 2
-    second-check: 2
-    last-check: 1
+    second-check: 4
+    last-check: 5
     first-email: stall_first.email
     second-email: stall_second.email
     last-email: stall_last.email

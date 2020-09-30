@@ -59,6 +59,7 @@ public class StalledSubmissionsCheckTask {
     }
 
     private void verifySubmission(Submission submission) {
+        log.info("Checking submission: {}", submission.getId());
         DateTime now = DateTime.now();
         DateTime sLastUpdated = submission.getLastUpdated().getTimestamp();
         String title;
@@ -76,7 +77,10 @@ public class StalledSubmissionsCheckTask {
         metadata.put(MailConstants.PUBLICATION_TITLE, title);
 
         // Last check: delete
-        if (sLastUpdated.isAfter(now.plusDays(backendSubmissionChecksConfig.getLastCheck()))) {
+        if (now.isAfter(sLastUpdated.plusDays(backendSubmissionChecksConfig.getLastCheck()))) {
+            log.info(" - Submission [{} | {}] stalled for more than {} days.", submission.getId(),
+                    submission.getReminderStatus(),
+                    backendSubmissionChecksConfig.getLastCheck());
             backendEmailService.sendReminderEmail(submission.getCreated().getUserId(), metadata, backendSubmissionChecksConfig.getLastEmail());
             submission.setReminderStatus(ReminderStatus.ARCHIVED.name());
             submission.setArchived(true);
@@ -86,7 +90,10 @@ public class StalledSubmissionsCheckTask {
         }
 
         // Second check: send second reminder
-        if (sLastUpdated.isAfter(now.plusDays(backendSubmissionChecksConfig.getSecondCheck()))) {
+        if (now.isAfter(sLastUpdated.plusDays(backendSubmissionChecksConfig.getSecondCheck()))) {
+            log.info(" - Submission [{} | {}] stalled for more than {} days.", submission.getId(),
+                    submission.getReminderStatus(),
+                    backendSubmissionChecksConfig.getSecondCheck());
             if (!submission.getReminderStatus().equalsIgnoreCase(ReminderStatus.SECOND.name())) {
                 backendEmailService.sendReminderEmail(submission.getCreated().getUserId(), metadata, backendSubmissionChecksConfig.getSecondEmail());
                 submission.setReminderStatus(ReminderStatus.SECOND.name());
@@ -96,7 +103,10 @@ public class StalledSubmissionsCheckTask {
         }
 
         // First check: send first reminder
-        if (sLastUpdated.isAfter(now.plusDays(backendSubmissionChecksConfig.getFirstCheck()))) {
+        if (now.isAfter(sLastUpdated.plusDays(backendSubmissionChecksConfig.getFirstCheck()))) {
+            log.info(" - Submission [{} | {}] stalled for more than {} days.", submission.getId(),
+                    submission.getReminderStatus(),
+                    backendSubmissionChecksConfig.getFirstCheck());
             if (!submission.getReminderStatus().equalsIgnoreCase(ReminderStatus.FIRST.name())) {
                 backendEmailService.sendReminderEmail(submission.getCreated().getUserId(), metadata, backendSubmissionChecksConfig.getFirstEmail());
                 submission.setReminderStatus(ReminderStatus.FIRST.name());
