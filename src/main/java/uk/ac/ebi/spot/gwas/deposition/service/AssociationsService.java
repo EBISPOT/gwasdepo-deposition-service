@@ -15,4 +15,6 @@ public interface AssociationsService {
     List<Association> retrieveAssociations(List<String> associations);
 
     Association getAssociation(String associationId);
+
+    void deleteAssociations(String submissionId);
 }

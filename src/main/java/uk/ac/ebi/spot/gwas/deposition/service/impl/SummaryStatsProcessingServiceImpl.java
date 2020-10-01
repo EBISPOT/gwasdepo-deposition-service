@@ -141,29 +141,6 @@ public class SummaryStatsProcessingServiceImpl implements SummaryStatsProcessing
             return;
         }
 
-        /*
-        log.info("Performing Globus wrap up operation for: {} | {}", publication.getId(), publication.getPmid());
-        if (sumStatsService == null) {
-            log.info("Summary Stats Service is not active.");
-            return;
-        }
-
-        Optional<SSTemplateEntryPlaceholder> ssTemplateEntryPlaceholderOptional = ssTemplateEntryPlaceholderRepository.findByPmid(publication.getPmid());
-        if (!ssTemplateEntryPlaceholderOptional.isPresent()) {
-            log.error("Unable to perform Globus wrap up operation. Study accession data is missing.");
-            return;
-        }
-        if (ssTemplateEntryPlaceholderOptional.get().getSsTemplateEntries() == null) {
-            log.error("Unable to perform Globus wrap up operation. Study accession data is missing.");
-            return;
-        }
-
-        Map<String, String> accessionMap = new LinkedHashMap<>();
-        for (SSTemplateEntry ssTemplateEntry : ssTemplateEntryPlaceholderOptional.get().getSsTemplateEntries()) {
-            accessionMap.put(ssTemplateEntry.getStudyTag(), ssTemplateEntry.getStudyAccession());
-        }
-        */
-
         log.info("Accession map [{}]: {}", callbackIdOptional.get().getCallbackId(), accessionMap);
 
         List<SSWrapUpRequestEntryDto> ssWrapUpRequestEntryDtos = new ArrayList<>();
