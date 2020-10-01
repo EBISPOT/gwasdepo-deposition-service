@@ -62,6 +62,9 @@ public class FileUploadsController {
     @Autowired
     private AuditProxy auditProxy;
 
+    @Autowired
+    private SubmissionDataCleaningService submissionDataCleaningService;
+
     /*
      * POST /v1/submissions/{submissionId}/uploads
      */
@@ -186,7 +189,7 @@ public class FileUploadsController {
         Submission submission = submissionService.getSubmission(submissionId, user);
         submissionService.deleteSubmissionFile(submission, fileUploadId, user.getId());
         auditProxy.addAuditEntry(AuditHelper.fileDelete(submission.getCreated().getUserId(), fileUpload, submission));
-//        submissionDataCleaningService.cleanSubmission(submission, fileUploadId);
+        submissionDataCleaningService.cleanSubmission(submission);
         log.info("File [{}] successfully removed from submission: {}", fileUploadId, submission.getId());
     }
 }

@@ -11,9 +11,11 @@ import uk.ac.ebi.spot.gwas.deposition.domain.Study;
 import uk.ac.ebi.spot.gwas.deposition.domain.Submission;
 import uk.ac.ebi.spot.gwas.deposition.repository.StudyRepository;
 import uk.ac.ebi.spot.gwas.deposition.service.StudiesService;
+import uk.ac.ebi.spot.gwas.deposition.util.IdCollector;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 @Service
 public class StudiesServiceImpl implements StudiesService {
@@ -59,4 +61,18 @@ public class StudiesServiceImpl implements StudiesService {
         log.error("Unable to find study: {}", studyId);
         return null;
     }
+
+    @Override
+    public void deleteStudies(String submissionId) {
+        log.info("Removing studies for submission: {}", submissionId);
+        Stream<Study> studyStream = studyRepository.readBySubmissionId(submissionId);
+        IdCollector idCollector = new IdCollector();
+        studyStream.forEach(study -> idCollector.addId(study.getId()));
+        studyStream.close();
+        log.info(" - Found {} studies.", idCollector.getIds().size());
+        for (String id : idCollector.getIds()) {
+            studyRepository.deleteById(id);
+        }
+    }
+
 }

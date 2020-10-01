@@ -11,9 +11,11 @@ import uk.ac.ebi.spot.gwas.deposition.domain.Sample;
 import uk.ac.ebi.spot.gwas.deposition.domain.Submission;
 import uk.ac.ebi.spot.gwas.deposition.repository.SampleRepository;
 import uk.ac.ebi.spot.gwas.deposition.service.SamplesService;
+import uk.ac.ebi.spot.gwas.deposition.util.IdCollector;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 @Service
 public class SamplesServiceImpl implements SamplesService {
@@ -59,4 +61,18 @@ public class SamplesServiceImpl implements SamplesService {
         log.error("Unable to find sample: {}", sampleId);
         return null;
     }
+
+    @Override
+    public void deleteSamples(String submissionId) {
+        log.info("Removing samples for submission: {}", submissionId);
+        Stream<Sample> sampleStream = sampleRepository.readBySubmissionId(submissionId);
+        IdCollector idCollector = new IdCollector();
+        sampleStream.forEach(sample -> idCollector.addId(sample.getId()));
+        sampleStream.close();
+        log.info(" - Found {} samples.", idCollector.getIds().size());
+        for (String id : idCollector.getIds()) {
+            sampleRepository.deleteById(id);
+        }
+    }
+
 }
