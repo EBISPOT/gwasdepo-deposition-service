@@ -15,4 +15,6 @@ public interface SamplesService {
     List<Sample> retrieveSamples(List<String> samples);
 
     Sample getSample(String sampleId);
+
+    void deleteSamples(String submissionId);
 }

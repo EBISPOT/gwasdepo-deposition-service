@@ -15,6 +15,7 @@ import uk.ac.ebi.spot.gwas.deposition.dto.summarystats.SummaryStatsStatusDto;
 import uk.ac.ebi.spot.gwas.deposition.repository.CallbackIdRepository;
 import uk.ac.ebi.spot.gwas.deposition.repository.SummaryStatsEntryRepository;
 import uk.ac.ebi.spot.gwas.deposition.service.*;
+import uk.ac.ebi.spot.gwas.deposition.util.BackendUtil;
 
 import java.util.HashMap;
 import java.util.List;
@@ -133,11 +134,11 @@ public class SSCallbackTask {
                             if (bodyOfWork.getFirstAuthor() == null) {
                                 if (bodyOfWork.getCorrespondingAuthors() != null) {
                                     if (!bodyOfWork.getCorrespondingAuthors().isEmpty()) {
-                                        metadata.put(MailConstants.FIRST_AUTHOR, extracName(bodyOfWork.getCorrespondingAuthors().get(0)));
+                                        metadata.put(MailConstants.FIRST_AUTHOR, BackendUtil.extractName(bodyOfWork.getCorrespondingAuthors().get(0)));
                                     }
                                 }
                             } else {
-                                metadata.put(MailConstants.FIRST_AUTHOR, extracName(bodyOfWork.getFirstAuthor()));
+                                metadata.put(MailConstants.FIRST_AUTHOR, BackendUtil.extractName(bodyOfWork.getFirstAuthor()));
                             }
                             workId = bodyOfWork.getBowId();
                         }
@@ -190,17 +191,4 @@ public class SSCallbackTask {
         }
     }
 
-    private String extracName(Author author) {
-        if (author.getLastName() != null) {
-            return author.getLastName();
-        }
-        if (author.getFirstName() != null) {
-            return author.getFirstName();
-        }
-        if (author.getGroup() != null) {
-            return author.getGroup();
-        }
-
-        return "N/A";
-    }
 }

@@ -11,9 +11,11 @@ import uk.ac.ebi.spot.gwas.deposition.domain.Association;
 import uk.ac.ebi.spot.gwas.deposition.domain.Submission;
 import uk.ac.ebi.spot.gwas.deposition.repository.AssociationRepository;
 import uk.ac.ebi.spot.gwas.deposition.service.AssociationsService;
+import uk.ac.ebi.spot.gwas.deposition.util.IdCollector;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 @Service
 public class AssociationsServiceImpl implements AssociationsService {
@@ -58,6 +60,19 @@ public class AssociationsServiceImpl implements AssociationsService {
         }
         log.error("Unable to find association: {}", associationId);
         return null;
+    }
+
+    @Override
+    public void deleteAssociations(String submissionId) {
+        log.info("Removing associations for submission: {}", submissionId);
+        Stream<Association> associationStream = associationRepository.readBySubmissionId(submissionId);
+        IdCollector idCollector = new IdCollector();
+        associationStream.forEach(association -> idCollector.addId(association.getId()));
+        associationStream.close();
+        log.info(" - Found {} associations.", idCollector.getIds().size());
+        for (String id : idCollector.getIds()) {
+            associationRepository.deleteById(id);
+        }
     }
 
 }
