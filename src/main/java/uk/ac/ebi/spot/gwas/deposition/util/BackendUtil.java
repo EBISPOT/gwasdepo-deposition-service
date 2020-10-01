@@ -3,6 +3,7 @@ package uk.ac.ebi.spot.gwas.deposition.util;
 import org.springframework.data.rest.webmvc.support.BaseUriLinkBuilder;
 import org.springframework.hateoas.LinkBuilder;
 import org.springframework.hateoas.mvc.ControllerLinkBuilder;
+import uk.ac.ebi.spot.gwas.deposition.domain.Author;
 import uk.ac.ebi.spot.gwas.deposition.domain.Study;
 
 import java.net.URI;
@@ -49,6 +50,20 @@ public class BackendUtil {
             }
         }
         return list;
+    }
+
+    public static String extractName(Author author) {
+        if (author.getLastName() != null) {
+            return author.getLastName();
+        }
+        if (author.getFirstName() != null) {
+            return author.getFirstName();
+        }
+        if (author.getGroup() != null) {
+            return author.getGroup();
+        }
+
+        return "N/A";
     }
 
     public static boolean ssIsNR(Study study) {
