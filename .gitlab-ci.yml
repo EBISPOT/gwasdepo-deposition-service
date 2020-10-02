@@ -7,7 +7,6 @@ stages:
   - docker
   - docker-release
   - deploy-sandbox
-  - deploy-fallback
   - deploy-live
 
 variables:
