@@ -7,6 +7,7 @@ stages:
   - docker
   - docker-release
   - deploy-sandbox
+  - deploy-fallback
   - deploy-live
 
 variables:
@@ -62,6 +63,21 @@ deploy-backend-sandbox:
     name: sandbox
   only:
     - develop
+
+deploy-fallback:
+  image: dtzar/helm-kubectl:2.13.1
+  stage: deploy-fallback
+  script:
+  - echo "Deploy to Production fallback server"
+  - mkdir -p /root/.kube
+  - echo ${PFALLBACK_KUBECONFIG} | base64 -d > /root/.kube/config
+  - helm init
+  - helm delete --purge gwas-deposition-backend || true
+  - helm install --name gwas-deposition-backend --set k8Namespace=gwas,replicaCount=3,image.env.envName=prod-fallback,image.repository=$BACKEND_REGISTRY_IMAGE,image.tag=$CI_COMMIT_SHA,image.env.dbUser=gwasdepo,image.env.secretsName=prod-secrets,image.env.secretsKey=db-backend ./k8chart/ --wait
+  environment:
+    name: prod
+  only:
+  - tags
 
 deploy-live:
   image: dtzar/helm-kubectl:2.13.1
