@@ -46,9 +46,9 @@ gwas-deposition:
     first-check: 2
     second-check: 4
     last-check: 5
-    first-email: stall_first.email
-    second-email: stall_second.email
-    last-email: stall_last.email
+    first-email: emails/stall_first.email
+    second-email: emails/stall_second.email
+    last-email: emails/stall_last.email
   email-config:
     subject: GWAS Catalog submission for %PMID%
     base-url: https://www.ebi.ac.uk/gwas/deposition/submission/
