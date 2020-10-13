@@ -4,6 +4,7 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 import uk.ac.ebi.spot.gwas.deposition.constants.PublicationStatus;
+import uk.ac.ebi.spot.gwas.deposition.constants.SummaryStatsResponseConstants;
 import uk.ac.ebi.spot.gwas.deposition.domain.*;
 import uk.ac.ebi.spot.gwas.deposition.dto.summarystats.SummaryStatsRequestDto;
 import uk.ac.ebi.spot.gwas.deposition.dto.summarystats.SummaryStatsRequestEntryDto;
@@ -133,6 +134,8 @@ public class TestUtil {
     public static SummaryStatsResponseDto summaryStatsResponseDto(String callbackId) {
         return new SummaryStatsResponseDto(callbackId,
                 false,
+                SummaryStatsResponseConstants.PROCESSING,
+                new ArrayList<>(),
                 Arrays.asList(new SummaryStatsStatusDto[]{
                         new SummaryStatsStatusDto(
                                 RandomStringUtils.randomAlphanumeric(10),
