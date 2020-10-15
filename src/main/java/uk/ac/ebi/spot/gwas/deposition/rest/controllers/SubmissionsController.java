@@ -136,7 +136,8 @@ public class SubmissionsController {
 
         Publication publication = publicationService.retrievePublication(submissionCreationDto.getPublication().getPmid(), false);
         if (publication.getStatus().equals(PublicationStatus.ELIGIBLE.name()) ||
-                publication.getStatus().equals(PublicationStatus.PUBLISHED.name())) {
+                publication.getStatus().equals(PublicationStatus.PUBLISHED.name()) ||
+                publication.getStatus().equals(PublicationStatus.PUBLISHED_WITH_SS.name())) {
 
             Submission submission = new Submission(publication.getId(),
                     SubmissionProvenanceType.PUBLICATION.name(),
@@ -155,7 +156,8 @@ public class SubmissionsController {
                         submission, publication, false, true, null));
                 publicationService.savePublication(publication);
             }
-            if (publication.getStatus().equals(PublicationStatus.PUBLISHED.name())) {
+            if (publication.getStatus().equals(PublicationStatus.PUBLISHED.name()) ||
+                    publication.getStatus().equals(PublicationStatus.PUBLISHED_WITH_SS.name())) {
                 publication.setStatus(PublicationStatus.UNDER_SUMMARY_STATS_SUBMISSION.name());
                 submission.setType(SubmissionType.SUMMARY_STATS.name());
                 submission = submissionService.createSubmission(submission);

@@ -108,6 +108,7 @@ public class SSCallbackTaskTest extends IntegrationTest {
                 new Long(1000),
                 FileUploadStatus.PROCESSING.name(),
                 FileUploadType.SUMMARY_STATS.name());
+        fileUpload.setCallbackId(callbackId.getCallbackId());
         fileUpload = fileUploadRepository.insert(fileUpload);
         summaryStatsEntry = new SummaryStatsEntry(fileUpload.getId(),
                 RandomStringUtils.randomAlphanumeric(10),
@@ -125,6 +126,8 @@ public class SSCallbackTaskTest extends IntegrationTest {
     public void shouldCheckCallbackIds() {
         SummaryStatsResponseDto summaryStatsResponseDto = new SummaryStatsResponseDto(callbackId.getCallbackId(),
                 true,
+                SummaryStatsResponseConstants.VALID,
+                null,
                 Arrays.asList(new SummaryStatsStatusDto[]{
                         new SummaryStatsStatusDto(summaryStatsEntry.getId(),
                                 SummaryStatsEntryStatus.VALID.name(),
@@ -148,6 +151,8 @@ public class SSCallbackTaskTest extends IntegrationTest {
     public void shouldFailToCheckCallbackIdsWithInvalidSS() {
         SummaryStatsResponseDto summaryStatsResponseDto = new SummaryStatsResponseDto(callbackId.getCallbackId(),
                 true,
+                SummaryStatsResponseConstants.INVALID,
+                null,
                 Arrays.asList(new SummaryStatsStatusDto[]{
                         new SummaryStatsStatusDto(summaryStatsEntry.getId(),
                                 SummaryStatsEntryStatus.INVALID.name(),
@@ -172,9 +177,41 @@ public class SSCallbackTaskTest extends IntegrationTest {
     }
 
     @Test
+    public void shouldFailToCheckCallbackIdsWithInvalidMetadataSS() {
+        SummaryStatsResponseDto summaryStatsResponseDto = new SummaryStatsResponseDto(callbackId.getCallbackId(),
+                true,
+                SummaryStatsResponseConstants.INVALID,
+                Arrays.asList(new String[] {"METADATA_ERROR"}),
+                Arrays.asList(new SummaryStatsStatusDto[]{
+                        new SummaryStatsStatusDto(summaryStatsEntry.getId(),
+                                SummaryStatsEntryStatus.VALID.name(),
+                                null)
+                }));
+
+        when(sumStatsService.retrieveSummaryStatsStatus(callbackId.getCallbackId())).thenReturn(summaryStatsResponseDto);
+        ssCallbackTask.checkCallbackIds();
+        Optional<Submission> submissionOptional = submissionRepository.findByIdAndArchived(callbackId.getSubmissionId(), false);
+
+        assertTrue(submissionOptional.isPresent());
+        assertEquals(Status.INVALID.name(), submissionOptional.get().getOverallStatus());
+        assertEquals(Status.INVALID.name(), submissionOptional.get().getSummaryStatsStatus());
+
+        Optional<CallbackId> callbackIdOptional = callbackIdRepository.findById(callbackId.getId());
+        assertTrue(callbackIdOptional.isPresent());
+        assertTrue(callbackIdOptional.get().isCompleted());
+
+        Optional<FileUpload> fileUploadOptional = fileUploadRepository.findById(fileUpload.getId());
+        assertEquals(FileUploadStatus.INVALID.name(), fileUploadOptional.get().getStatus());
+        assertEquals(1, fileUploadOptional.get().getErrors().size());
+        assertEquals("METADATA_ERROR", fileUploadOptional.get().getErrors().get(0));
+    }
+
+    @Test
     public void shouldNotCompleteCheck() {
         SummaryStatsResponseDto summaryStatsResponseDto = new SummaryStatsResponseDto(callbackId.getCallbackId(),
                 false,
+                SummaryStatsResponseConstants.PROCESSING,
+                null,
                 Arrays.asList(new SummaryStatsStatusDto[]{
                         new SummaryStatsStatusDto(summaryStatsEntry.getId(),
                                 SummaryStatsEntryStatus.VALID.name(),

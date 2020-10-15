@@ -15,4 +15,6 @@ public interface StudiesService {
     List<Study> retrieveStudies(List<String> studies);
 
     Study getStudy(String studyId);
+
+    void deleteStudies(String submissionId);
 }

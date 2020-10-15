@@ -156,7 +156,20 @@ public class ConversionServiceImpl implements ConversionService {
         fileUpload.setStatus(FileUploadStatus.VALID.name());
         fileUploadsService.save(fileUpload);
 
-        summaryStatsProcessingService.processSummaryStats(submission, fileUpload.getId(), summaryStatsEntries, userId);
+        Publication publication = null;
+        BodyOfWork bodyOfWork = null;
+        if (submission.getProvenanceType().equalsIgnoreCase(SubmissionProvenanceType.PUBLICATION.name())) {
+            Optional<Publication> publicationOptional = publicationRepository.findById(submission.getPublicationId());
+            if (publicationOptional.isPresent()) {
+                publication = publicationOptional.get();
+            }
+        } else {
+            Optional<BodyOfWork> bodyOfWorkOptional = bodyOfWorkRepository.findByBowIdAndArchived(submission.getBodyOfWorks().get(0), false);
+            if (bodyOfWorkOptional.isPresent()) {
+                bodyOfWork = bodyOfWorkOptional.get();
+            }
+        }
+        summaryStatsProcessingService.processSummaryStats(submission, fileUpload.getId(), summaryStatsEntries, publication, bodyOfWork, userId);
     }
 
 }

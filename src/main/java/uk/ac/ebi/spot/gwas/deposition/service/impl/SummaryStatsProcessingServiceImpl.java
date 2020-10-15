@@ -8,8 +8,12 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import uk.ac.ebi.spot.gwas.deposition.audit.AuditHelper;
 import uk.ac.ebi.spot.gwas.deposition.audit.AuditProxy;
+import uk.ac.ebi.spot.gwas.deposition.config.BackendMailConfig;
+import uk.ac.ebi.spot.gwas.deposition.config.GWASDepositionBackendConfig;
 import uk.ac.ebi.spot.gwas.deposition.constants.FileUploadStatus;
+import uk.ac.ebi.spot.gwas.deposition.constants.MailConstants;
 import uk.ac.ebi.spot.gwas.deposition.constants.Status;
+import uk.ac.ebi.spot.gwas.deposition.constants.SubmissionProvenanceType;
 import uk.ac.ebi.spot.gwas.deposition.domain.*;
 import uk.ac.ebi.spot.gwas.deposition.dto.summarystats.SSWrapUpRequestDto;
 import uk.ac.ebi.spot.gwas.deposition.dto.summarystats.SSWrapUpRequestEntryDto;
@@ -21,9 +25,9 @@ import uk.ac.ebi.spot.gwas.deposition.repository.SummaryStatsEntryRepository;
 import uk.ac.ebi.spot.gwas.deposition.rest.dto.SummaryStatsRequestEntryDtoAssembler;
 import uk.ac.ebi.spot.gwas.deposition.service.*;
 import uk.ac.ebi.spot.gwas.deposition.util.AccessionMapUtil;
+import uk.ac.ebi.spot.gwas.deposition.util.BackendUtil;
 
 import java.util.*;
-import java.util.stream.Stream;
 
 @Service
 public class SummaryStatsProcessingServiceImpl implements SummaryStatsProcessingService {
@@ -52,11 +56,21 @@ public class SummaryStatsProcessingServiceImpl implements SummaryStatsProcessing
     private StudyRepository studyRepository;
 
     @Autowired
+    private BackendMailConfig backendMailConfig;
+
+    @Autowired
     private BackendEmailService backendEmailService;
+
+    @Autowired
+    private GWASDepositionBackendConfig gwasDepositionBackendConfig;
+
+    @Autowired
+    private UserService userService;
 
     @Override
     @Async
-    public void processSummaryStats(Submission submission, String fileUploadId, List<SummaryStatsEntry> summaryStatsEntries, String userId) {
+    public void processSummaryStats(Submission submission, String fileUploadId, List<SummaryStatsEntry> summaryStatsEntries,
+                                    Publication publication, BodyOfWork bodyOfWork, String userId) {
         log.info("Processing {} summary stats.", summaryStatsEntries.size());
         log.info("Summary stats service enabled: {}", (sumStatsService != null));
 
@@ -67,6 +81,43 @@ public class SummaryStatsProcessingServiceImpl implements SummaryStatsProcessing
             submission.setOverallStatus(Status.VALID.name());
             submission.setSummaryStatsStatus(Status.NA.name());
             submissionService.saveSubmission(submission, userId);
+
+            Map<String, Object> metadata = new HashMap<>();
+            String workId = null;
+            if (publication != null) {
+                metadata.put(MailConstants.PUBLICATION_TITLE, publication.getTitle());
+                metadata.put(MailConstants.PMID, publication.getPmid());
+                metadata.put(MailConstants.FIRST_AUTHOR, publication.getFirstAuthor());
+                workId = publication.getPmid();
+            } else {
+                if (bodyOfWork != null) {
+                    metadata.put(MailConstants.PUBLICATION_TITLE, bodyOfWork.getTitle());
+                    metadata.put(MailConstants.PMID, bodyOfWork.getBowId());
+                    metadata.put(MailConstants.FIRST_AUTHOR, "N/A");
+                    if (bodyOfWork.getFirstAuthor() == null) {
+                        if (bodyOfWork.getCorrespondingAuthors() != null) {
+                            if (!bodyOfWork.getCorrespondingAuthors().isEmpty()) {
+                                metadata.put(MailConstants.FIRST_AUTHOR, BackendUtil.extractName(bodyOfWork.getCorrespondingAuthors().get(0)));
+                            }
+                        }
+                    } else {
+                        metadata.put(MailConstants.FIRST_AUTHOR, BackendUtil.extractName(bodyOfWork.getFirstAuthor()));
+                    }
+                    workId = bodyOfWork.getBowId();
+                }
+            }
+
+            metadata.put(MailConstants.SUBMISSION_ID, backendMailConfig.getSubmissionsBaseURL() + submission.getId());
+            metadata.put(MailConstants.SUBMISSION_STUDIES, backendMailConfig.getSubmissionsBaseURL() + submission.getId());
+
+            if (workId != null) {
+                backendEmailService.sendSuccessEmail(submission.getCreated().getUserId(), workId, metadata);
+            }
+            auditProxy.addAuditEntry(AuditHelper.submissionValidate(submission.getCreated().getUserId(), submission, true, null));
+            User user = userService.getUser(submission.getCreated().getUserId());
+            submission = submissionService.updateSubmissionStatus(submission.getId(), Status.SUBMITTED.name(), user);
+            auditProxy.addAuditEntry(AuditHelper.submissionSubmit(user.getId(), submission));
+            log.info("Submission [{}] successfully submitted.", submission.getId());
             return;
         }
         submission.setSummaryStatsStatus(Status.VALIDATING.name());
@@ -117,9 +168,17 @@ public class SummaryStatsProcessingServiceImpl implements SummaryStatsProcessing
     public void callGlobusWrapUp(String submissionId) {
         log.info("Wrapping up Globus folder for submission: {}", submissionId);
         AccessionMapUtil accessionMapUtil = new AccessionMapUtil();
-        Stream<Study> studyStream = studyRepository.readBySubmissionId(submissionId);
-        studyStream.forEach(study -> accessionMapUtil.addStudy(study.getStudyTag(), study.getAccession()));
-        studyStream.close();
+        User user = new User("Auto Curator", gwasDepositionBackendConfig.getAutoCuratorServiceAccount());
+        user.setDomains(gwasDepositionBackendConfig.getCuratorDomains());
+        Submission submission = submissionService.getSubmission(submissionId, user);
+        for (String studyId : submission.getStudies()) {
+            Optional<Study> studyOptional = studyRepository.findById(studyId);
+            if (!studyOptional.isPresent()) {
+                log.error("Unable to find study [{}] for submission: {}", studyId, submissionId);
+            } else {
+                accessionMapUtil.addStudy(studyOptional.get().getStudyTag(), studyOptional.get().getAccession());
+            }
+        }
         Map<String, String> accessionMap = accessionMapUtil.getAccessionMap();
 
         Optional<CallbackId> callbackIdOptional = callbackIdRepository.findBySubmissionIdAndCompleted(submissionId, true);
@@ -129,29 +188,6 @@ public class SummaryStatsProcessingServiceImpl implements SummaryStatsProcessing
                     "Unable to perform Globus wrap up operation. Cannot find callback ID for submission: " + submissionId);
             return;
         }
-
-        /*
-        log.info("Performing Globus wrap up operation for: {} | {}", publication.getId(), publication.getPmid());
-        if (sumStatsService == null) {
-            log.info("Summary Stats Service is not active.");
-            return;
-        }
-
-        Optional<SSTemplateEntryPlaceholder> ssTemplateEntryPlaceholderOptional = ssTemplateEntryPlaceholderRepository.findByPmid(publication.getPmid());
-        if (!ssTemplateEntryPlaceholderOptional.isPresent()) {
-            log.error("Unable to perform Globus wrap up operation. Study accession data is missing.");
-            return;
-        }
-        if (ssTemplateEntryPlaceholderOptional.get().getSsTemplateEntries() == null) {
-            log.error("Unable to perform Globus wrap up operation. Study accession data is missing.");
-            return;
-        }
-
-        Map<String, String> accessionMap = new LinkedHashMap<>();
-        for (SSTemplateEntry ssTemplateEntry : ssTemplateEntryPlaceholderOptional.get().getSsTemplateEntries()) {
-            accessionMap.put(ssTemplateEntry.getStudyTag(), ssTemplateEntry.getStudyAccession());
-        }
-        */
 
         log.info("Accession map [{}]: {}", callbackIdOptional.get().getCallbackId(), accessionMap);
 

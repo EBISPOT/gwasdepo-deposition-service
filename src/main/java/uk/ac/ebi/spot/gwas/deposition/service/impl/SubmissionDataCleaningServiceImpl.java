@@ -82,4 +82,19 @@ public class SubmissionDataCleaningServiceImpl implements SubmissionDataCleaning
 
         submissionRepository.delete(submission);
     }
+
+    @Override
+    @Async
+    public void cleanSubmission(Submission submission) {
+        log.info("Cleaning submission data: {}", submission.getId());
+
+        log.info("Removing associations ...");
+        associationsService.deleteAssociations(submission.getId());
+
+        log.info("Removing studies ...");
+        studiesService.deleteStudies(submission.getId());
+
+        log.info("Removing samples ...");
+        samplesService.deleteSamples(submission.getId());
+    }
 }
