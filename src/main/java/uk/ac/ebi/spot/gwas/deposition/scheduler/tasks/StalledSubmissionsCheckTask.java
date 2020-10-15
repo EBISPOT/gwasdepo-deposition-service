@@ -76,6 +76,10 @@ public class StalledSubmissionsCheckTask {
         metadata.put(MailConstants.SUBMISSION_ID, submission.getId());
         metadata.put(MailConstants.PUBLICATION_TITLE, title);
 
+        /**
+         * TODO: Fix existing submissions by introducing a new ReminderStatus.
+         */
+
         // Last check: delete
         if (now.isAfter(sLastUpdated.plusDays(backendSubmissionChecksConfig.getLastCheck()))) {
             log.info(" - Submission [{} | {}] stalled for more than {} days.", submission.getId(),
