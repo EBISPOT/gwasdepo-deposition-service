@@ -62,6 +62,16 @@ public class BackendEmailServiceImpl implements BackendEmailService {
         }
     }
 
+    public void sendReminderEmail(String userId, Map<String, Object> metadata, String emailFile) {
+        User user = userService.getUser(userId);
+        metadata.put(MailConstants.USER_NAME, user.getName());
+        metadata.put(MailConstants.SUBMISSION_ID, backendMailConfig.getSubmissionsBaseURL() + metadata.get(MailConstants.SUBMISSION_ID));
+        if (emailService != null) {
+            EmailBuilder successBuilder = new SuccessEmailBuilder(emailFile);
+            emailService.sendMessage(user.getEmail(), "GWAS Catalog submission (" + metadata.get(MailConstants.SUBMISSION_ID) + ")", successBuilder.getEmailContent(metadata), false);
+        }
+    }
+
     private String getSubject(String pubmedId) {
         String subject = backendMailConfig.getSubject();
         if (subject.contains("%PMID%")) {

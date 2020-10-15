@@ -31,6 +31,9 @@ public class BackendQuartzConfig {
     @Autowired(required = false)
     private SOLRDocumentStatusCheckConfigSandbox solrDocumentStatusCheckConfigSandbox;
 
+    @Autowired(required = false)
+    private StalledSubmissionsCheckConfig stalledSubmissionsCheckConfig;
+
     @PostConstruct
     private void initialize() throws SchedulerException {
         if (statsConfig != null) {
@@ -50,6 +53,9 @@ public class BackendQuartzConfig {
         }
         if (solrDocumentStatusCheckConfigSandbox != null) {
             quartzSchedulerJobConfig.addJob(solrDocumentStatusCheckConfigSandbox);
+        }
+        if (stalledSubmissionsCheckConfig != null) {
+            quartzSchedulerJobConfig.addJob(stalledSubmissionsCheckConfig);
         }
         quartzSchedulerJobConfig.initializeJobs();
     }

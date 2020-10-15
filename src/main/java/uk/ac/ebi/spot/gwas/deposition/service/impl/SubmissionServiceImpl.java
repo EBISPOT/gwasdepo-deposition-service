@@ -88,8 +88,9 @@ public class SubmissionServiceImpl implements SubmissionService {
     }
 
     @Override
-    public Submission saveSubmission(Submission submission) {
+    public Submission saveSubmission(Submission submission, String userId) {
         log.info("Saving submission: {}", submission.getId());
+        submission.setLastUpdated(new Provenance(DateTime.now(), userId));
         submission = submissionRepository.save(submission);
         return submission;
     }

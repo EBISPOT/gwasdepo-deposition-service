@@ -93,7 +93,7 @@ public class StudiesControllerTest extends IntegrationTest {
         submission.setSamples(Arrays.asList(new String[]{sample.getId()}));
         submission.setStudies(Arrays.asList(new String[]{study.getId()}));
         submission.setNotes(Arrays.asList(new String[]{note.getId()}));
-        submissionService.saveSubmission(submission);
+        submissionService.saveSubmission(submission, user.getId());
 
         String endpoint = GeneralCommon.API_V1 + GWASDepositionBackendConstants.API_SUBMISSIONS +
                 "/" + submissionDto.getSubmissionId() + GWASDepositionBackendConstants.API_STUDIES;
@@ -160,7 +160,7 @@ public class StudiesControllerTest extends IntegrationTest {
         submission.setSamples(Arrays.asList(new String[]{sample.getId()}));
         submission.setStudies(Arrays.asList(new String[]{study.getId()}));
         submission.setNotes(Arrays.asList(new String[]{note.getId()}));
-        submissionService.saveSubmission(submission);
+        submissionService.saveSubmission(submission, user.getId());
 
         String endpoint = GeneralCommon.API_V1 + GWASDepositionBackendConstants.API_SUBMISSIONS +
                 "/" + submissionDto.getSubmissionId() + GWASDepositionBackendConstants.API_STUDY_ENVELOPES;

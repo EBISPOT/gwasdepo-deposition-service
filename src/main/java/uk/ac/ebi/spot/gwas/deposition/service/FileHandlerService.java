@@ -8,9 +8,9 @@ import uk.ac.ebi.spot.gwas.deposition.domain.User;
 
 public interface FileHandlerService {
 
-    void handleSummaryStatsTemplate(Submission submission, Publication publication);
+    void handleSummaryStatsTemplate(Submission submission, Publication publication, User user);
 
     FileUpload handleMetadataFile(Submission submission, MultipartFile file, User user);
 
-    FileUpload handleSummaryStatsFile(Submission submission, MultipartFile file);
+    FileUpload handleSummaryStatsFile(Submission submission, MultipartFile file, User user);
 }
