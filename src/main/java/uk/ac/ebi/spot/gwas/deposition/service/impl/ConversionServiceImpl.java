@@ -75,7 +75,8 @@ public class ConversionServiceImpl implements ConversionService {
     @Async
     @Override
     public void convertData(Submission submission, FileUpload fileUpload,
-                            StreamSubmissionTemplateReader streamSubmissionTemplateReader, TemplateSchemaDto schema) {
+                            StreamSubmissionTemplateReader streamSubmissionTemplateReader,
+                            TemplateSchemaDto schema, String userId) {
         log.info("Converting data ...");
         SubmissionDataDto submissionDataDto = SubmissionConverter.fromSubmissionDocument(
                 templateConverterService.convert(streamSubmissionTemplateReader, schema)
@@ -121,7 +122,7 @@ public class ConversionServiceImpl implements ConversionService {
         }
         if (!summaryStatsEntries.isEmpty()) {
             submission.setSummaryStatsStatus(Status.VALIDATING.name());
-            submissionService.saveSubmission(submission);
+            submissionService.saveSubmission(submission, userId);
         }
 
         log.info("Found {} associations.", submissionDataDto.getAssociations().size());
@@ -150,7 +151,7 @@ public class ConversionServiceImpl implements ConversionService {
         log.info("Data conversion finalised.");
         submission.setOverallStatus(Status.VALIDATING.name());
         submission.setMetadataStatus(Status.VALID.name());
-        submissionService.saveSubmission(submission);
+        submissionService.saveSubmission(submission, userId);
 
         fileUpload.setStatus(FileUploadStatus.VALID.name());
         fileUploadsService.save(fileUpload);
@@ -168,7 +169,7 @@ public class ConversionServiceImpl implements ConversionService {
                 bodyOfWork = bodyOfWorkOptional.get();
             }
         }
-        summaryStatsProcessingService.processSummaryStats(submission, fileUpload.getId(), summaryStatsEntries, publication, bodyOfWork);
+        summaryStatsProcessingService.processSummaryStats(submission, fileUpload.getId(), summaryStatsEntries, publication, bodyOfWork, userId);
     }
 
 }

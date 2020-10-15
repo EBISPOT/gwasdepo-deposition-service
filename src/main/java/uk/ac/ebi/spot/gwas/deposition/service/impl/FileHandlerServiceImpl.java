@@ -60,7 +60,7 @@ public class FileHandlerServiceImpl implements FileHandlerService {
 
     @Override
     @Async
-    public void handleSummaryStatsTemplate(Submission submission, Publication publication) {
+    public void handleSummaryStatsTemplate(Submission submission, Publication publication, User user) {
         log.info("Started summary stats template handling for PMID: {} - {}", submission.getId(),
                 submission.getPublicationId());
 
@@ -82,8 +82,8 @@ public class FileHandlerServiceImpl implements FileHandlerService {
             submission.addFileUpload(fileUpload.getId());
             auditProxy.addAuditEntry(AuditHelper.fileCreate(submission.getCreated().getUserId(), fileUpload, submission, false,
                     "No summary stats data available for publication: {}" + publication.getPmid()));
-            submissionService.saveSubmission(submission);
-            markInvalidFile(fileUpload, submission, ErrorType.NO_SS_DATA, publication.getPmid());
+            submissionService.saveSubmission(submission, user.getId());
+            markInvalidFile(fileUpload, submission, ErrorType.NO_SS_DATA, publication.getPmid(), user);
             return;
         }
 
@@ -92,8 +92,8 @@ public class FileHandlerServiceImpl implements FileHandlerService {
             fileUpload = fileUploadsService.storeFile(null, null, null, 0, FileUploadType.SUMMARY_STATS_TEMPLATE.name());
             submission.addFileUpload(fileUpload.getId());
             auditProxy.addAuditEntry(AuditHelper.fileCreate(submission.getCreated().getUserId(), fileUpload, submission, false, "Template service not available."));
-            submissionService.saveSubmission(submission);
-            markInvalidFile(fileUpload, submission, ErrorType.NO_TEMPLATE_SERVICE, null);
+            submissionService.saveSubmission(submission, user.getId());
+            markInvalidFile(fileUpload, submission, ErrorType.NO_TEMPLATE_SERVICE, null, user);
         } else {
             FileObject fileObject = templateService.retrievePrefilledTemplate(new SSTemplateRequestDto(true,
                     new SSTemplateRequestStudyDto(summaryStatsEntries)));
@@ -103,8 +103,8 @@ public class FileHandlerServiceImpl implements FileHandlerService {
                 fileUpload = fileUploadsService.storeFile(null, null, null, 0, FileUploadType.SUMMARY_STATS_TEMPLATE.name());
                 submission.addFileUpload(fileUpload.getId());
                 auditProxy.addAuditEntry(AuditHelper.fileCreate(submission.getCreated().getUserId(), fileUpload, submission, false, "No file object received from the template service!"));
-                submissionService.saveSubmission(submission);
-                markInvalidFile(fileUpload, submission, ErrorType.UNUSABLE_DATA, null);
+                submissionService.saveSubmission(submission, user.getId());
+                markInvalidFile(fileUpload, submission, ErrorType.UNUSABLE_DATA, null, user);
                 return;
             }
 
@@ -117,7 +117,7 @@ public class FileHandlerServiceImpl implements FileHandlerService {
 
             log.info("File upload created: {}", fileUpload.getId());
             submission.addFileUpload(fileUpload.getId());
-            submissionService.saveSubmission(submission);
+            submissionService.saveSubmission(submission, user.getId());
         }
     }
 
@@ -129,32 +129,32 @@ public class FileHandlerServiceImpl implements FileHandlerService {
         FileUpload fileUpload = fileUploadsService.storeFile(file, FileUploadType.METADATA.name());
         fileUploadsService.setNotLatest(submission.getFileUploads());
         submission.addFileUpload(fileUpload.getId());
-        submissionService.saveSubmission(submission);
+        submissionService.saveSubmission(submission, user.getId());
         metadataValidationService.validateTemplate(submission.getId(), fileUpload,
                 fileUploadsService.retrieveFileContent(fileUpload.getId()), user);
         return fileUpload;
     }
 
     @Override
-    public FileUpload handleSummaryStatsFile(Submission submission, MultipartFile file) {
+    public FileUpload handleSummaryStatsFile(Submission submission, MultipartFile file, User user) {
         log.info("Started summary stats data handling for PMID: {} - {} - {}", submission.getId(),
                 submission.getPublicationId(), file.getName());
 
         FileUpload fileUpload = fileUploadsService.storeFile(file, FileUploadType.SUMMARY_STATS.name());
         submission.addFileUpload(fileUpload.getId());
-        submissionService.saveSubmission(submission);
-        summaryStatsValidationService.validateSummaryStatsData(submission);
+        submissionService.saveSubmission(submission, user.getId());
+        summaryStatsValidationService.validateSummaryStatsData(submission, user);
         return fileUpload;
     }
 
-    private void markInvalidFile(FileUpload fileUpload, Submission submission, String errorType, String context) {
+    private void markInvalidFile(FileUpload fileUpload, Submission submission, String errorType, String context, User user) {
         fileUpload.setErrors(errorMessageTemplateProcessor.processGenericError(errorType, context));
         fileUpload.setStatus(FileUploadStatus.INVALID.name());
         fileUploadsService.save(fileUpload);
 
         submission.setSummaryStatsStatus(Status.INVALID.name());
         submission.setOverallStatus(Status.INVALID.name());
-        submissionService.saveSubmission(submission);
+        submissionService.saveSubmission(submission, user.getId());
     }
 
 }

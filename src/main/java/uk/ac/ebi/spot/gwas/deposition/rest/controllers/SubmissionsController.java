@@ -164,7 +164,7 @@ public class SubmissionsController {
                 auditProxy.addAuditEntry(AuditHelper.submissionCreatePub(user.getId(),
                         submission, publication, false, true, null));
                 publicationService.savePublication(publication);
-                fileHandlerService.handleSummaryStatsTemplate(submission, publication);
+                fileHandlerService.handleSummaryStatsTemplate(submission, publication, user);
             }
             log.info("Returning new submission: {}", submission.getId());
             return submissionAssemblyService.toResource(submission);

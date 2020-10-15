@@ -9,10 +9,7 @@ import uk.ac.ebi.spot.gwas.deposition.constants.GWASDepositionBackendConstants;
 import uk.ac.ebi.spot.gwas.deposition.constants.GeneralCommon;
 import uk.ac.ebi.spot.gwas.deposition.domain.Publication;
 import uk.ac.ebi.spot.gwas.deposition.domain.Submission;
-import uk.ac.ebi.spot.gwas.deposition.service.FileHandlerService;
-import uk.ac.ebi.spot.gwas.deposition.service.PublicationService;
-import uk.ac.ebi.spot.gwas.deposition.service.SOLRService;
-import uk.ac.ebi.spot.gwas.deposition.service.SubmissionService;
+import uk.ac.ebi.spot.gwas.deposition.service.*;
 
 @RestController
 @RequestMapping(value = GeneralCommon.API_V1)
@@ -32,6 +29,9 @@ public class ServiceManagementController {
     @Autowired
     private PublicationService publicationService;
 
+    @Autowired
+    private UserService userService;
+
     /**
      * GET /v1/recreate-ss-template
      */
@@ -41,7 +41,7 @@ public class ServiceManagementController {
         log.info("Request to recreate SS template for submission on publication: {}", pmid);
         Publication publication = publicationService.retrievePublication(pmid, false);
         Submission submission = submissionService.getSubmission(publication.getId());
-        fileHandlerService.handleSummaryStatsTemplate(submission, publication);
+        fileHandlerService.handleSummaryStatsTemplate(submission, publication, userService.getUser(submission.getCreated().getUserId()));
     }
 
     /**

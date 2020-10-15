@@ -43,9 +43,9 @@ gwas-deposition:
   solr:
     enabled: false
   stalled-submissions:
-    first-check: 2
-    second-check: 4
-    last-check: 5
+    first-check: 15
+    second-check: 23
+    last-check: 30
     first-email: emails/stall_first.email
     second-email: emails/stall_second.email
     last-email: emails/stall_last.email

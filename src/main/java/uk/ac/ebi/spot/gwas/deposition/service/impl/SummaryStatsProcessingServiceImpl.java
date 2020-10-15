@@ -70,7 +70,7 @@ public class SummaryStatsProcessingServiceImpl implements SummaryStatsProcessing
     @Override
     @Async
     public void processSummaryStats(Submission submission, String fileUploadId, List<SummaryStatsEntry> summaryStatsEntries,
-                                    Publication publication, BodyOfWork bodyOfWork) {
+                                    Publication publication, BodyOfWork bodyOfWork, String userId) {
         log.info("Processing {} summary stats.", summaryStatsEntries.size());
         log.info("Summary stats service enabled: {}", (sumStatsService != null));
 
@@ -80,7 +80,7 @@ public class SummaryStatsProcessingServiceImpl implements SummaryStatsProcessing
             }
             submission.setOverallStatus(Status.VALID.name());
             submission.setSummaryStatsStatus(Status.NA.name());
-            submissionService.saveSubmission(submission);
+            submissionService.saveSubmission(submission, userId);
 
             Map<String, Object> metadata = new HashMap<>();
             String workId = null;
@@ -121,7 +121,7 @@ public class SummaryStatsProcessingServiceImpl implements SummaryStatsProcessing
             return;
         }
         submission.setSummaryStatsStatus(Status.VALIDATING.name());
-        submissionService.saveSubmission(submission);
+        submissionService.saveSubmission(submission, userId);
 
         List<SummaryStatsRequestEntryDto> list = new ArrayList<>();
         for (SummaryStatsEntry summaryStatsEntry : summaryStatsEntries) {
@@ -136,7 +136,7 @@ public class SummaryStatsProcessingServiceImpl implements SummaryStatsProcessing
 
             submission.setOverallStatus(Status.INVALID.name());
             submission.setSummaryStatsStatus(Status.INVALID.name());
-            submissionService.saveSubmission(submission);
+            submissionService.saveSubmission(submission, userId);
 
             List<String> errors = Arrays.asList(new String[]{"Sorry! There is a fault on our end. Please contact gwas-subs@ebi.ac.uk for help."});
             fileUpload.setStatus(FileUploadStatus.INVALID.name());
@@ -159,7 +159,7 @@ public class SummaryStatsProcessingServiceImpl implements SummaryStatsProcessing
             fileUploadsService.save(fileUpload);
 
             submission.setSummaryStatsStatus(Status.VALIDATING.name());
-            submissionService.saveSubmission(submission);
+            submissionService.saveSubmission(submission, userId);
         }
     }
 

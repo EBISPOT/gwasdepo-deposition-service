@@ -9,7 +9,7 @@ import java.util.List;
 
 public interface SummaryStatsProcessingService {
 
-    void processSummaryStats(Submission submission, String fileUploadId, List<SummaryStatsEntry> summaryStatsEntries, Publication publication, BodyOfWork bodyOfWork);
+    void processSummaryStats(Submission submission, String fileUploadId, List<SummaryStatsEntry> summaryStatsEntries, Publication publication, BodyOfWork bodyOfWork, String userId);
 
     void callGlobusWrapUp(String submissionId);
 }
