@@ -60,6 +60,11 @@ public class StalledSubmissionsCheckTask {
 
     private void verifySubmission(Submission submission) {
         log.info("Checking submission: {}", submission.getId());
+        if (submission.getReminderStatus().equalsIgnoreCase(ReminderStatus.EXCLUDED.name())) {
+            log.info(" - Excluded.");
+            return;
+        }
+
         DateTime now = DateTime.now();
         DateTime sLastUpdated = submission.getLastUpdated().getTimestamp();
         String title;
@@ -75,10 +80,6 @@ public class StalledSubmissionsCheckTask {
         Map<String, Object> metadata = new HashMap<>();
         metadata.put(MailConstants.SUBMISSION_ID, submission.getId());
         metadata.put(MailConstants.PUBLICATION_TITLE, title);
-
-        /**
-         * TODO: Fix existing submissions by introducing a new ReminderStatus.
-         */
 
         // Last check: delete
         if (now.isAfter(sLastUpdated.plusDays(backendSubmissionChecksConfig.getLastCheck()))) {
