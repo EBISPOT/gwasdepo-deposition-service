@@ -351,8 +351,8 @@
                         <p>Dear <span th:text="${USER_NAME}"></span>,</p>
 
                         <p>This email is a notification that since your GWAS catalog submission (<a th:href="${SUBMISSION_ID}"><span th:text="${PUBLICATION_TITLE}"></span></a>) has been
-                        dormant for 30 days it has been removed from the system. To retrieve this submission, or for any further assistance,
-                        please contact <strong>gwas-subs@ebi.ac.uk</strong>. If there were aspects of the process that could be easier or more intuitive, please let us know.</p>
+                        dormant for 30 days it has been removed from the system. To retrieve this submission, or for any further assistance, contact <strong>gwas-subs@ebi.ac.uk</strong>.
+                        If there were aspects of the process that could be easier or more intuitive, please let us know.</p>
 
                         <p>Best wishes,<br/>
                         GWAS Catalog team</p>

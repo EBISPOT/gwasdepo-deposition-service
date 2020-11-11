@@ -352,8 +352,8 @@
 
                         <p>REMINDER: your GWAS Catalog submission (<a th:href="${SUBMISSION_ID}"><span th:text="${PUBLICATION_TITLE}"></span></a>)
                         has not yet been completed. Please note that if the submission is not updated within 30 days of creation,
-                        it will be removed from the system. If you need assistance with the submission,
-                        lease contact <strong>gwas-subs@ebi.ac.uk</strong>, quoting the GCP or PMID, and we will be happy to help.</p>
+                        it will be removed from the system. If you need assistance with the submission, contact <strong>gwas-subs@ebi.ac.uk</strong>,
+                        quoting the GCP or PMID, and we will be happy to help.</p>
 
                         <p>Regards,<br/>
                         GWAS Catalog team</p>
