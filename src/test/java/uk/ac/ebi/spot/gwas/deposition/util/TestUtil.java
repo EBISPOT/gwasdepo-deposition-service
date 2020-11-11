@@ -96,8 +96,8 @@ public class TestUtil {
                         true,
                         RandomStringUtils.randomAlphanumeric(10),
                         RandomStringUtils.randomAlphanumeric(10),
-                        10.0,
-                        10.0,
+                        "10.0",
+                        "10.0",
                         10,
                         Arrays.asList(new String[]{
                                 RandomStringUtils.randomAlphanumeric(10),
