@@ -213,6 +213,7 @@ public abstract class IntegrationTest {
         study.setBackgroundTrait(RandomStringUtils.randomAlphanumeric(10));
         study.setBackgroundEfoTrait(RandomStringUtils.randomAlphanumeric(10));
         study.setSummaryStatisticsFile(RandomStringUtils.randomAlphanumeric(10));
+        study.setRawFilePath(RandomStringUtils.randomAlphanumeric(10));
         study.setSummaryStatisticsAssembly(RandomStringUtils.randomAlphanumeric(10));
         study = studyRepository.insert(study);
 

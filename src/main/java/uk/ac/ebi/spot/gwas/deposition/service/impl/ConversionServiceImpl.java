@@ -116,7 +116,7 @@ public class ConversionServiceImpl implements ConversionService {
             if (!BackendUtil.ssIsNR(study)) {
                 summaryStatsEntries.add(new SummaryStatsEntry(fileUpload.getId(),
                         study.getStudyTag(), study.getSummaryStatisticsFile(),
-                        study.getChecksum(), study.getSummaryStatisticsAssembly(),
+                        study.getRawFilePath(), study.getChecksum(), study.getSummaryStatisticsAssembly(),
                         study.getReadmeFile(), submission.getGlobusFolderId()));
             }
         }

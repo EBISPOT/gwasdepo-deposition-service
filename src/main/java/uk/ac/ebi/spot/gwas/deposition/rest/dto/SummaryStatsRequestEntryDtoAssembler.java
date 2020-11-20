@@ -8,6 +8,7 @@ public class SummaryStatsRequestEntryDtoAssembler {
     public static SummaryStatsRequestEntryDto assemble(SummaryStatsEntry summaryStatsEntry) {
         return new SummaryStatsRequestEntryDto(summaryStatsEntry.getId(),
                 summaryStatsEntry.getFilePath(),
+                summaryStatsEntry.getRawFilePath(),
                 summaryStatsEntry.getMd5(),
                 summaryStatsEntry.getAssembly(),
                 summaryStatsEntry.getReadme(),

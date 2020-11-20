@@ -35,6 +35,7 @@ public class StudyDtoAssembler implements ResourceAssembler<Study, Resource<Stud
                 study.getBackgroundTrait(),
                 study.getBackgroundEfoTrait(),
                 study.getSummaryStatisticsFile(),
+                study.getRawFilePath(),
                 study.getChecksum(),
                 study.getSummaryStatisticsAssembly(),
                 study.getReadmeFile(),
@@ -65,6 +66,7 @@ public class StudyDtoAssembler implements ResourceAssembler<Study, Resource<Stud
                 study.getBackgroundTrait(),
                 study.getBackgroundEfoTrait(),
                 study.getSummaryStatisticsFile(),
+                study.getRawFilePath(),
                 study.getChecksum(),
                 study.getSummaryStatisticsAssembly(),
                 study.getReadmeFile(),
@@ -90,6 +92,7 @@ public class StudyDtoAssembler implements ResourceAssembler<Study, Resource<Stud
         study.setBackgroundTrait(studyDto.getBackgroundTrait());
         study.setSummaryStatisticsAssembly(studyDto.getSummaryStatisticsAssembly());
         study.setSummaryStatisticsFile(studyDto.getSummaryStatisticsFile());
+        study.setRawFilePath(studyDto.getRawSumstatsFile());
         study.setReadmeFile(studyDto.getReadmeFile());
         study.setChecksum(studyDto.getChecksum());
         study.setCohort(studyDto.getCohort());
