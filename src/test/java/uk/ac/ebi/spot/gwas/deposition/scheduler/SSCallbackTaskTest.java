@@ -116,6 +116,7 @@ public class SSCallbackTaskTest extends IntegrationTest {
                 RandomStringUtils.randomAlphanumeric(10),
                 RandomStringUtils.randomAlphanumeric(10),
                 RandomStringUtils.randomAlphanumeric(10),
+                RandomStringUtils.randomAlphanumeric(10),
                 RandomStringUtils.randomAlphanumeric(10));
         summaryStatsEntry = summaryStatsEntryRepository.insert(summaryStatsEntry);
         doNothing().when(backendEmailService).sendSuccessEmail(any(), any(), any());
