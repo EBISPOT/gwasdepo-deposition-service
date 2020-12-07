@@ -40,7 +40,10 @@ public class StudyDtoAssembler implements ResourceAssembler<Study, Resource<Stud
                 study.getSummaryStatisticsAssembly(),
                 study.getReadmeFile(),
                 study.getCohort(),
-                study.getCohortId());
+                study.getCohortId(),
+                null,
+                null,
+                null);
 
         final ControllerLinkBuilder lb = ControllerLinkBuilder.linkTo(
                 ControllerLinkBuilder.methodOn(SubmissionsController.class).getSubmission(study.getSubmissionId(), null));
@@ -71,7 +74,10 @@ public class StudyDtoAssembler implements ResourceAssembler<Study, Resource<Stud
                 study.getSummaryStatisticsAssembly(),
                 study.getReadmeFile(),
                 study.getCohort(),
-                study.getCohortId());
+                study.getCohortId(),
+                null,
+                null,
+                null);
     }
 
     public static Study disassemble(StudyDto studyDto) {

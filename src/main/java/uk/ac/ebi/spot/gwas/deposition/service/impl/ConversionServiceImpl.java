@@ -144,6 +144,7 @@ public class ConversionServiceImpl implements ConversionService {
         log.info("Found {} notes.", submissionDataDto.getNotes().size());
         for (NoteDto noteDto : submissionDataDto.getNotes()) {
             Note note = NoteDtoAssembler.disassemble(noteDto);
+            note.setSubmissionId(submission.getId());
             note = noteRepository.insert(note);
             submission.addNote(note.getId());
         }
