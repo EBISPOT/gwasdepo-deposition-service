@@ -19,4 +19,6 @@ public interface BodyOfWorkService {
     void save(BodyOfWork bodyOfWork);
 
     BodyOfWork updateBodyOfWork(String bodyofworkId, BodyOfWork bodyOfWork, User user);
+
+    void removeEmbargo(String bowId, User user);
 }
