@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import uk.ac.ebi.spot.gwas.deposition.components.BodyOfWorkListener;
 import uk.ac.ebi.spot.gwas.deposition.constants.PublicationStatus;
 import uk.ac.ebi.spot.gwas.deposition.domain.*;
+import uk.ac.ebi.spot.gwas.deposition.exception.AuthorizationException;
 import uk.ac.ebi.spot.gwas.deposition.exception.EntityNotFoundException;
 import uk.ac.ebi.spot.gwas.deposition.repository.BodyOfWorkRepository;
 import uk.ac.ebi.spot.gwas.deposition.repository.PublicationRepository;
@@ -181,5 +182,26 @@ public class BodyOfWorkServiceImpl implements BodyOfWorkService {
         existing = bodyOfWorkRepository.save(existing);
         bodyOfWorkListener.update(bodyOfWork, publicationId);
         return existing;
+    }
+
+    @Override
+    public void removeEmbargo(String bowId, User user) {
+        log.info("Removing embargo on BoW: {}", bowId);
+        if (!curatorAuthService.isCurator(user)) {
+            log.error("Unauthorized access: {}", user.getId());
+            throw new AuthorizationException("User [" + user.getId() + "] does not have access to resource: " + bowId);
+        }
+
+        Optional<BodyOfWork> optionalBodyOfWork = bodyOfWorkRepository.findByBowIdAndArchived(bowId, false);
+        if (!optionalBodyOfWork.isPresent()) {
+            log.error("Unable to find BoW: {}", bowId);
+            throw new EntityNotFoundException("Unable to find BoW: " + bowId);
+        }
+
+        BodyOfWork bodyOfWork = optionalBodyOfWork.get();
+        bodyOfWork.setEmbargoUntilPublished(false);
+        bodyOfWork.setEmbargoDate(null);
+        bodyOfWork.setLastUpdated(new Provenance(DateTime.now(), user.getId()));
+        bodyOfWorkRepository.save(bodyOfWork);
     }
 }

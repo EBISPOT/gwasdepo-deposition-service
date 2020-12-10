@@ -35,11 +35,15 @@ public class StudyDtoAssembler implements ResourceAssembler<Study, Resource<Stud
                 study.getBackgroundTrait(),
                 study.getBackgroundEfoTrait(),
                 study.getSummaryStatisticsFile(),
+                study.getRawFilePath(),
                 study.getChecksum(),
                 study.getSummaryStatisticsAssembly(),
                 study.getReadmeFile(),
                 study.getCohort(),
-                study.getCohortId());
+                study.getCohortId(),
+                null,
+                null,
+                null);
 
         final ControllerLinkBuilder lb = ControllerLinkBuilder.linkTo(
                 ControllerLinkBuilder.methodOn(SubmissionsController.class).getSubmission(study.getSubmissionId(), null));
@@ -65,11 +69,15 @@ public class StudyDtoAssembler implements ResourceAssembler<Study, Resource<Stud
                 study.getBackgroundTrait(),
                 study.getBackgroundEfoTrait(),
                 study.getSummaryStatisticsFile(),
+                study.getRawFilePath(),
                 study.getChecksum(),
                 study.getSummaryStatisticsAssembly(),
                 study.getReadmeFile(),
                 study.getCohort(),
-                study.getCohortId());
+                study.getCohortId(),
+                null,
+                null,
+                null);
     }
 
     public static Study disassemble(StudyDto studyDto) {
@@ -90,6 +98,7 @@ public class StudyDtoAssembler implements ResourceAssembler<Study, Resource<Stud
         study.setBackgroundTrait(studyDto.getBackgroundTrait());
         study.setSummaryStatisticsAssembly(studyDto.getSummaryStatisticsAssembly());
         study.setSummaryStatisticsFile(studyDto.getSummaryStatisticsFile());
+        study.setRawFilePath(studyDto.getRawSumstatsFile());
         study.setReadmeFile(studyDto.getReadmeFile());
         study.setChecksum(studyDto.getChecksum());
         study.setCohort(studyDto.getCohort());
