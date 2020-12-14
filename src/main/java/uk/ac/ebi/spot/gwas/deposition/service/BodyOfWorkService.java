@@ -21,4 +21,6 @@ public interface BodyOfWorkService {
     BodyOfWork updateBodyOfWork(String bodyofworkId, BodyOfWork bodyOfWork, User user);
 
     void removeEmbargo(String bowId, User user);
+
+    void addEmbargo(String bowId, User user);
 }

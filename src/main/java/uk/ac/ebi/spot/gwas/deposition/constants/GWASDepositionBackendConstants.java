@@ -10,6 +10,8 @@ public class GWASDepositionBackendConstants {
 
     public static final String API_REMOVE_EMBARGO = "/remove-embargo";
 
+    public static final String API_ADD_EMBARGO = "/add-embargo";
+
     public static final String API_SUBMISSIONS = "/submissions";
 
     public static final String API_STUDIES = "/studies";
