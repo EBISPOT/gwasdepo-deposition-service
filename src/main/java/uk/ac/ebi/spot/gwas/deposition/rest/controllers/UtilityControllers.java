@@ -44,4 +44,16 @@ public class UtilityControllers {
         bodyOfWorkService.removeEmbargo(bowId, user);
     }
 
+    /**
+     * POST /v1/add-embargo
+     */
+    @PostMapping(value = GWASDepositionBackendConstants.API_ADD_EMBARGO,
+            consumes = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public void addEmbargo(@RequestBody String bowId, HttpServletRequest request) {
+        User user = userService.findUser(jwtService.extractUser(HeadersUtil.extractJWT(request)), false);
+        log.info("[{}] Request to remove embargo on body of work: {}", user.getId(), bowId);
+        bodyOfWorkService.addEmbargo(bowId, user);
+    }
 }
