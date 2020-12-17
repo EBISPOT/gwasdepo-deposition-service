@@ -8,7 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.Resource;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
-import uk.ac.ebi.spot.gwas.deposition.config.GWASDepositionBackendConfig;
 import uk.ac.ebi.spot.gwas.deposition.constants.GWASDepositionBackendConstants;
 import uk.ac.ebi.spot.gwas.deposition.constants.GeneralCommon;
 import uk.ac.ebi.spot.gwas.deposition.domain.SSGlobusResponse;
@@ -42,9 +41,6 @@ public class UtilityControllerTest extends IntegrationTest {
 
     @Autowired
     private BodyOfWorkService bodyOfWorkService;
-
-    @Autowired
-    private GWASDepositionBackendConfig gwasDepositionBackendConfig;
 
     @Before
     public void setup() {
@@ -110,4 +106,39 @@ public class UtilityControllerTest extends IntegrationTest {
         assertFalse(actual.getEmbargoUntilPublished());
     }
 
+    /**
+     * POST /v1/add-embargo
+     */
+    @Test
+    public void shouldAddEmbargo() throws Exception {
+        BodyOfWorkDto bodyOfWorkDto = create();
+        bodyOfWorkService.removeEmbargo(bodyOfWorkDto.getBodyOfWorkId(), new User("auto-curator-service@ebi.ac.uk", "auto-curator-service@ebi.ac.uk"));
+        String endpoint = GeneralCommon.API_V1 + GWASDepositionBackendConstants.API_BODY_OF_WORK + "/" + bodyOfWorkDto.getBodyOfWorkId();
+
+        String response = mockMvc.perform(get(endpoint)
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        Resource<BodyOfWorkDto> actualResource = mapper.readValue(response, new TypeReference<Resource<BodyOfWorkDto>>() {
+        });
+        BodyOfWorkDto actual = actualResource.getContent();
+        assertFalse(actual.getEmbargoUntilPublished());
+
+        bodyOfWorkService.addEmbargo(bodyOfWorkDto.getBodyOfWorkId(), new User("auto-curator-service@ebi.ac.uk", "auto-curator-service@ebi.ac.uk"));
+        response = mockMvc.perform(get(endpoint)
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        actualResource = mapper.readValue(response, new TypeReference<Resource<BodyOfWorkDto>>() {
+        });
+        actual = actualResource.getContent();
+        assertTrue(actual.getEmbargoUntilPublished());
+
+    }
 }

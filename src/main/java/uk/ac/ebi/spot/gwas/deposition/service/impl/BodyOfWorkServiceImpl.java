@@ -204,4 +204,24 @@ public class BodyOfWorkServiceImpl implements BodyOfWorkService {
         bodyOfWork.setLastUpdated(new Provenance(DateTime.now(), user.getId()));
         bodyOfWorkRepository.save(bodyOfWork);
     }
+
+    @Override
+    public void addEmbargo(String bowId, User user) {
+        log.info("Adding embargo until published on BoW: {}", bowId);
+        if (!curatorAuthService.isCurator(user)) {
+            log.error("Unauthorized access: {}", user.getId());
+            throw new AuthorizationException("User [" + user.getId() + "] does not have access to resource: " + bowId);
+        }
+
+        Optional<BodyOfWork> optionalBodyOfWork = bodyOfWorkRepository.findByBowIdAndArchived(bowId, false);
+        if (!optionalBodyOfWork.isPresent()) {
+            log.error("Unable to find BoW: {}", bowId);
+            throw new EntityNotFoundException("Unable to find BoW: " + bowId);
+        }
+
+        BodyOfWork bodyOfWork = optionalBodyOfWork.get();
+        bodyOfWork.setEmbargoUntilPublished(true);
+        bodyOfWork.setLastUpdated(new Provenance(DateTime.now(), user.getId()));
+        bodyOfWorkRepository.save(bodyOfWork);
+    }
 }
