@@ -30,6 +30,7 @@ maven-build:
 
 sonarcloud-check:
   image: maven:3.6.3-jdk-11
+  stage: build
   cache:
     key: "${CI_JOB_NAME}"
     paths:
