@@ -37,7 +37,7 @@ sonarcloud-check:
       - .sonar/cache
   script:
     - echo ${MAVEN_SETTINGS} | base64 -d > settings.xml
-    - mvn -s settings.xml verify sonar:sonar -Dspring.profiles.active=test
+    - mvn -s settings.xml sonar:sonar -Dspring.profiles.active=test
   only:
     - merge_requests
     - develop
