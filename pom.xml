@@ -22,7 +22,7 @@
         <start-class>uk.ac.ebi.spot.gwas.deposition.Application</start-class>
         <sonar.projectKey>uk.ac.ebi.spot.gwasdepo:gwasdepo-deposition-service</sonar.projectKey>
         <sonar.organization>gwas-ebi</sonar.organization>
-        <sonar.java.binaries>target/classes</sonar.java.binaries>
+        <sonar.java.binaries>${project.basedir}/target/classes</sonar.java.binaries>
     </properties>
 
     <scm>
