@@ -4,6 +4,7 @@ services:
 
 stages:
   - build
+  - test
   - docker
   - docker-release
   - deploy-sandbox
@@ -23,14 +24,15 @@ maven-build:
   stage: build
   script:
     - echo ${MAVEN_SETTINGS} | base64 -d > settings.xml
-    - mvn -s settings.xml clean install -B -Dspring.profiles.active=test
+    - mvn -s settings.xml clean install -B -Dspring.profiles.active=test -Dmaven.test.error.ignore=true
   artifacts:
     paths:
       - target/*.jar
 
+
 sonarcloud-check:
   image: maven:3.6.3-jdk-11
-  stage: build
+  stage: test
   cache:
     key: "${CI_JOB_NAME}"
     paths:
