@@ -20,8 +20,8 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <start-class>uk.ac.ebi.spot.gwas.deposition.Application</start-class>
-        <sonar.projectKey>gwasdepo-deposition-service</sonar.projectKey>
-        <sonar.organization>gwas-ebi</sonar.organization>
+        <sonar.projectKey>uk.ac.ebi.spot.gwasdepo:gwasdepo-deposition-service</sonar.projectKey>
+        <sonar.organization>EBISPOT</sonar.organization>
     </properties>
 
     <scm>
