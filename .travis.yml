@@ -23,4 +23,4 @@ addons:
 
 script:
 
-  - mvn clean verify sonar:sonar -Dsonar.projectKey=uk.ac.ebi.spot.gwasdepo:gwasdepo-deposition-service -Dspring.profiles.active=test -Dmaven.test.error.ignore=true
+  - mvn clean verify sonar:sonar -Dsonar.projectKey=uk.ac.ebi.spot.gwasdepo:gwasdepo-deposition-service -Dspring.profiles.active=test -Dmaven.test.failure.ignore=true -Dmaven.test.error.ignore=true
