@@ -1,0 +1,26 @@
+language: java
+
+sudo: false
+
+jdk:
+  - openjdk8
+  -
+env:
+  global:
+    - JAVA_OPTS="-XX:+TieredCompilation -XX:TieredStopAtLevel=1 -Xmn48M -Xmx512M"
+
+addons:
+
+  sonarcloud:
+
+    organization: "gwas-ebi"
+
+    token:
+
+      secure: "MKYwPxnPRuBBqkuz+WzvACKj0abUghPgDlIA83imeHu29cfFeOVIJuKqEi58II+5BzRvrQbraHHim6RT5QrTdt+/HA/tbFak8u8rJyh0bckR7dT8+XEvDBfgd2OmUnslgbADQ9JSoC9IKrQ5RCHlddtPo4l1paWmX69Wt13uq4vpv3F9vFseV2k346iy38lxr/igcJ63rVK7IblJv5hOB6Xz9KrAH+gIMluv3fGxz0ph6LkIYYm3wbKsCSqqbtu0kuYjOxooE6RsChIWAUjpgGKyiDPyohEQsunjQJxDedkqzoHb4MIC+xlqbOJIjRWVXpstuE3+4Owcuo8eFDB5tqi974UjD4C0mTGaWNmjPOgSb0llx8QzijLhJdp+iMWa0kC/u8pIWTLzKGVdKXHwW5am8CwMdjCyGQjiCFuU0SC4Cl5+QZjRp9y0rOPKMPyGXNb3wIFwVM2HBJcUD3NqWRfHWDyBZC6ADgxTng4HbNii7nU8EzTKgbczlOXeNtdAJHfj2EOGBl9+QzGG39/K8hWTR0Q6sVq+zXNuNKM2DIlJAiBKHm9iNJDRsJE0VvjGOqAmj9KsBiKuTnRZBEaImFgaKmMYyHiRPKnIwf1S3iz0yOxN9Qq0bt9Cgm6HHiALZwK5XZHC4ilB5SuuR0U1qyxxQfkncZbqTLfAg8r7Y/8="
+
+
+
+script:
+
+  - mvn clean verify sonar:sonar -Dsonar.projectKey=uk.ac.ebi.spot.gwasdepo:gwasdepo-deposition-service -Dmaven.test.error.ignore=true
