@@ -4,7 +4,7 @@ server:
 spring:
   data:
     mongodb:
-      uri: localhost:27017
+      uri: snoopy.ebi.ac.uk:27017
     solr:
       host: http://localhost:8983/solr
 
@@ -23,3 +23,10 @@ gwas-sumstats-service:
 quartz:
   scheduler:
     dbName: gwas-deposition-dev
+
+management:
+  metrics:
+    export:
+      newrelic:
+        api-key: "eu01xxb51cef090fc9b5942caa79818605cfNRAL"
+        account-id: "3065202"
