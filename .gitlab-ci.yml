@@ -74,7 +74,7 @@ deploy-backend-sandbox:
     - echo "Deploy to sandbox server"
     - mkdir -p /root/.kube
     - echo ${SANBOX_KUBECONF} | base64 -d > /root/.kube/config
-    - helm init
+    - helm init --stable-repo-url https://charts.helm.sh/stable
     - helm delete --purge gwas-deposition-backend || true
     - helm install --name gwas-deposition-backend --set k8Namespace=gwas,image.repository=$BACKEND_REGISTRY_IMAGE,image.tag=$CI_COMMIT_SHA,image.env.secretsName=sandbox-secrets,image.env.secretsKey=db-backend ./k8chart/ --wait
   environment:
