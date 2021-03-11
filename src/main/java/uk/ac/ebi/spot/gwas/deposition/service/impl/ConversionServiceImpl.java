@@ -91,6 +91,7 @@ public class ConversionServiceImpl implements ConversionService {
                 study.setAccession(gcstCounter.getNext());
             }
             study.setSubmissionId(submission.getId());
+            study.setAgreedToCc0(submission.isAgreedToCc0());
             if (submission.getProvenanceType().equalsIgnoreCase(SubmissionProvenanceType.BODY_OF_WORK.name())) {
                 if (!submission.getBodyOfWorks().isEmpty()) {
                     study.setBodyOfWorkList(submission.getBodyOfWorks());
