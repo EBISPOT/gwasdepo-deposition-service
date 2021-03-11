@@ -30,19 +30,19 @@ maven-build:
       - target/*.jar
 
 
-sonarcloud-check:
-  image: maven:3.6.3-jdk-11
-  stage: test
-  cache:
-    key: "${CI_JOB_NAME}"
-    paths:
-      - .sonar/cache
-  script:
-    - echo ${MAVEN_SETTINGS} | base64 -d > settings.xml
-    - mvn -s settings.xml sonar:sonar -Dspring.profiles.active=test
-  #only:
-    #- merge_requests
-    #- develop
+#sonarcloud-check:
+#  image: maven:3.6.3-jdk-11
+#  stage: test
+#  cache:
+#    key: "${CI_JOB_NAME}"
+#    paths:
+#      - .sonar/cache
+#  script:
+#    - echo ${MAVEN_SETTINGS} | base64 -d > settings.xml
+#    - mvn -s settings.xml sonar:sonar -Dspring.profiles.active=test
+#  #only:
+#    #- merge_requests
+#    #- develop
 
 build-backend-container:
   stage: docker
