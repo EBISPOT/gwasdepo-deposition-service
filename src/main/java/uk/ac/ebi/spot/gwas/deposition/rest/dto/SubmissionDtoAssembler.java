@@ -27,7 +27,8 @@ public class SubmissionDtoAssembler {
                 submission.getSummaryStatsStatus(),
                 submission.getDateSubmitted(),
                 submission.getProvenanceType(),
-                created, lastUpdated
+                created, lastUpdated,
+                submission.isAgreedToCc0()
         );
     }
 }
