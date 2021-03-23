@@ -113,11 +113,11 @@ public class FileUploadsController {
                                               HttpServletRequest request) {
         User user = userService.findUser(jwtService.extractUser(HeadersUtil.extractJWT(request)), false);
         log.info("[{}] Request to upload a new file [{}] to submission: {}", user.getName(), file.getOriginalFilename(), submissionId);
-        Submission submission = submissionService.getSubmission(submissionId, user);
-        FileUpload fileUpload;
-        CompletableFuture.allOf(CompletableFuture.runAsync(() -> submissionService.deleteSubmission(submissionId, user)),
-                                CompletableFuture.runAsync(() -> submissionService.deleteSubmissionChildren(submissionId, user)));
 
+        FileUpload fileUpload;
+        CompletableFuture.allOf(CompletableFuture.runAsync(() -> submissionService.editFileUploadSubmissionDetails(submissionId, user)),
+                                CompletableFuture.runAsync(() -> submissionService.deleteSubmissionChildren(submissionId)));
+        Submission submission = submissionService.getSubmission(submissionId, user);
         if (submission.getType().equals(SubmissionType.SUMMARY_STATS.name())) {
             fileUpload = fileHandlerService.handleSummaryStatsFile(submission, file, user);
         } else {

@@ -193,25 +193,54 @@ public class SubmissionServiceImpl implements SubmissionService {
      *
      * @param submissionId
      * @param user
+     * Reset the Submission related Child objects for Uploading new template
+     */
+    public void editFileUploadSubmissionDetails(String submissionId, User user) {
+        log.info("Updating submission with new File Content: {}", submissionId);
+        Submission submission = this.getSubmission(submissionId, user);
+        Optional.ofNullable(submission.getFileUploads()).ifPresent((fileUploadIds) -> {
+            fileUploadIds.forEach((fileUploadId) -> {
+                Optional.ofNullable(fileUploadsService.getFileUpload(fileUploadId)).ifPresent((fileUpload) -> {
+                    Optional.ofNullable(fileUpload.getCallbackId()).ifPresent((callbackId) ->
+                            deleteCallbackId(callbackId));
+                    Optional.ofNullable(summaryStatsEntryRepository.findByFileUploadId(fileUploadId)).ifPresent((sumstats) ->
+                            summaryStatsEntryRepository.deleteAll(sumstats));
+
+                });
+            });
+        });
+            submission.setAssociations(new ArrayList<>());
+            submission.setSamples(new ArrayList<>());
+            submission.setNotes(new ArrayList<>());
+            submission.setStudies(new ArrayList<>());
+            submission.setFileUploads(new ArrayList<>());
+            submission.setLastUpdated(new Provenance(DateTime.now(), user.getId()));
+            submissionRepository.save(submission);
+    }
+
+    /**
+     *
+     * @param submissionId
      * Delete Old submission related child objects
      */
     @Override
-    public void deleteSubmissionChildren(String submissionId, User user) {
+    public void deleteSubmissionChildren(String submissionId) {
+        log.info("Deleting Old Submission related object for new File Content: {}", submissionId);
         Optional.ofNullable(studyRepository.findBySubmissionId(submissionId, Pageable.unpaged())).
-                ifPresent((studies) -> studies.forEach(study -> studyRepository.delete(study)));
+                ifPresent((studies) ->  studyRepository.deleteAll(studies));
 
         Optional.ofNullable(associationRepository.findBySubmissionId(submissionId, Pageable.unpaged())).
-                ifPresent((associations) -> associations.forEach(association -> associationRepository.delete(association)));
+                ifPresent((associations) ->  associationRepository.deleteAll(associations));
 
         Optional.ofNullable(sampleRepository.findBySubmissionId(submissionId, Pageable.unpaged())).
-                ifPresent((samples) -> samples.forEach(sample -> sampleRepository.delete(sample)));
+                ifPresent((samples) ->  sampleRepository.deleteAll(samples));
 
         Optional.ofNullable(noteRepository.findBySubmissionId(submissionId, Pageable.unpaged())).
-                ifPresent((notes) -> notes.forEach(note -> noteRepository.delete(note)));
+                ifPresent((notes) ->  noteRepository.deleteAll(notes));
 
     }
 
-   
+
 
 
     @Override
