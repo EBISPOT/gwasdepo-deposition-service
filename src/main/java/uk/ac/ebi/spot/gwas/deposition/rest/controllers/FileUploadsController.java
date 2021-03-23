@@ -115,9 +115,17 @@ public class FileUploadsController {
         log.info("[{}] Request to upload a new file [{}] to submission: {}", user.getName(), file.getOriginalFilename(), submissionId);
 
         FileUpload fileUpload;
-        CompletableFuture.allOf(CompletableFuture.runAsync(() -> submissionService.editFileUploadSubmissionDetails(submissionId, user)),
-                                CompletableFuture.runAsync(() -> submissionService.deleteSubmissionChildren(submissionId)));
-        Submission submission = submissionService.getSubmission(submissionId, user);
+        /*CompletableFuture.allOf(CompletableFuture.runAsync(() -> submissionService.editFileUploadSubmissionDetails(submissionId, user)),
+                                CompletableFuture.runAsync(() -> submissionService.deleteSubmissionChildren(submissionId)));*/
+        CompletableFuture.runAsync(() -> submissionService.deleteSubmissionChildren(submissionId));
+        Submission submission = submissionService.editFileUploadSubmissionDetails(submissionId, user);
+        log.info("Studies after Deleting Old submission"+submission.getStudies());
+        log.info("FileUpload after Deleting Old submission"+submission.getFileUploads());
+        log.info("Associations after Deleting Old submission"+submission.getAssociations());
+        log.info("Sample after Deleting Old submission"+submission.getSamples());
+        log.info("Notes after Deleting Old submission"+submission.getNotes());
+
+        //Submission submission = submissionService.getSubmission(submissionId, user);
         if (submission.getType().equals(SubmissionType.SUMMARY_STATS.name())) {
             fileUpload = fileHandlerService.handleSummaryStatsFile(submission, file, user);
         } else {
