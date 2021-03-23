@@ -195,7 +195,7 @@ public class SubmissionServiceImpl implements SubmissionService {
      * @param user
      * Reset the Submission related Child objects for Uploading new template
      */
-    public void editFileUploadSubmissionDetails(String submissionId, User user) {
+    public Submission editFileUploadSubmissionDetails(String submissionId, User user) {
         log.info("Updating submission with new File Content: {}", submissionId);
         Submission submission = this.getSubmission(submissionId, user);
         Optional.ofNullable(submission.getFileUploads()).ifPresent((fileUploadIds) -> {
@@ -215,7 +215,8 @@ public class SubmissionServiceImpl implements SubmissionService {
             submission.setStudies(new ArrayList<>());
             submission.setFileUploads(new ArrayList<>());
             submission.setLastUpdated(new Provenance(DateTime.now(), user.getId()));
-            submissionRepository.save(submission);
+            return saveSubmission(submission, user.getId());
+
     }
 
     /**

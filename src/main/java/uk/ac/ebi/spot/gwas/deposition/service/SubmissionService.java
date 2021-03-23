@@ -23,7 +23,7 @@ public interface SubmissionService {
 
     void deleteSubmissionChildren(String submissionId);
 
-    void editFileUploadSubmissionDetails(String submissionId, User user);
+    Submission editFileUploadSubmissionDetails(String submissionId, User user);
 
     Submission updateSubmissionStatus(String submissionId, String status, User user);
 
