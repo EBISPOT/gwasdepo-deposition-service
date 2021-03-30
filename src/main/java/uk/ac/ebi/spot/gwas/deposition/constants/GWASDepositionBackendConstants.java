@@ -24,8 +24,6 @@ public class GWASDepositionBackendConstants {
 
     public static final String API_UPLOADS = "/uploads";
 
-    public static final String API_EDIT_UPLOADS = "/edituploads";
-
     public static final String API_DOWNLOAD = "/download";
 
     public static final String API_SUBMIT = "/submit";

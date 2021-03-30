@@ -389,8 +389,7 @@ public class FileUploadsControllerSSTest extends IntegrationTest {
     private SubmissionDto createSubmissionFromPublished() throws Exception {
         SubmissionCreationDto submissionCreationDto = new SubmissionCreationDto(PublicationDtoAssembler.assemble(publishedPublication),
                 null,
-                RandomStringUtils.randomAlphanumeric(10),
-                false);
+                RandomStringUtils.randomAlphanumeric(10));
         SSTemplateEntryDto ssTemplateEntryDto = new SSTemplateEntryDto(RandomStringUtils.randomAlphanumeric(10),
                 RandomStringUtils.randomAlphanumeric(10),
                 RandomStringUtils.randomAlphanumeric(10),

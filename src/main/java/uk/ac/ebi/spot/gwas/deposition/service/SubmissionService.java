@@ -21,10 +21,6 @@ public interface SubmissionService {
 
     void deleteSubmission(String submissionId, User user);
 
-    void deleteSubmissionChildren(String submissionId);
-
-    Submission editFileUploadSubmissionDetails(String submissionId, User user);
-
     Submission updateSubmissionStatus(String submissionId, String status, User user);
 
     void deleteSubmissionFile(Submission submission, String fileUploadId, String userId);

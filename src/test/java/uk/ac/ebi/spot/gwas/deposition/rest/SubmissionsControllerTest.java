@@ -87,8 +87,7 @@ public class SubmissionsControllerTest extends IntegrationTest {
         when(sumStatsService.createGlobusFolder(any())).thenReturn(new SSGlobusResponse(true, RandomStringUtils.randomAlphanumeric(10)));
         SubmissionCreationDto submissionCreationDto = new SubmissionCreationDto(PublicationDtoAssembler.assemble(eligiblePublication),
                 null,
-                RandomStringUtils.randomAlphanumeric(10),
-                false);
+                RandomStringUtils.randomAlphanumeric(10));
         String response = mockMvc.perform(post(GeneralCommon.API_V1 +
                 GWASDepositionBackendConstants.API_SUBMISSIONS)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -121,8 +120,7 @@ public class SubmissionsControllerTest extends IntegrationTest {
         when(sumStatsService.createGlobusFolder(any())).thenReturn(new SSGlobusResponse(true, RandomStringUtils.randomAlphanumeric(10)));
         SubmissionCreationDto submissionCreationDto = new SubmissionCreationDto(PublicationDtoAssembler.assemble(publishedPublication),
                 null,
-                RandomStringUtils.randomAlphanumeric(10),
-                true);
+                RandomStringUtils.randomAlphanumeric(10));
         SSTemplateEntryDto ssTemplateEntryDto = new SSTemplateEntryDto(RandomStringUtils.randomAlphanumeric(10),
                 RandomStringUtils.randomAlphanumeric(10),
                 RandomStringUtils.randomAlphanumeric(10),
@@ -179,8 +177,7 @@ public class SubmissionsControllerTest extends IntegrationTest {
 
         SubmissionCreationDto submissionCreationDto = new SubmissionCreationDto(null,
                 BodyOfWorkDtoAssembler.assemble(bodyOfWork),
-                RandomStringUtils.randomAlphanumeric(10),
-                true);
+                RandomStringUtils.randomAlphanumeric(10));
         String response = mockMvc.perform(post(GeneralCommon.API_V1 +
                 GWASDepositionBackendConstants.API_SUBMISSIONS)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -220,8 +217,7 @@ public class SubmissionsControllerTest extends IntegrationTest {
     public void shouldGetSubmission() throws Exception {
         SubmissionCreationDto submissionCreationDto = new SubmissionCreationDto(PublicationDtoAssembler.assemble(eligiblePublication),
                 null,
-                RandomStringUtils.randomAlphanumeric(10),
-                true);
+                RandomStringUtils.randomAlphanumeric(10));
         String response = mockMvc.perform(post(GeneralCommon.API_V1 +
                 GWASDepositionBackendConstants.API_SUBMISSIONS)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -279,8 +275,7 @@ public class SubmissionsControllerTest extends IntegrationTest {
     public void shouldDeleteSubmission() throws Exception {
         SubmissionCreationDto submissionCreationDto = new SubmissionCreationDto(PublicationDtoAssembler.assemble(eligiblePublication),
                 null,
-                RandomStringUtils.randomAlphanumeric(10),
-                true);
+                RandomStringUtils.randomAlphanumeric(10));
         String response = mockMvc.perform(post(GeneralCommon.API_V1 +
                 GWASDepositionBackendConstants.API_SUBMISSIONS)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -315,8 +310,7 @@ public class SubmissionsControllerTest extends IntegrationTest {
     public void shouldDeleteSubmissionOfPublishedPublication() throws Exception {
         SubmissionCreationDto submissionCreationDto = new SubmissionCreationDto(PublicationDtoAssembler.assemble(publishedPublication),
                 null,
-                RandomStringUtils.randomAlphanumeric(10),
-                true);
+                RandomStringUtils.randomAlphanumeric(10));
 
         SSTemplateEntryDto ssTemplateEntryDto = new SSTemplateEntryDto(RandomStringUtils.randomAlphanumeric(10),
                 RandomStringUtils.randomAlphanumeric(10),
@@ -366,8 +360,7 @@ public class SubmissionsControllerTest extends IntegrationTest {
     public void shouldSubmitSubmission() throws Exception {
         SubmissionCreationDto submissionCreationDto = new SubmissionCreationDto(PublicationDtoAssembler.assemble(eligiblePublication),
                 null,
-                RandomStringUtils.randomAlphanumeric(10),
-                true);
+                RandomStringUtils.randomAlphanumeric(10));
         String response = mockMvc.perform(post(GeneralCommon.API_V1 +
                 GWASDepositionBackendConstants.API_SUBMISSIONS)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -405,8 +398,7 @@ public class SubmissionsControllerTest extends IntegrationTest {
     public void shouldGetSubmissions() throws Exception {
         SubmissionCreationDto submissionCreationDto = new SubmissionCreationDto(PublicationDtoAssembler.assemble(eligiblePublication),
                 null,
-                RandomStringUtils.randomAlphanumeric(10),
-                true);
+                RandomStringUtils.randomAlphanumeric(10));
         String response = mockMvc.perform(post(GeneralCommon.API_V1 +
                 GWASDepositionBackendConstants.API_SUBMISSIONS)
                 .contentType(MediaType.APPLICATION_JSON)
