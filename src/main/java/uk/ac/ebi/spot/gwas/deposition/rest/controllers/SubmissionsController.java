@@ -118,6 +118,7 @@ public class SubmissionsController {
             submission.setGlobusFolderId(globusFolder);
             submission.setGlobusOriginId(outcome.getOutcome());
             submission.setType(SubmissionType.METADATA.name());
+            submission.setAgreedToCc0(submissionCreationDto.isAgreedToCc0());
             auditProxy.addAuditEntry(AuditHelper.submissionCreateBOW(user.getId(), submission, bodyOfWork, true, true));
 
             Submission existing = submissionService.findByBodyOfWork(bodyOfWork.getBowId(), user.getId());
@@ -144,6 +145,7 @@ public class SubmissionsController {
 
             submission.setGlobusFolderId(globusFolder);
             submission.setGlobusOriginId(outcome.getOutcome());
+            submission.setAgreedToCc0(submissionCreationDto.isAgreedToCc0());
             auditProxy.addAuditEntry(AuditHelper.submissionCreatePub(user.getId(),
                     submission, publication, true, true, null));
 
