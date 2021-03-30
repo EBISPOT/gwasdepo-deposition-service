@@ -62,7 +62,8 @@ public class StudiesControllerTest extends IntegrationTest {
     public void shouldGetStudies() throws Exception {
         SubmissionCreationDto submissionCreationDto = new SubmissionCreationDto(PublicationDtoAssembler.assemble(eligiblePublication),
                 null,
-                RandomStringUtils.randomAlphanumeric(10));
+                RandomStringUtils.randomAlphanumeric(10),
+                false);
         String response = mockMvc.perform(post(GeneralCommon.API_V1 +
                 GWASDepositionBackendConstants.API_SUBMISSIONS)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -129,7 +130,8 @@ public class StudiesControllerTest extends IntegrationTest {
     public void shouldGetStudyEnvelopes() throws Exception {
         SubmissionCreationDto submissionCreationDto = new SubmissionCreationDto(PublicationDtoAssembler.assemble(eligiblePublication),
                 null,
-                RandomStringUtils.randomAlphanumeric(10));
+                RandomStringUtils.randomAlphanumeric(10),
+                true);
         String response = mockMvc.perform(post(GeneralCommon.API_V1 +
                 GWASDepositionBackendConstants.API_SUBMISSIONS)
                 .contentType(MediaType.APPLICATION_JSON)

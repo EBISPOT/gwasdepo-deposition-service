@@ -9,18 +9,16 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import uk.ac.ebi.spot.gwas.deposition.components.BodyOfWorkListener;
+import uk.ac.ebi.spot.gwas.deposition.constants.BodyOfWorkStatus;
+import uk.ac.ebi.spot.gwas.deposition.constants.PublicationStatus;
 import uk.ac.ebi.spot.gwas.deposition.constants.Status;
 import uk.ac.ebi.spot.gwas.deposition.constants.SubmissionProvenanceType;
 import uk.ac.ebi.spot.gwas.deposition.domain.*;
 import uk.ac.ebi.spot.gwas.deposition.exception.EntityNotFoundException;
-import uk.ac.ebi.spot.gwas.deposition.repository.ArchivedSubmissionRepository;
-import uk.ac.ebi.spot.gwas.deposition.repository.CallbackIdRepository;
-import uk.ac.ebi.spot.gwas.deposition.repository.SubmissionRepository;
-import uk.ac.ebi.spot.gwas.deposition.repository.SummaryStatsEntryRepository;
-import uk.ac.ebi.spot.gwas.deposition.service.CuratorAuthService;
-import uk.ac.ebi.spot.gwas.deposition.service.FileUploadsService;
-import uk.ac.ebi.spot.gwas.deposition.service.SubmissionService;
+import uk.ac.ebi.spot.gwas.deposition.repository.*;
+import uk.ac.ebi.spot.gwas.deposition.service.*;
 
+import javax.swing.text.html.Option;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -50,6 +48,24 @@ public class SubmissionServiceImpl implements SubmissionService {
 
     @Autowired
     private BodyOfWorkListener bodyOfWorkListener;
+
+    @Autowired
+    private StudyRepository studyRepository;
+
+    @Autowired
+    private AssociationRepository associationRepository;
+
+    @Autowired
+    private SampleRepository sampleRepository;
+
+    @Autowired
+    private NoteRepository noteRepository;
+
+    @Autowired
+    PublicationService publicationService;
+
+    @Autowired
+    BodyOfWorkService bodyOfWorkService;
 
     @Override
     public Submission createSubmission(Submission submission) {
@@ -146,6 +162,7 @@ public class SubmissionServiceImpl implements SubmissionService {
         return null;
     }
 
+
     @Override
     public void deleteSubmission(String submissionId, User user) {
         log.info("Deleting submission: {}", submissionId);
@@ -171,6 +188,61 @@ public class SubmissionServiceImpl implements SubmissionService {
         submission.setLastUpdated(new Provenance(DateTime.now(), user.getId()));
         submissionRepository.save(submission);
     }
+
+    /**
+     *
+     * @param submissionId
+     * @param user
+     * Reset the Submission related Child objects for Uploading new template
+     */
+    public Submission editFileUploadSubmissionDetails(String submissionId, User user) {
+        log.info("Updating submission with new File Content: {}", submissionId);
+        Submission submission = this.getSubmission(submissionId, user);
+        Optional.ofNullable(submission.getFileUploads()).ifPresent((fileUploadIds) -> {
+            fileUploadIds.forEach((fileUploadId) -> {
+                Optional.ofNullable(fileUploadsService.getFileUpload(fileUploadId)).ifPresent((fileUpload) -> {
+                    Optional.ofNullable(fileUpload.getCallbackId()).ifPresent((callbackId) ->
+                            deleteCallbackId(callbackId));
+                    Optional.ofNullable(summaryStatsEntryRepository.findByFileUploadId(fileUploadId)).ifPresent((sumstats) ->
+                            summaryStatsEntryRepository.deleteAll(sumstats));
+
+                });
+            });
+        });
+            submission.setAssociations(new ArrayList<>());
+            submission.setSamples(new ArrayList<>());
+            submission.setNotes(new ArrayList<>());
+            submission.setStudies(new ArrayList<>());
+            submission.setFileUploads(new ArrayList<>());
+            submission.setLastUpdated(new Provenance(DateTime.now(), user.getId()));
+            return saveSubmission(submission, user.getId());
+
+    }
+
+    /**
+     *
+     * @param submissionId
+     * Delete Old submission related child objects
+     */
+    @Override
+    public void deleteSubmissionChildren(String submissionId) {
+        log.info("Deleting Old Submission related object for new File Content: {}", submissionId);
+        Optional.ofNullable(studyRepository.findBySubmissionId(submissionId, Pageable.unpaged())).
+                ifPresent((studies) ->  studyRepository.deleteAll(studies));
+
+        Optional.ofNullable(associationRepository.findBySubmissionId(submissionId, Pageable.unpaged())).
+                ifPresent((associations) ->  associationRepository.deleteAll(associations));
+
+        Optional.ofNullable(sampleRepository.findBySubmissionId(submissionId, Pageable.unpaged())).
+                ifPresent((samples) ->  sampleRepository.deleteAll(samples));
+
+        Optional.ofNullable(noteRepository.findBySubmissionId(submissionId, Pageable.unpaged())).
+                ifPresent((notes) ->  noteRepository.deleteAll(notes));
+
+    }
+
+
+
 
     @Override
     public void deleteSubmissionFile(Submission submission, String fileUploadId, String userId) {

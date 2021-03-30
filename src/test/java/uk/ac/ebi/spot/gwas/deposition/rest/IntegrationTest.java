@@ -259,7 +259,8 @@ public abstract class IntegrationTest {
     protected SubmissionDto createSubmissionFromEligible() throws Exception {
         SubmissionCreationDto submissionCreationDto = new SubmissionCreationDto(PublicationDtoAssembler.assemble(eligiblePublication),
                 null,
-                RandomStringUtils.randomAlphanumeric(10));
+                RandomStringUtils.randomAlphanumeric(10),
+                false);
         String response = mockMvc.perform(post(GeneralCommon.API_V1 +
                 GWASDepositionBackendConstants.API_SUBMISSIONS)
                 .contentType(MediaType.APPLICATION_JSON)
