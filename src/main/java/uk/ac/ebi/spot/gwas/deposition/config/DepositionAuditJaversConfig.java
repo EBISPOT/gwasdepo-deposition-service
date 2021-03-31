@@ -1,3 +1,4 @@
+/*
 package uk.ac.ebi.spot.gwas.deposition.config;
 
 import org.javers.spring.auditable.AuthorProvider;
@@ -13,3 +14,4 @@ public class DepositionAuditJaversConfig {
         return new SimpalAuthorProvider();
     }
 }
+*/
