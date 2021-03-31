@@ -1,6 +1,6 @@
 package uk.ac.ebi.spot.gwas.deposition.repository;
 
-import org.javers.spring.annotation.JaversSpringDataAuditable;
+//import org.javers.spring.annotation.JaversSpringDataAuditable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.repository.MongoRepository;
@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-@JaversSpringDataAuditable
+/*@JaversSpringDataAuditable*/
 public interface SubmissionRepository extends MongoRepository<Submission, String> {
 
     Optional<Submission> findByIdAndArchived(String id, boolean archived);

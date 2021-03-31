@@ -1,3 +1,4 @@
+/*
 package uk.ac.ebi.spot.gwas.deposition.rest.controllers;
 
 import org.javers.core.Changes;
@@ -38,9 +39,11 @@ public class JaversAuditController {
         this.javers = javers;
     }
 
-    /**
+    */
+/**
      * GET /v1/submissions/{submissionId}/changes
-     */
+     *//*
+
     @GetMapping(value = "submissions/{submissionId}/changes",
             produces = MediaType.TEXT_PLAIN_VALUE)
     @ResponseStatus(HttpStatus.OK)
@@ -56,3 +59,4 @@ public class JaversAuditController {
 
 
 
+*/
