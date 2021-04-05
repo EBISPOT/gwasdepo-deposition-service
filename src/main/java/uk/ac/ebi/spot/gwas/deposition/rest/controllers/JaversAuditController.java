@@ -44,7 +44,7 @@ public class JaversAuditController {
  */
 
 
-    @GetMapping(value = "submissions/{submissionId}/changes",
+    @GetMapping(value = "/submissions/{submissionId}/changes",
             produces = MediaType.TEXT_PLAIN_VALUE)
     @ResponseStatus(HttpStatus.OK)
     public String getSubmissionChanges(@PathVariable  String submissionId, HttpServletRequest request){

@@ -16,7 +16,6 @@ import org.springframework.data.mongodb.config.AbstractMongoConfiguration;
 import org.springframework.data.mongodb.gridfs.GridFsTemplate;
 import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
-import uk.ac.ebi.spot.gwas.deposition.rest.controllers.FileUploadsController;
 
 import java.util.ArrayList;
 import java.util.List;
