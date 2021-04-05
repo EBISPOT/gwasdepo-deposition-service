@@ -215,6 +215,7 @@ public class SubmissionServiceImpl implements SubmissionService {
             submission.setStudies(new ArrayList<>());
             submission.setFileUploads(new ArrayList<>());
             submission.setLastUpdated(new Provenance(DateTime.now(), user.getId()));
+            submission.setEditTemplate(new Provenance(DateTime.now(), user.getId()));
             return saveSubmission(submission, user.getId());
 
     }

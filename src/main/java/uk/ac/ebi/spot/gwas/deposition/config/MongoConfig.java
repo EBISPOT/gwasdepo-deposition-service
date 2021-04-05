@@ -3,6 +3,11 @@ package uk.ac.ebi.spot.gwas.deposition.config;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientURI;
 import com.mongodb.ServerAddress;
+import org.javers.core.Javers;
+import org.javers.core.JaversBuilder;
+import org.javers.repository.mongo.MongoRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -11,6 +16,7 @@ import org.springframework.data.mongodb.config.AbstractMongoConfiguration;
 import org.springframework.data.mongodb.gridfs.GridFsTemplate;
 import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
+import uk.ac.ebi.spot.gwas.deposition.rest.controllers.FileUploadsController;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,6 +29,7 @@ public class MongoConfig {
     @Profile({"dev", "test"})
     public static class MongoConfigDev extends AbstractMongoConfiguration {
 
+        private static final Logger log = LoggerFactory.getLogger(MongoConfigDev.class);
         @Autowired
         private SystemConfigProperties systemConfigProperties;
 
@@ -30,6 +37,7 @@ public class MongoConfig {
         protected String getDatabaseName() {
             String serviceName = systemConfigProperties.getServerName();
             String environmentName = systemConfigProperties.getActiveSpringProfile();
+
             return serviceName + "-" + environmentName;
         }
 
@@ -41,6 +49,7 @@ public class MongoConfig {
         @Override
         public MongoClient mongoClient() {
             String mongoUri = systemConfigProperties.getMongoUri();
+
             String[] addresses = mongoUri.split(",");
             List<ServerAddress> servers = new ArrayList<>();
             for (String address : addresses) {
@@ -49,6 +58,13 @@ public class MongoConfig {
             }
             return new MongoClient(servers);
         }
+
+        @Bean
+        public Javers javers() {
+            MongoRepository mongoRepository = new MongoRepository(mongoClient().getDatabase(getDatabaseName()));
+            return JaversBuilder.javers().registerJaversRepository(mongoRepository).build();
+        }
+
     }
 
     @Configuration
@@ -77,6 +93,12 @@ public class MongoConfig {
         public MongoClient mongoClient() {
             String mongoUri = systemConfigProperties.getMongoUri();
             return new MongoClient(new MongoClientURI("mongodb://" + mongoUri));
+        }
+
+        @Bean
+        public Javers javers() {
+            MongoRepository mongoRepository = new MongoRepository(mongoClient().getDatabase(getDatabaseName()));
+            return JaversBuilder.javers().registerJaversRepository(mongoRepository).build();
         }
     }
 

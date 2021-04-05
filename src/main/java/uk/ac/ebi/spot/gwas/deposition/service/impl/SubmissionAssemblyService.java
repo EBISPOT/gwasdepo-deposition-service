@@ -75,7 +75,9 @@ public class SubmissionAssemblyService implements ResourceAssembler<Submission, 
                 ProvenanceDtoAssembler.assemble(submission.getCreated(), userService.getUser(submission.getCreated().getUserId())),
                 submission.getLastUpdated() != null ?
                         ProvenanceDtoAssembler.assemble(submission.getLastUpdated(), userService.getUser(submission.getLastUpdated().getUserId())) :
-                        ProvenanceDtoAssembler.assemble(submission.getCreated(), userService.getUser(submission.getCreated().getUserId()))
+                        ProvenanceDtoAssembler.assemble(submission.getCreated(), userService.getUser(submission.getCreated().getUserId())),
+                submission.getEditTemplate() !=null ?
+                        ProvenanceDtoAssembler.assemble(submission.getEditTemplate(), userService.getUser(submission.getEditTemplate().getUserId())):null
         );
 
         final ControllerLinkBuilder lb = linkTo(
