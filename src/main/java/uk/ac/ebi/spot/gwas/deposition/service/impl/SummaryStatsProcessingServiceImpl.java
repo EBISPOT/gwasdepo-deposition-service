@@ -1,6 +1,7 @@
 package uk.ac.ebi.spot.gwas.deposition.service.impl;
 
 import org.apache.commons.lang3.StringUtils;
+import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -80,6 +81,7 @@ public class SummaryStatsProcessingServiceImpl implements SummaryStatsProcessing
             }
             submission.setOverallStatus(Status.VALID.name());
             submission.setSummaryStatsStatus(Status.NA.name());
+            submission.setEditTemplate(null);
             submissionService.saveSubmission(submission, userId);
 
             Map<String, Object> metadata = new HashMap<>();
@@ -121,6 +123,7 @@ public class SummaryStatsProcessingServiceImpl implements SummaryStatsProcessing
             return;
         }
         submission.setSummaryStatsStatus(Status.VALIDATING.name());
+        submission.setEditTemplate(null);
         submissionService.saveSubmission(submission, userId);
 
         List<SummaryStatsRequestEntryDto> list = new ArrayList<>();

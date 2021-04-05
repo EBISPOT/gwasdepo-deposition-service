@@ -218,6 +218,11 @@
             <artifactId>fluent-hc</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.javers</groupId>
+            <artifactId>javers-spring-mongo</artifactId>
+            <version>5.0.0</version>
+        </dependency>
         <!--<dependency>
             <groupId>org.javers</groupId>
             <artifactId>javers-spring-boot-starter-mongo</artifactId>
