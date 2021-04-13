@@ -81,7 +81,6 @@ public class SummaryStatsProcessingServiceImpl implements SummaryStatsProcessing
             }
             submission.setOverallStatus(Status.VALID.name());
             submission.setSummaryStatsStatus(Status.NA.name());
-            submission.setEditTemplate(null);
             submissionService.saveSubmission(submission, userId);
 
             Map<String, Object> metadata = new HashMap<>();
@@ -123,7 +122,6 @@ public class SummaryStatsProcessingServiceImpl implements SummaryStatsProcessing
             return;
         }
         submission.setSummaryStatsStatus(Status.VALIDATING.name());
-        submission.setEditTemplate(null);
         submissionService.saveSubmission(submission, userId);
 
         List<SummaryStatsRequestEntryDto> list = new ArrayList<>();
