@@ -19,7 +19,7 @@ import uk.ac.ebi.spot.gwas.deposition.util.HeadersUtil;
 import javax.servlet.http.HttpServletRequest;
 
 @RestController
-@RequestMapping(value = GeneralCommon.API_V1)
+@RequestMapping(value = GeneralCommon.API_V1+ GWASDepositionBackendConstants.API_Javers)
 public class JaversAuditController {
 
     private final Javers javers;
