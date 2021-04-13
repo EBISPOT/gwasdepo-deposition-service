@@ -7,7 +7,7 @@ import uk.ac.ebi.spot.gwas.deposition.domain.FileUpload;
 import java.util.List;
 import java.util.Optional;
 
-@JaversSpringDataAuditable
+//@JaversSpringDataAuditable
 public interface FileUploadRepository extends MongoRepository<FileUpload, String> {
     List<FileUpload> findByIdIn(List<String> ids);
 
