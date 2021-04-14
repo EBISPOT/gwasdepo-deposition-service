@@ -234,8 +234,9 @@ public class SubmissionServiceImpl implements SubmissionService {
         Optional.ofNullable(associationRepository.findBySubmissionId(submissionId, Pageable.unpaged())).
                 ifPresent((associations) -> {
                     try {
-                        log.debug("Debugging Association Javers data");
-                    associationRepository.deleteAll(associations);
+                        log.info("Debugging Association Javers data");
+                        associations.forEach((association) -> associationRepository.delete(association));
+                    //associationRepository.deleteAll(associations);
                 }catch(Exception ex){
                     log.error("Exception in Javers Audit associaation"+ ex.getMessage(),ex);
                 }
