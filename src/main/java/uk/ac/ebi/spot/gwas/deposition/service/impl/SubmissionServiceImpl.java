@@ -230,9 +230,17 @@ public class SubmissionServiceImpl implements SubmissionService {
         log.info("Deleting Old Submission related object for new File Content: {}", submissionId);
         Optional.ofNullable(studyRepository.findBySubmissionId(submissionId, Pageable.unpaged())).
                 ifPresent((studies) ->  studyRepository.deleteAll(studies));
-
+        log.info("Reached Deleting Assocation Stage");
         Optional.ofNullable(associationRepository.findBySubmissionId(submissionId, Pageable.unpaged())).
-                ifPresent((associations) ->  associationRepository.deleteAll(associations));
+                ifPresent((associations) -> {
+                    try {
+                        log.debug("Debugging Association Javers data");
+                    associationRepository.deleteAll(associations);
+                }catch(Exception ex){
+                    log.error("Exception in Javers Audit associaation"+ ex.getMessage(),ex);
+                }
+
+                });
 
         Optional.ofNullable(sampleRepository.findBySubmissionId(submissionId, Pageable.unpaged())).
                 ifPresent((samples) ->  sampleRepository.deleteAll(samples));
