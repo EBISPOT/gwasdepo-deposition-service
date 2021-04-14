@@ -9,7 +9,7 @@ import uk.ac.ebi.spot.gwas.deposition.domain.Association;
 import java.util.List;
 import java.util.stream.Stream;
 
-//@JaversSpringDataAuditable
+@JaversSpringDataAuditable
 public interface AssociationRepository extends MongoRepository<Association, String> {
 
     Stream<Association> readBySubmissionId(String submissionId);
