@@ -8,7 +8,7 @@ import uk.ac.ebi.spot.gwas.deposition.domain.Note;
 
 import java.util.List;
 
-@JaversSpringDataAuditable
+//@JaversSpringDataAuditable
 public interface NoteRepository extends MongoRepository<Note, String> {
     List<Note> findByIdIn(List<String> noteIds);
     Page<Note> findBySubmissionId(String submissionId, Pageable page);
