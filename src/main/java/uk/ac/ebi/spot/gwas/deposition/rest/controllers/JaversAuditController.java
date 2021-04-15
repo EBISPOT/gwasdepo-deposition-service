@@ -9,11 +9,10 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import uk.ac.ebi.spot.gwas.deposition.constants.GWASDepositionBackendConstants;
 import uk.ac.ebi.spot.gwas.deposition.constants.GeneralCommon;
-import uk.ac.ebi.spot.gwas.deposition.domain.Submission;
-import uk.ac.ebi.spot.gwas.deposition.domain.User;
-import uk.ac.ebi.spot.gwas.deposition.service.JWTService;
-import uk.ac.ebi.spot.gwas.deposition.service.SubmissionService;
-import uk.ac.ebi.spot.gwas.deposition.service.UserService;
+
+
+import uk.ac.ebi.spot.gwas.deposition.domain.*;
+import uk.ac.ebi.spot.gwas.deposition.service.*;
 import uk.ac.ebi.spot.gwas.deposition.util.HeadersUtil;
 
 import javax.servlet.http.HttpServletRequest;
@@ -26,6 +25,15 @@ public class JaversAuditController {
 
     @Autowired
     private SubmissionService submissionService;
+
+    @Autowired
+    private AssociationsService associationsService;
+
+    @Autowired
+    private StudiesService studiesService;
+
+    @Autowired
+    private SamplesService samplesService;
 
     @Autowired
     private UserService userService;
@@ -55,6 +63,44 @@ public class JaversAuditController {
         return javers.getJsonConverter().toJson(changes);
 
     }
+
+    @GetMapping(value = "/association/{associationId}/changes",
+            produces = MediaType.TEXT_PLAIN_VALUE)
+    @ResponseStatus(HttpStatus.OK)
+    public String getAssociationChanges(@PathVariable  String associationId, HttpServletRequest request){
+        User user = userService.findUser(jwtService.extractUser(HeadersUtil.extractJWT(request)), false);
+        Association association = associationsService.getAssociation(associationId);
+        QueryBuilder queryBuilder = QueryBuilder.byInstance(association);
+        Changes changes = javers.findChanges(queryBuilder.build());
+        return javers.getJsonConverter().toJson(changes);
+
+    }
+
+
+    @GetMapping(value = "/study/{studyId}/changes",
+            produces = MediaType.TEXT_PLAIN_VALUE)
+    @ResponseStatus(HttpStatus.OK)
+    public String getStudyChanges(@PathVariable  String studyId, HttpServletRequest request){
+        User user = userService.findUser(jwtService.extractUser(HeadersUtil.extractJWT(request)), false);
+        Study study = studiesService.getStudy(studyId);
+        QueryBuilder queryBuilder = QueryBuilder.byInstance(study);
+        Changes changes = javers.findChanges(queryBuilder.build());
+        return javers.getJsonConverter().toJson(changes);
+    }
+
+
+    @GetMapping(value = "/sample/{sampleId}/changes",
+            produces = MediaType.TEXT_PLAIN_VALUE)
+    @ResponseStatus(HttpStatus.OK)
+    public String getSampleChanges(@PathVariable  String sampleId, HttpServletRequest request){
+        User user = userService.findUser(jwtService.extractUser(HeadersUtil.extractJWT(request)), false);
+        Sample sample = samplesService.getSample(sampleId);
+        QueryBuilder queryBuilder = QueryBuilder.byInstance(sample);
+        Changes changes = javers.findChanges(queryBuilder.build());
+        return javers.getJsonConverter().toJson(changes);
+    }
+
+
 }
 
 

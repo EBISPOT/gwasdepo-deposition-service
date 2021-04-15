@@ -129,8 +129,12 @@ public class FileUploadsController {
         final ControllerLinkBuilder lb = linkTo(
                 methodOn(FileUploadsController.class).getFileUpload(submissionId, fileUpload.getId(), null));
 
+        final ControllerLinkBuilder lbnew  = linkTo(
+                methodOn(JaversAuditController.class).getSubmissionChanges(submissionId, null));
+
         Resource<FileUploadDto> resource = new Resource<>(FileUploadDtoAssembler.assemble(fileUpload, null));
         resource.add(BackendUtil.underBasePath(lb, gwasDepositionBackendConfig.getProxyPrefix()).withSelfRel());
+        resource.add(BackendUtil.underBasePath(lbnew, gwasDepositionBackendConfig.getProxyPrefix()).withSelfRel());
         return resource;
     }
 
