@@ -6,7 +6,7 @@ import uk.ac.ebi.spot.gwas.deposition.domain.SummaryStatsEntry;
 
 import java.util.List;
 
-//@JaversSpringDataAuditable
+@JaversSpringDataAuditable
 public interface SummaryStatsEntryRepository extends MongoRepository<SummaryStatsEntry, String> {
 
     List<SummaryStatsEntry> findByFileUploadId(String fileId);

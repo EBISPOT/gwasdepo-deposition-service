@@ -173,7 +173,10 @@ public class SubmissionServiceImpl implements SubmissionService {
                 deleteCallbackId(fileUpload.getCallbackId());
             }
             List<SummaryStatsEntry> summaryStatsEntries = summaryStatsEntryRepository.findByFileUploadId(fileId);
-            summaryStatsEntryRepository.deleteAll(summaryStatsEntries);
+            /* Modifying fo Javers Bug with DeleteALl operation */
+            //summaryStatsEntryRepository.deleteAll(summaryStatsEntries);
+            Optional.ofNullable(summaryStatsEntries).ifPresent((sumstats) ->
+                    sumstats.forEach((sumstat) -> summaryStatsEntryRepository.delete(sumstat)));
         }
 
         ArchivedSubmission archivedSubmission = ArchivedSubmission.fromSubmission(submission);
@@ -198,13 +201,14 @@ public class SubmissionServiceImpl implements SubmissionService {
     public Submission editFileUploadSubmissionDetails(String submissionId, User user) {
         log.info("Updating submission with new File Content: {}", submissionId);
         Submission submission = this.getSubmission(submissionId, user);
+        log.info("Reached Callback & Sumstats Stage");
         Optional.ofNullable(submission.getFileUploads()).ifPresent((fileUploadIds) -> {
             fileUploadIds.forEach((fileUploadId) -> {
                 Optional.ofNullable(fileUploadsService.getFileUpload(fileUploadId)).ifPresent((fileUpload) -> {
                     Optional.ofNullable(fileUpload.getCallbackId()).ifPresent((callbackId) ->
                             deleteCallbackId(callbackId));
                     Optional.ofNullable(summaryStatsEntryRepository.findByFileUploadId(fileUploadId)).ifPresent((sumstats) ->
-                            summaryStatsEntryRepository.deleteAll(sumstats));
+                           sumstats.forEach((sumstat) -> summaryStatsEntryRepository.delete(sumstat)));
 
                 });
             });
@@ -228,26 +232,22 @@ public class SubmissionServiceImpl implements SubmissionService {
     @Override
     public void deleteSubmissionChildren(String submissionId) {
         log.info("Deleting Old Submission related object for new File Content: {}", submissionId);
+
+        log.info("Reached Deleting Study Stage");
         Optional.ofNullable(studyRepository.findBySubmissionId(submissionId, Pageable.unpaged())).
-                ifPresent((studies) ->  studyRepository.deleteAll(studies));
-        log.info("Reached Deleting Assocation Stage");
+                ifPresent((studies) ->  studies.forEach((study) -> studyRepository.delete(study)));
+        log.info("Reached Deleting Association Stage");
         Optional.ofNullable(associationRepository.findBySubmissionId(submissionId, Pageable.unpaged())).
-                ifPresent((associations) -> {
-                    try {
-                        log.info("Debugging Association Javers data");
-                        associations.forEach((association) -> associationRepository.delete(association));
-                    //associationRepository.deleteAll(associations);
-                }catch(Exception ex){
-                    log.error("Exception in Javers Audit associaation"+ ex.getMessage(),ex);
-                }
+                ifPresent((associations) ->
+                        associations.forEach((association) -> associationRepository.delete(association)));
 
-                });
-
+        log.info("Reached Deleting Sample Stage");
         Optional.ofNullable(sampleRepository.findBySubmissionId(submissionId, Pageable.unpaged())).
-                ifPresent((samples) ->  sampleRepository.deleteAll(samples));
+                ifPresent((samples) ->  samples.forEach((sample) -> sampleRepository.delete(sample)));
 
+        log.info("Reached Deleting Note Stage");
         Optional.ofNullable(noteRepository.findBySubmissionId(submissionId, Pageable.unpaged())).
-                ifPresent((notes) ->  noteRepository.deleteAll(notes));
+                ifPresent((notes) ->  notes.forEach((note) -> noteRepository.delete(note)));
 
     }
 
@@ -274,8 +274,10 @@ public class SubmissionServiceImpl implements SubmissionService {
             deleteCallbackId(fileUpload.getCallbackId());
         }
         List<SummaryStatsEntry> summaryStatsEntries = summaryStatsEntryRepository.findByFileUploadId(fileUploadId);
-        summaryStatsEntryRepository.deleteAll(summaryStatsEntries);
-
+        /* Modifying due to Javers Bug for DeleteAll operation */
+        //summaryStatsEntryRepository.deleteAll(summaryStatsEntries);
+        Optional.ofNullable(summaryStatsEntries).ifPresent((sumstats) ->
+                sumstats.forEach((sumstat) -> summaryStatsEntryRepository.delete(sumstat)));
         ArchivedSubmission archivedSubmission = ArchivedSubmission.fromSubmission(submission);
         archivedSubmissionRepository.insert(archivedSubmission);
         submission.removeFileUpload(fileUploadId);
