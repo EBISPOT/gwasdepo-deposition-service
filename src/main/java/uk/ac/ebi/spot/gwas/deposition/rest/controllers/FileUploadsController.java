@@ -3,6 +3,7 @@ package uk.ac.ebi.spot.gwas.deposition.rest.controllers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.hateoas.Link;
 import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.Resources;
 import org.springframework.hateoas.mvc.ControllerLinkBuilder;
@@ -129,12 +130,12 @@ public class FileUploadsController {
         final ControllerLinkBuilder lb = linkTo(
                 methodOn(FileUploadsController.class).getFileUpload(submissionId, fileUpload.getId(), null));
 
-        final ControllerLinkBuilder lbnew  = linkTo(
-                methodOn(JaversAuditController.class).getSubmissionChanges(submissionId, null));
+        Link javersLink = linkTo(methodOn(JaversAuditController.class)
+                    .getSubmissionChanges(submissionId, null)).withSelfRel();
 
         Resource<FileUploadDto> resource = new Resource<>(FileUploadDtoAssembler.assemble(fileUpload, null));
         resource.add(BackendUtil.underBasePath(lb, gwasDepositionBackendConfig.getProxyPrefix()).withSelfRel());
-        resource.add(BackendUtil.underBasePath(lbnew, gwasDepositionBackendConfig.getProxyPrefix()).withSelfRel());
+        resource.add(javersLink);
         return resource;
     }
 
