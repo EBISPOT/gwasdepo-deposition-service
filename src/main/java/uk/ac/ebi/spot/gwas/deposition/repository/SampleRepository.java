@@ -9,7 +9,7 @@ import uk.ac.ebi.spot.gwas.deposition.domain.Sample;
 import java.util.List;
 import java.util.stream.Stream;
 
-//@JaversSpringDataAuditable
+@JaversSpringDataAuditable
 public interface SampleRepository extends MongoRepository<Sample, String> {
 
     Stream<Sample> readBySubmissionId(String submissionId);
