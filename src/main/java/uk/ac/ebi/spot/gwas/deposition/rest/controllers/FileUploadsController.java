@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.Link;
+import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.Resources;
 import org.springframework.hateoas.mvc.ControllerLinkBuilder;
@@ -105,7 +106,7 @@ public class FileUploadsController {
     @PostMapping(
             value = "/{submissionId}" + GWASDepositionBackendConstants.API_EDIT_UPLOADS,
             consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
-            produces = MediaType.APPLICATION_JSON_VALUE
+            produces = MediaTypes.HAL_JSON_VALUE
     )
     @ResponseStatus(HttpStatus.CREATED)
     @ResponseBody
