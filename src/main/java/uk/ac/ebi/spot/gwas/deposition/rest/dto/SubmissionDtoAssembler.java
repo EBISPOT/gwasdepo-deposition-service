@@ -13,7 +13,8 @@ public class SubmissionDtoAssembler {
                                          List<FileUploadDto> fileUploads,
                                          ProvenanceDto created,
                                          ProvenanceDto lastUpdated,
-                                         ProvenanceDto editTemplate) {
+                                         ProvenanceDto editTemplate,
+                                         LockDetailsDto lockDetailsDto) {
         return new SubmissionDto(submission.getId(),
                 publication,
                 bodyOfWork,
@@ -29,6 +30,7 @@ public class SubmissionDtoAssembler {
                 submission.getDateSubmitted(),
                 submission.getProvenanceType(),
                 created, lastUpdated,editTemplate,
+                lockDetailsDto,
                 submission.isAgreedToCc0()
         );
     }

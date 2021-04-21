@@ -298,4 +298,15 @@ public class SubmissionServiceImpl implements SubmissionService {
             callbackIdRepository.delete(callbackIdOptional.get());
         }
     }
+
+    public Submission lockSubmission(Submission submission,User user, String status){
+        Optional.ofNullable(status).ifPresent((lockstatus) -> {
+            if (lockstatus.equals("lock"))
+                submission.setLockDetails(new LockDetails(new Provenance(DateTime.now(),
+                        user.getId()), Status.LOCKED_FOR_EDITING.name()));
+            else
+                submission.setLockDetails(null);
+        });
+        return saveSubmission(submission, user.getId());
+    }
 }
