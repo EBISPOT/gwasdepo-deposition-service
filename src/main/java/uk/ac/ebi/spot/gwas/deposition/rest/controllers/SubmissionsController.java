@@ -283,4 +283,18 @@ public class SubmissionsController {
                 new Link(BackendUtil.underBasePath(lb, gwasDepositionBackendConfig.getProxyPrefix()).toUri().toString()));
     }
 
+    /**
+     * PUT /v1/submissions/{submissionId}/lock?lockStatus=lock|unlock
+     */
+    @PutMapping(value = "/{submissionId}" + GWASDepositionBackendConstants.API_SUBMISSIONS_LOCK,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseStatus(HttpStatus.OK)
+    public Resource<SubmissionDto> lockSubmission(@RequestParam String lockStatus,@PathVariable String submissionId, HttpServletRequest request) {
+        User user = userService.findUser(jwtService.extractUser(HeadersUtil.extractJWT(request)), false);
+        log.info("[{}] Request to submit submission: {}", user.getName(), submissionId);
+        Submission submission = submissionService.getSubmission(submissionId, user);
+        Submission lockSubmission = submissionService.lockSubmission(submission, user, lockStatus);
+        return submissionAssemblyService.toResource(lockSubmission);
+    }
+
 }

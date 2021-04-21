@@ -28,4 +28,6 @@ public interface SubmissionService {
     Submission updateSubmissionStatus(String submissionId, String status, User user);
 
     void deleteSubmissionFile(Submission submission, String fileUploadId, String userId);
+
+    Submission lockSubmission(Submission submission,User user, String status);
 }
