@@ -9,6 +9,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.Link;
+import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.mvc.ControllerLinkBuilder;
@@ -287,7 +288,7 @@ public class SubmissionsController {
      * PUT /v1/submissions/{submissionId}/lock?lockStatus=lock|unlock
      */
     @PutMapping(value = "/{submissionId}" + GWASDepositionBackendConstants.API_SUBMISSIONS_LOCK,
-            produces = MediaType.APPLICATION_JSON_VALUE)
+            produces = MediaTypes.HAL_JSON_VALUE)
     @ResponseStatus(HttpStatus.OK)
     public Resource<SubmissionDto> lockSubmission(@RequestParam String lockStatus,@PathVariable String submissionId, HttpServletRequest request) {
         User user = userService.findUser(jwtService.extractUser(HeadersUtil.extractJWT(request)), false);
