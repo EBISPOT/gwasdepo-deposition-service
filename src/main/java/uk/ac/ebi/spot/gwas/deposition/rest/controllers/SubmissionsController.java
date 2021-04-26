@@ -293,6 +293,7 @@ public class SubmissionsController {
     public Resource<SubmissionDto> lockSubmission(@RequestParam String lockStatus,@PathVariable String submissionId, HttpServletRequest request) {
         User user = userService.findUser(jwtService.extractUser(HeadersUtil.extractJWT(request)), false);
         log.info("[{}] Request to submit submission: {}", user.getName(), submissionId);
+        log.info("LockStatus is ->"+lockStatus+"!!");
         Submission submission = submissionService.getSubmission(submissionId, user);
         Submission lockSubmission = submissionService.lockSubmission(submission, user, lockStatus);
         return submissionAssemblyService.toResource(lockSubmission);
