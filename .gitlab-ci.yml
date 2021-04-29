@@ -14,8 +14,8 @@ stages:
 variables:
   DOCKER_DRIVER: overlay2
   DOCKER_TLS_CERTDIR: ""
-  BACKEND_REGISTRY_IMAGE: ebispot/gwas-deposition-backend-sajo-testing
-  BACKEND_SERVICE_NAME: gwas-deposition-backend-sajo-testing
+  BACKEND_REGISTRY_IMAGE: ebispot/gwas-deposition-backend
+  BACKEND_SERVICE_NAME: gwas-deposition-backend
   SONAR_USER_HOME: "${CI_PROJECT_DIR}/.sonar"  # Defines the location of the analysis task cache
   GIT_DEPTH: "0"  # Tells git to fetch all the branches of the project, required by the analysis task
 
