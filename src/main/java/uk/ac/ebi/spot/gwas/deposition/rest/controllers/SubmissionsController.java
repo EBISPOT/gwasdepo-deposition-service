@@ -74,6 +74,9 @@ public class SubmissionsController {
     @Autowired
     private AuditProxy auditProxy;
 
+    @Autowired
+    private CuratorAuthService curatorAuthService;
+
 
     /**
      * POST /v1/submissions
@@ -296,6 +299,24 @@ public class SubmissionsController {
         Submission submission = submissionService.getSubmission(submissionId, user);
         Submission lockSubmission = submissionService.lockSubmission(submission, user, lockStatus);
         return submissionAssemblyService.toResource(lockSubmission);
+    }
+
+    /**
+     * POST /v1/submissions/{submissionId}/globus
+     * used to create Globus folder if a user requests to reopen a stale submission
+     * that was archived
+     */
+    @PostMapping(value = "/{submissionId}/globus",
+            consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseStatus(HttpStatus.CREATED)
+    public Resource<SubmissionDto> createGlobusFolderForReopenedSubmission(@PathVariable String submissionId,
+                                                                           HttpServletRequest request,
+                                                                           @RequestBody SSGlobusFolderDto folderDto) {
+        User user = userService.findUser(jwtService.extractUser(HeadersUtil.extractJWT(request)), false);
+        Submission submission = submissionService
+                .createGlobusFolderForReopenedSubmission(submissionId, user, folderDto);
+        return submissionAssemblyService.toResource(submission);
     }
 
 }

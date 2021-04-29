@@ -4,6 +4,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import uk.ac.ebi.spot.gwas.deposition.domain.Submission;
 import uk.ac.ebi.spot.gwas.deposition.domain.User;
+import uk.ac.ebi.spot.gwas.deposition.dto.summarystats.SSGlobusFolderDto;
 
 public interface SubmissionService {
 
@@ -30,4 +31,6 @@ public interface SubmissionService {
     void deleteSubmissionFile(Submission submission, String fileUploadId, String userId);
 
     Submission lockSubmission(Submission submission,User user, String status);
+
+    Submission createGlobusFolderForReopenedSubmission(String submissionId, User apiCaller, SSGlobusFolderDto folderDto);
 }
