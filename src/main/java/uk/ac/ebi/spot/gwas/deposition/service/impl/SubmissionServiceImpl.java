@@ -235,19 +235,35 @@ public class SubmissionServiceImpl implements SubmissionService {
 
         log.info("Reached Deleting Study Stage");
         Optional.ofNullable(studyRepository.findBySubmissionId(submissionId, Pageable.unpaged())).
-                ifPresent((studies) ->  studies.forEach((study) -> studyRepository.delete(study)));
+                ifPresent((studies) ->  studies.forEach((study) ->  {
+                    study.setSubmissionId("");
+                    studyRepository.save(study);
+
+                }));
         log.info("Reached Deleting Association Stage");
         Optional.ofNullable(associationRepository.findBySubmissionId(submissionId, Pageable.unpaged())).
                 ifPresent((associations) ->
-                        associations.forEach((association) -> associationRepository.delete(association)));
+                        associations.forEach((association) -> {
+                            association.setSubmissionId("");
+                            associationRepository.save(association);
+
+                        }));
 
         log.info("Reached Deleting Sample Stage");
         Optional.ofNullable(sampleRepository.findBySubmissionId(submissionId, Pageable.unpaged())).
-                ifPresent((samples) ->  samples.forEach((sample) -> sampleRepository.delete(sample)));
+                ifPresent((samples) ->  samples.forEach((sample) -> {
+                            sample.setSubmissionId("");
+                            sampleRepository.save(sample);
+                        }
+                ));
 
         log.info("Reached Deleting Note Stage");
         Optional.ofNullable(noteRepository.findBySubmissionId(submissionId, Pageable.unpaged())).
-                ifPresent((notes) ->  notes.forEach((note) -> noteRepository.delete(note)));
+                ifPresent((notes) ->  notes.forEach((note) -> {
+                            note.setSubmissionId("");
+                            noteRepository.save(note);
+                        }
+                ));
 
     }
 
