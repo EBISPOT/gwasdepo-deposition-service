@@ -20,6 +20,8 @@ import uk.ac.ebi.spot.gwas.deposition.service.*;
 import uk.ac.ebi.spot.gwas.deposition.util.HeadersUtil;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.Arrays;
+import java.util.List;
 
 @RestController
 @RequestMapping(value = GeneralCommon.API_V1+ GWASDepositionBackendConstants.API_Javers)
@@ -61,15 +63,16 @@ public class JaversAuditController {
     @GetMapping(value = "/submissions/{submissionId}/changes",
             produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.OK)
-    public JaversChangeWrapper getSubmissionChanges(@PathVariable  String submissionId, HttpServletRequest request) throws Exception {
+    public List<JaversChangeWrapper> getSubmissionChanges(@PathVariable  String submissionId, HttpServletRequest request) throws Exception {
         User user = userService.findUser(jwtService.extractUser(HeadersUtil.extractJWT(request)), false);
         Submission submission = submissionService.getSubmission(submissionId, user);
         QueryBuilder queryBuilder = QueryBuilder.byInstance(submission);
         Changes changes = javers.findChanges(queryBuilder.build());
         try {
-            JaversChangeWrapper javersChangeWrapper = new ObjectMapper().readValue(
-                    javers.getJsonConverter().toJson(changes), JaversChangeWrapper.class);
-            return javersChangeWrapper;
+            JaversChangeWrapper[] javersChangeWrapperArray = new ObjectMapper().readValue(
+                    javers.getJsonConverter().toJson(changes), JaversChangeWrapper[].class);
+            return Arrays.asList(javersChangeWrapperArray);
+
         }catch(Exception ex){
             log.error("Error in mapping Javers Changes "+ex.getMessage(),ex);
             return null;
