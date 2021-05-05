@@ -1,5 +1,6 @@
 package uk.ac.ebi.spot.gwas.deposition.rest.controllers;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.javers.core.Changes;
 import org.javers.core.Javers;
 import org.javers.repository.jql.QueryBuilder;
@@ -12,6 +13,7 @@ import uk.ac.ebi.spot.gwas.deposition.constants.GeneralCommon;
 
 
 import uk.ac.ebi.spot.gwas.deposition.domain.*;
+import uk.ac.ebi.spot.gwas.deposition.javers.JaversChangeWrapper;
 import uk.ac.ebi.spot.gwas.deposition.service.*;
 import uk.ac.ebi.spot.gwas.deposition.util.HeadersUtil;
 
@@ -53,14 +55,17 @@ public class JaversAuditController {
 
 
     @GetMapping(value = "/submissions/{submissionId}/changes",
-            produces = MediaType.TEXT_PLAIN_VALUE)
+            produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.OK)
-    public String getSubmissionChanges(@PathVariable  String submissionId, HttpServletRequest request){
+    public JaversChangeWrapper getSubmissionChanges(@PathVariable  String submissionId, HttpServletRequest request) throws Exception {
         User user = userService.findUser(jwtService.extractUser(HeadersUtil.extractJWT(request)), false);
         Submission submission = submissionService.getSubmission(submissionId, user);
         QueryBuilder queryBuilder = QueryBuilder.byInstance(submission);
         Changes changes = javers.findChanges(queryBuilder.build());
-        return javers.getJsonConverter().toJson(changes);
+
+        JaversChangeWrapper javersChangeWrapper = new ObjectMapper().readValue(
+                javers.getJsonConverter().toJson(changes), JaversChangeWrapper.class);
+        return javersChangeWrapper;
 
     }
 
