@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.javers.core.Changes;
 import org.javers.core.Javers;
 import org.javers.repository.jql.QueryBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -22,6 +24,8 @@ import javax.servlet.http.HttpServletRequest;
 @RestController
 @RequestMapping(value = GeneralCommon.API_V1+ GWASDepositionBackendConstants.API_Javers)
 public class JaversAuditController {
+
+    private static final Logger log = LoggerFactory.getLogger(JaversAuditController.class);
 
     private final Javers javers;
 
@@ -62,10 +66,14 @@ public class JaversAuditController {
         Submission submission = submissionService.getSubmission(submissionId, user);
         QueryBuilder queryBuilder = QueryBuilder.byInstance(submission);
         Changes changes = javers.findChanges(queryBuilder.build());
-
-        JaversChangeWrapper javersChangeWrapper = new ObjectMapper().readValue(
-                javers.getJsonConverter().toJson(changes), JaversChangeWrapper.class);
-        return javersChangeWrapper;
+        try {
+            JaversChangeWrapper javersChangeWrapper = new ObjectMapper().readValue(
+                    javers.getJsonConverter().toJson(changes), JaversChangeWrapper.class);
+            return javersChangeWrapper;
+        }catch(Exception ex){
+            log.error("Error in mapping Javers Changes "+ex.getMessage(),ex);
+            return null;
+        }
 
     }
 
