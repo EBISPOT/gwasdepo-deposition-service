@@ -3,6 +3,8 @@ package uk.ac.ebi.spot.gwas.deposition.rest.controllers;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.javers.core.Changes;
 import org.javers.core.Javers;
+import org.javers.core.diff.Diff;
+import org.javers.core.diff.changetype.ValueChange;
 import org.javers.repository.jql.QueryBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -96,12 +98,16 @@ public class JaversAuditController {
     @GetMapping(value = "/study/{studyId}/changes",
             produces = MediaType.TEXT_PLAIN_VALUE)
     @ResponseStatus(HttpStatus.OK)
-    public String getStudyChanges(@PathVariable  String studyId, HttpServletRequest request){
+    public String getStudyChanges(@PathVariable  String studyId, HttpServletRequest request, @RequestParam String studyId1){
         User user = userService.findUser(jwtService.extractUser(HeadersUtil.extractJWT(request)), false);
         Study study = studiesService.getStudy(studyId);
+        Study study1 = studiesService.getStudy(studyId1);
+        Diff diff = javers.compare(study, study1);
+        List<ValueChange> valChanges = diff.getChangesByType(ValueChange.class);
+
         QueryBuilder queryBuilder = QueryBuilder.byInstance(study);
         Changes changes = javers.findChanges(queryBuilder.build());
-        return javers.getJsonConverter().toJson(changes);
+        return javers.getJsonConverter().toJson(valChanges);
     }
 
 
