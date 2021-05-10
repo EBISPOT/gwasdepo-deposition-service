@@ -3,6 +3,7 @@ package uk.ac.ebi.spot.gwas.deposition.rest.controllers;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.javers.core.Changes;
 import org.javers.core.Javers;
+import org.javers.core.JaversBuilder;
 import org.javers.core.diff.Diff;
 import org.javers.core.diff.changetype.ValueChange;
 import org.javers.repository.jql.QueryBuilder;
@@ -102,9 +103,13 @@ public class JaversAuditController {
         User user = userService.findUser(jwtService.extractUser(HeadersUtil.extractJWT(request)), false);
         Study study = studiesService.getStudy(studyId);
         Study study1 = studiesService.getStudy(studyId1);
-        Diff diff = javers.compare(study, study1);
-        List<ValueChange> valChanges = diff.getChangesByType(ValueChange.class);
 
+        Javers javers1 = JaversBuilder.javers().build();
+        Diff diff = javers1.compare(study, study1);
+        log.info("************");
+        log.info("Diff"+ diff);
+        List<ValueChange> valChanges = diff.getChangesByType(ValueChange.class);
+        log.info("Changes ->"+valChanges);
         QueryBuilder queryBuilder = QueryBuilder.byInstance(study);
         Changes changes = javers.findChanges(queryBuilder.build());
         return javers.getJsonConverter().toJson(valChanges);
