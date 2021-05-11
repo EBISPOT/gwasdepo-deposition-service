@@ -18,7 +18,9 @@ import uk.ac.ebi.spot.gwas.deposition.constants.GeneralCommon;
 
 
 import uk.ac.ebi.spot.gwas.deposition.domain.*;
+import uk.ac.ebi.spot.gwas.deposition.dto.StudyDto;
 import uk.ac.ebi.spot.gwas.deposition.javers.JaversChangeWrapper;
+import uk.ac.ebi.spot.gwas.deposition.rest.dto.StudyDtoAssembler;
 import uk.ac.ebi.spot.gwas.deposition.service.*;
 import uk.ac.ebi.spot.gwas.deposition.util.HeadersUtil;
 
@@ -104,8 +106,10 @@ public class JaversAuditController {
         Study study = studiesService.getStudy(studyId);
         Study study1 = studiesService.getStudy(studyId1);
 
+        StudyDto studyDto1 = StudyDtoAssembler.assemble(study);
+        StudyDto studyDto2 = StudyDtoAssembler.assemble(study1);
         Javers javers1 = JaversBuilder.javers().build();
-        Diff diff = javers1.compare(study, study1);
+        Diff diff = javers1.compare(studyDto1, studyDto2);
         log.info("************");
         log.info("Diff"+ diff);
         List<ValueChange> valChanges = diff.getChangesByType(ValueChange.class);
