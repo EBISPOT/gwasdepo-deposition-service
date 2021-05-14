@@ -121,10 +121,11 @@ public class ConversionServiceImpl implements ConversionService {
                         study.getReadmeFile(), submission.getGlobusFolderId()));
             }
         }
-        if (!summaryStatsEntries.isEmpty()) {
+        //Moving code block to avoid repeated changing of Submission Object to capture Javers correctly
+        /*if (!summaryStatsEntries.isEmpty()) {
             submission.setSummaryStatsStatus(Status.VALIDATING.name());
             submissionService.saveSubmission(submission, userId);
-        }
+        }*/
 
         log.info("Found {} associations.", submissionDataDto.getAssociations().size());
         for (AssociationDto associationDto : submissionDataDto.getAssociations()) {
@@ -151,6 +152,11 @@ public class ConversionServiceImpl implements ConversionService {
         }
 
         log.info("Data conversion finalised.");
+
+        if (!summaryStatsEntries.isEmpty()) {
+            submission.setSummaryStatsStatus(Status.VALIDATING.name());
+            //submissionService.saveSubmission(submission, userId);
+        }
         submission.setOverallStatus(Status.VALIDATING.name());
         submission.setMetadataStatus(Status.VALID.name());
         submissionService.saveSubmission(submission, userId);

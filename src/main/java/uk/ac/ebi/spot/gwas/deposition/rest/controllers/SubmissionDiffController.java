@@ -9,6 +9,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import uk.ac.ebi.spot.gwas.deposition.constants.DepositionCurationConstants;
 
+import uk.ac.ebi.spot.gwas.deposition.domain.FileUpload;
+import uk.ac.ebi.spot.gwas.deposition.javers.VersionSummary;
 import uk.ac.ebi.spot.gwas.deposition.service.SubmissionDiffService;
 import uk.ac.ebi.spot.gwas.deposition.service.ConversionJaversService;
 import uk.ac.ebi.spot.gwas.deposition.util.CurationUtil;
@@ -17,6 +19,7 @@ import uk.ac.ebi.spot.gwas.deposition.javers.JaversChangeWrapper;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -37,15 +40,15 @@ public class SubmissionDiffController {
 
     @ResponseStatus(HttpStatus.CREATED)
     @ResponseBody
-    public List<JaversChangeWrapper> diffVersionSubmissions(@PathVariable String submissionId, HttpServletRequest request) {
+    public List<VersionSummary> diffVersionSubmissions(@PathVariable String submissionId, HttpServletRequest request) {
         String jwtToken = CurationUtil.parseJwt(request);
         ResponseEntity<List<JaversChangeWrapper>> responseEntity = submissionDiffService.diffVersionsSubmission(submissionId, jwtToken );
-        Optional<List<JaversChangeWrapper>> convertedEntityOptional = conversionService.filterJaversResponse(responseEntity.getBody());
+        Optional<Map<Double, List<JaversChangeWrapper>>> convertedEntityOptional = conversionService.filterJaversResponse(responseEntity.getBody());
+        List<VersionSummary> summaries = conversionService.filterStudiesFromJavers(convertedEntityOptional);
+        List<FileUpload> fileUploads = conversionService.filterJaversResponseForFiles(responseEntity.getBody()).get();
+        List<VersionSummary> versionSummaries = conversionService.mapFilesToVersionSummary(summaries, fileUploads);
 
-        if(convertedEntityOptional.isPresent())
-            return convertedEntityOptional.get();
-        else
-            return null;
+        return versionSummaries;
 
 
     }
