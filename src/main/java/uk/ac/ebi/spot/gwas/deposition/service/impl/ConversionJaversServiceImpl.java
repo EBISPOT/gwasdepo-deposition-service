@@ -81,10 +81,13 @@ public class ConversionJaversServiceImpl implements ConversionJaversService {
     @Override
     public List<VersionSummary> filterStudiesFromJavers(Optional<Map<Double, List<JaversChangeWrapper>>> javersChangeWrapperList) {
         Map<Double, List<JaversChangeWrapper>> versionMap = javersChangeWrapperList.get();
+        log.info("versionMap ****"+versionMap);
         List<VersionSummary> summaries = new ArrayList<>();
         Set<Double> keys = versionMap.keySet();
         Double[] keysArray = (Double[]) keys.toArray();
+        log.info("keysArray ****"+versionMap);
         for(int i = 0 ; i < keys.size() -1 ; i++) {
+            log.info("Inside Keys");
             VersionSummary versionSummary = compareVersions(versionMap.get(keysArray[i]),
                     versionMap.get(keysArray[i+1]));
             summaries.add(versionSummary);
@@ -128,12 +131,18 @@ public class ConversionJaversServiceImpl implements ConversionJaversService {
                 .map(this::processAssociationTag)
                 .collect(Collectors.toList());
 
+
         List<Association> prevAssociations = oldChange.stream()
                 .filter( (javersChangeWrapper) ->
                 javersChangeWrapper.getProperty().equals("associations"))
                 .flatMap((javersChange) -> javersChange.getElementChanges().stream())
                 .map(this::processAssociationTag)
                 .collect(Collectors.toList());
+
+        log.info("newStudies****"+newStudies);
+        log.info("prevStudies****"+prevStudies);
+        log.info("newAssociations****"+newAssociations);
+        log.info("prevAssociations****"+prevAssociations);
 
         VersionSummary versionSummary = new VersionSummary();
         versionSummary.setCurrentVersionSummary(populateCurrentVersionSummary(
@@ -158,6 +167,7 @@ public class ConversionJaversServiceImpl implements ConversionJaversService {
                 .collect(Collectors.groupingBy(Study::getStudyTag));
 
         prevStudyMap.forEach((tag, studyList) -> {
+            log.info("Study Tag ****"+tag);
             VersionDiffStats  versionStudyDiffStats = findStudyChanges(tag, studyList, newStudies);
             AddedRemoved  addedRemovedAsscns = getAssociationVersionStats(prevstudyAscnsMap.get(tag),
                     newstudyAscnsMap.get(tag));
@@ -217,6 +227,7 @@ public class ConversionJaversServiceImpl implements ConversionJaversService {
         diffStats.setAssociations(new ArrayList<VersionDiffStats>());
 
         prevAscns.forEach((asscn) -> {
+            log.info("VariantId*****"+asscn.getVariantId());
             List<AssociationDto> newAsscnsDto = newAscns.stream()
                     .filter((ascn) -> ascn.getVariantId().equals(asscn.getVariantId()))
                     .map(AssociationDtoAssembler::assemble)
@@ -258,10 +269,11 @@ public class ConversionJaversServiceImpl implements ConversionJaversService {
                 .filter((study) -> !prevStudyTags.contains(study.getStudyTag()))
                 .collect(Collectors.toList());
 
-       /* VersionDiffStats versionDiffStats = new VersionDiffStats();
-        versionDiffStats.setEntity("studies");
-        versionDiffStats.setAdded(studiesAdded.size());
-        versionDiffStats.setRemoved(studiesRemoved.size());*/
+        log.info("newStudyTags****"+newStudyTags);
+        log.info("prevStudyTags****"+prevStudyTags);
+        log.info("studiesRemoved****"+studiesRemoved);
+        log.info("studiesAdded****"+studiesAdded);
+
 
         AddedRemoved addedRemoved = new AddedRemoved();
         addedRemoved.setAdded(studiesAdded.size());
@@ -284,9 +296,11 @@ public class ConversionJaversServiceImpl implements ConversionJaversService {
         List<Association> asscnsAdded = newAscns.stream().filter((asscn) -> !prevAscnsTags.contains(asscn.getStudyTag() + asscn.getVariantId()))
                 .collect(Collectors.toList());
 
+        log.info("newAscnsTags****"+newAscnsTags);
+        log.info("prevAscnsTags****"+prevAscnsTags);
+        log.info("asscnsRemoved****"+asscnsRemoved);
+        log.info("asscnsAdded****"+asscnsAdded);
 
-//        versionDiffStats.setAscnsAdded(asscnsAdded.size());
-//        versionDiffStats.setAscnsRemoved(asscnsRemoved.size());
         AddedRemoved addedRemoved = new AddedRemoved();
         addedRemoved.setAdded(asscnsAdded.size());
         addedRemoved.setRemoved(asscnsRemoved.size());
@@ -324,7 +338,7 @@ public class ConversionJaversServiceImpl implements ConversionJaversService {
         Javers javers = JaversBuilder.javers().build();
         Diff diff = javers.compare(dto1, dto2);
         log.info("************");
-        log.info("Diff"+ diff);
+        log.info("Diff Asscn"+ diff);
         List<ValueChange> valChanges = diff.getChangesByType(ValueChange.class);
         try {
             ValueChangeWrapper[]  changes = new ObjectMapper().readValue(
