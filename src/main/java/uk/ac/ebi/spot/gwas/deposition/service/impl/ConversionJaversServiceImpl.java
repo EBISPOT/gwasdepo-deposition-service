@@ -84,8 +84,9 @@ public class ConversionJaversServiceImpl implements ConversionJaversService {
         log.info("versionMap ****"+versionMap);
         List<VersionSummary> summaries = new ArrayList<>();
         Set<Double> keys = versionMap.keySet();
+        log.info("keys ****"+keys);
         Double[] keysArray = (Double[]) keys.toArray();
-        log.info("keysArray ****"+versionMap);
+        log.info("keysArray ****"+keysArray);
         for(int i = 0 ; i < keys.size() -1 ; i++) {
             log.info("Inside Keys");
             VersionSummary versionSummary = compareVersions(versionMap.get(keysArray[i]),
