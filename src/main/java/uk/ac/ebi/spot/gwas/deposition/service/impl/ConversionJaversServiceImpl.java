@@ -373,7 +373,7 @@ public class ConversionJaversServiceImpl implements ConversionJaversService {
 
     private Association processAssociationTag(ElementChange elementChange){
       if (elementChange.getElementChangeType().equals("ValueAdded")){
-          return associationsService.getAssociation(elementChange.getRightValue().toString() );
+          return associationsService.getAssociation(elementChange.getValue().toString() );
         }
         return null;
     }
