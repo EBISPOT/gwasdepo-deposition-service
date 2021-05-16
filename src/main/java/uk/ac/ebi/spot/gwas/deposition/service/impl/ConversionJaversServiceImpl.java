@@ -175,20 +175,48 @@ public class ConversionJaversServiceImpl implements ConversionJaversService {
                 .collect(Collectors.groupingBy(Association::getStudyTag));
         Map<String, List<Study>> prevStudyMap = prevStudies.stream()
                 .collect(Collectors.groupingBy(Study::getStudyTag));
+        Map<String, List<Study>> newStudyMap = prevStudies.stream()
+                .collect(Collectors.groupingBy(Study::getStudyTag));
+
 
         prevStudyMap.forEach((tag, studyList) -> {
             log.info("Study Tag ****"+tag);
             VersionDiffStats  versionStudyDiffStats = findStudyChanges(tag, studyList, newStudies);
-            if(prevstudyAscnsMap.get(tag) != null && newstudyAscnsMap.get(tag) != null ) {
+            if(prevstudyAscnsMap.get(tag) != null  ) {
                 log.info("Inside Association loop ");
                 AddedRemoved addedRemovedAsscns = getAssociationVersionStats(prevstudyAscnsMap.get(tag),
-                        newstudyAscnsMap.get(tag));
+                        newstudyAscnsMap.get(tag) !=null ? newstudyAscnsMap.get(tag) : Collections.emptyList());
                 versionStudyDiffStats.setAscnsAdded(addedRemovedAsscns.getAdded());
                 versionStudyDiffStats.setAscnsRemoved(addedRemovedAsscns.getRemoved());
                 VersionDiffStats aggregateDiffStats = findAssociationChanges(tag, prevstudyAscnsMap.get(tag),
-                        newstudyAscnsMap.get(tag), versionStudyDiffStats);
+                        newstudyAscnsMap.get(tag) !=null ? newstudyAscnsMap.get(tag) : Collections.emptyList(), versionStudyDiffStats);
                 versionDiffStats.getStudies().add(aggregateDiffStats);
+            }else{
+                if(newstudyAscnsMap.get(tag) != null) {
+                    AddedRemoved addedRemovedAsscns = getAssociationVersionStats(Collections.emptyList(),
+                            newstudyAscnsMap.get(tag) );
+                    versionStudyDiffStats.setAscnsAdded(addedRemovedAsscns.getAdded());
+                    versionStudyDiffStats.setAscnsRemoved(addedRemovedAsscns.getRemoved());
+                    versionDiffStats.getStudies().add(versionStudyDiffStats);
+                }
             }
+        });
+
+        String[] studyTagsAdded = versionDiffStats.getStudyTagsAdded().split(",");
+        List<String> studyTagsList = Arrays.asList(studyTagsAdded);
+
+        newStudyMap.forEach((tag, studyList) -> {
+            if(studyTagsList.contains(tag)) {
+                VersionDiffStats newversionDiffStats = new VersionDiffStats();
+                newversionDiffStats.setEntity(tag);
+                AddedRemoved addedRemovedAsscns = getAssociationVersionStats(Collections.emptyList(),
+                        newstudyAscnsMap.get(tag) !=null ? newstudyAscnsMap.get(tag) : Collections.emptyList());
+                newversionDiffStats.setAscnsAdded(addedRemovedAsscns.getAdded());
+                newversionDiffStats.setAscnsRemoved(addedRemovedAsscns.getRemoved());
+                versionDiffStats.getStudies().add(newversionDiffStats);
+            }
+
+
         });
         versionSummary.setVersionDiffStats(versionDiffStats);
         return versionSummary;
@@ -242,6 +270,7 @@ public class ConversionJaversServiceImpl implements ConversionJaversService {
 
     private VersionDiffStats findAssociationChanges(String tag, List<Association> prevAscns, List<Association> newAscns, VersionDiffStats diffStats) {
 
+        if(!newAscns.isEmpty())
         diffStats.setAssociations(new ArrayList<VersionDiffStats>());
 
         prevAscns.forEach((asscn) -> {
