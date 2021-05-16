@@ -190,7 +190,7 @@ public class ConversionJaversServiceImpl implements ConversionJaversService {
                 versionDiffStats.getStudies().add(aggregateDiffStats);
             }
         });
-
+        versionSummary.setVersionDiffStats(versionDiffStats);
         return versionSummary;
     }
 
