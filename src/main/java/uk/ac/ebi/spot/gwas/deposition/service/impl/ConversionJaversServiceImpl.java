@@ -170,7 +170,8 @@ public class ConversionJaversServiceImpl implements ConversionJaversService {
         prevStudyMap.forEach((tag, studyList) -> {
             log.info("Study Tag ****"+tag);
             VersionDiffStats  versionStudyDiffStats = findStudyChanges(tag, studyList, newStudies);
-            if(!prevstudyAscnsMap.get(tag).isEmpty() && !newstudyAscnsMap.get(tag).isEmpty() ) {
+            if(prevstudyAscnsMap.get(tag)!=null && newstudyAscnsMap.get(tag)!=null ) {
+                log.info("Inside Association loop ");
                 AddedRemoved addedRemovedAsscns = getAssociationVersionStats(prevstudyAscnsMap.get(tag),
                         newstudyAscnsMap.get(tag));
                 versionStudyDiffStats.setAscnsAdded(addedRemovedAsscns.getAdded());
