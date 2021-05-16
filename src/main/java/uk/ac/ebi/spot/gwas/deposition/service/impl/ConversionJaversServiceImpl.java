@@ -72,7 +72,9 @@ public class ConversionJaversServiceImpl implements ConversionJaversService {
                             .collect(Collectors.toList()).stream()
                             .distinct()
                             .map(this::getFileUploadDetails)
+                            .filter(fileUpload -> !fileUpload.getStatus().equals("INVALID"))
                             .collect(Collectors.toList()));
+
 
 
 
@@ -97,14 +99,20 @@ public class ConversionJaversServiceImpl implements ConversionJaversService {
     }
 
     public List<VersionSummary> mapFilesToVersionSummary(List<VersionSummary> summaries, List<FileUpload> fileUploads) {
-        VersionSummary[] summaryArr = (VersionSummary[]) summaries.toArray();
-        FileUpload[] fileUploadArr = (FileUpload[]) fileUploads.toArray();
+        VersionSummary[] summaryArr = summaries.toArray(new VersionSummary[summaries.size()]);
+        FileUpload[] fileUploadArr = fileUploads.toArray(new FileUpload[fileUploads.size()]);
         for(int i = 0 ; i < fileUploadArr.length; i++) {
+            log.info("FileName is ->"+fileUploadArr[i].getFileName());
             FileSummaryStats fileSummaryStats = new FileSummaryStats();
             fileSummaryStats.setFileName(fileUploadArr[i].getFileName());
             fileSummaryStats.setFileId(fileUploadArr[i].getId());
-            summaryArr[i].setFileSummaryStats(fileSummaryStats);
         }
+
+        for(int i = 0 ; i < summaryArr.length; i++) {
+            summaryArr[i].setNewFileName(fileUploadArr[i].getFileName());
+            summaryArr[i].setOldFileName(fileUploadArr[i+1].getFileName());
+        }
+
         return Arrays.asList(summaryArr);
     }
 
@@ -149,7 +157,8 @@ public class ConversionJaversServiceImpl implements ConversionJaversService {
         versionSummary.setCurrentVersionSummary(populateCurrentVersionSummary(
                 newStudies.size(), newAssociations.size()));
         VersionSummaryStats versionSummaryStats = new VersionSummaryStats();
-        AddedRemoved addedRemoved = getStudyVersionStats(prevStudies , newStudies);
+        VersionDiffStats  versionDiffStats = new VersionDiffStats();
+        AddedRemoved addedRemoved = getStudyVersionStats(prevStudies , newStudies, versionDiffStats);
         VersionSummaryStats studyStats = populateVersionSummaryStudyStats(addedRemoved.getAdded(),
                 addedRemoved.getRemoved(), versionSummaryStats);
 
@@ -158,7 +167,7 @@ public class ConversionJaversServiceImpl implements ConversionJaversService {
                 addedRemovedasscn.getRemoved(), studyStats);
         versionSummary.setVersionSummaryStats(asscnStats);
 
-        VersionDiffStats  versionDiffStats = new VersionDiffStats();
+
         versionDiffStats.setStudies(new ArrayList<VersionDiffStats>());
         Map<String,List<Association>> prevstudyAscnsMap = prevAssociations.stream()
                 .collect(Collectors.groupingBy(Association::getStudyTag));
@@ -170,7 +179,7 @@ public class ConversionJaversServiceImpl implements ConversionJaversService {
         prevStudyMap.forEach((tag, studyList) -> {
             log.info("Study Tag ****"+tag);
             VersionDiffStats  versionStudyDiffStats = findStudyChanges(tag, studyList, newStudies);
-            if(prevstudyAscnsMap.get(tag)!=null && newstudyAscnsMap.get(tag)!=null ) {
+            if(prevstudyAscnsMap.get(tag) != null && newstudyAscnsMap.get(tag) != null ) {
                 log.info("Inside Association loop ");
                 AddedRemoved addedRemovedAsscns = getAssociationVersionStats(prevstudyAscnsMap.get(tag),
                         newstudyAscnsMap.get(tag));
@@ -261,7 +270,7 @@ public class ConversionJaversServiceImpl implements ConversionJaversService {
 
     }
 
-    private AddedRemoved getStudyVersionStats(List<Study> prevStudies, List<Study> newStudies) {
+    private AddedRemoved getStudyVersionStats(List<Study> prevStudies, List<Study> newStudies, VersionDiffStats versionDiffStats) {
         List<String> newStudyTags = newStudies.stream()
                 .map(Study::getStudyTag)
                 .collect(Collectors.toList());
@@ -274,15 +283,26 @@ public class ConversionJaversServiceImpl implements ConversionJaversService {
                 .filter((study) -> !newStudyTags.contains(study.getStudyTag()))
                 .collect(Collectors.toList());
 
+        String studyTagsRemoved = studiesRemoved.stream()
+                .map(study -> study.getStudyTag())
+                .collect(Collectors.joining(","));
+
         List<Study> studiesAdded = newStudies.stream()
                 .filter((study) -> !prevStudyTags.contains(study.getStudyTag()))
                 .collect(Collectors.toList());
+
+        String studyTagsAdded = studiesAdded.stream()
+                .map(study -> study.getStudyTag())
+                .collect(Collectors.joining(","));
+
 
         log.info("newStudyTags****"+newStudyTags);
         log.info("prevStudyTags****"+prevStudyTags);
         log.info("studiesRemoved****"+studiesRemoved);
         log.info("studiesAdded****"+studiesAdded);
 
+        versionDiffStats.setStudyTagsAdded(studyTagsAdded);
+        versionDiffStats.setStudyTagsRemoved(studyTagsRemoved);
 
         AddedRemoved addedRemoved = new AddedRemoved();
         addedRemoved.setAdded(studiesAdded.size());
@@ -294,16 +314,20 @@ public class ConversionJaversServiceImpl implements ConversionJaversService {
     private AddedRemoved getAssociationVersionStats(List<Association> prevAscns, List<Association> newAscns) {
         log.info("Inside getAssociationVersionStats() ");
 
-        List<String> newAscnsTags = newAscns.stream().map((asscn) -> (asscn.getStudyTag() + asscn.getVariantId()))
+        List<String> newAscnsTags = newAscns.stream()
+                .map(asscn -> asscn.getStudyTag() + asscn.getVariantId())
                 .collect(Collectors.toList());
 
-        List<String> prevAscnsTags = prevAscns.stream().map((asscn) -> (asscn.getStudyTag() + asscn.getVariantId()))
+        List<String> prevAscnsTags = prevAscns.stream()
+                .map(asscn -> asscn.getStudyTag() + asscn.getVariantId())
                 .collect(Collectors.toList());
 
-        List<Association> asscnsRemoved = prevAscns.stream().filter((asscn) -> !newAscnsTags.contains(asscn.getStudyTag() + asscn.getVariantId()))
+        List<Association> asscnsRemoved = prevAscns.stream()
+                .filter(asscn -> !newAscnsTags.contains(asscn.getStudyTag() + asscn.getVariantId()))
                 .collect(Collectors.toList());
 
-        List<Association> asscnsAdded = newAscns.stream().filter((asscn) -> !prevAscnsTags.contains(asscn.getStudyTag() + asscn.getVariantId()))
+        List<Association> asscnsAdded = newAscns.stream()
+                .filter(asscn -> !prevAscnsTags.contains(asscn.getStudyTag() + asscn.getVariantId()))
                 .collect(Collectors.toList());
 
         log.info("newAscnsTags****"+newAscnsTags);
