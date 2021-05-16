@@ -175,7 +175,7 @@ public class ConversionJaversServiceImpl implements ConversionJaversService {
                 .collect(Collectors.groupingBy(Association::getStudyTag));
         Map<String, List<Study>> prevStudyMap = prevStudies.stream()
                 .collect(Collectors.groupingBy(Study::getStudyTag));
-        Map<String, List<Study>> newStudyMap = prevStudies.stream()
+        Map<String, List<Study>> newStudyMap = newStudies.stream()
                 .collect(Collectors.groupingBy(Study::getStudyTag));
 
 
@@ -193,6 +193,7 @@ public class ConversionJaversServiceImpl implements ConversionJaversService {
                 versionDiffStats.getStudies().add(aggregateDiffStats);
             }else{
                 if(newstudyAscnsMap.get(tag) != null) {
+                    log.info("Inside Association loop where old study has no asscn ");
                     AddedRemoved addedRemovedAsscns = getAssociationVersionStats(Collections.emptyList(),
                             newstudyAscnsMap.get(tag) );
                     versionStudyDiffStats.setAscnsAdded(addedRemovedAsscns.getAdded());
@@ -207,6 +208,8 @@ public class ConversionJaversServiceImpl implements ConversionJaversService {
 
         newStudyMap.forEach((tag, studyList) -> {
             if(studyTagsList.contains(tag)) {
+                log.info("Studies added newly");
+                log.info("Studies added ->"+tag);
                 VersionDiffStats newversionDiffStats = new VersionDiffStats();
                 newversionDiffStats.setEntity(tag);
                 AddedRemoved addedRemovedAsscns = getAssociationVersionStats(Collections.emptyList(),
