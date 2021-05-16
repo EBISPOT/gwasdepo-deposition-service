@@ -212,13 +212,16 @@ public class ConversionJaversServiceImpl implements ConversionJaversService {
                 .map(StudyDtoAssembler::assemble)
                 .collect(Collectors.toList());
 
-        List<ValueChangeWrapper> studyChanges = diffStudies(prevStudiesDTO.get(0),
-                newStudiesDTO.get(0));
+
         VersionDiffStats versionDiffStats = new VersionDiffStats();
         versionDiffStats.setEntity(tag);
-        versionDiffStats.setEdited(studyChanges.stream()
-                .map(this::mapChangetoVersionStats)
-                .collect(Collectors.toList()));
+        if(!newStudiesDTO.isEmpty()) {
+            List<ValueChangeWrapper> studyChanges = diffStudies(prevStudiesDTO.get(0),
+                    newStudiesDTO.get(0));
+            versionDiffStats.setEdited(studyChanges.stream()
+                    .map(this::mapChangetoVersionStats)
+                    .collect(Collectors.toList()));
+        }
         return versionDiffStats;
 
     }
