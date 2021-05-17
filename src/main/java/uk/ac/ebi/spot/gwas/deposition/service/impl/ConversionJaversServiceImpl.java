@@ -199,6 +199,12 @@ public class ConversionJaversServiceImpl implements ConversionJaversService {
                     versionStudyDiffStats.setAscnsAdded(addedRemovedAsscns.getAdded());
                     versionStudyDiffStats.setAscnsRemoved(addedRemovedAsscns.getRemoved());
                     versionDiffStats.getStudies().add(versionStudyDiffStats);
+                }else {
+                    AddedRemoved addedRemovedAsscns = getAssociationVersionStats(Collections.emptyList(),
+                            Collections.emptyList() );
+                    versionStudyDiffStats.setAscnsAdded(addedRemovedAsscns.getAdded());
+                    versionStudyDiffStats.setAscnsRemoved(addedRemovedAsscns.getRemoved());
+                    versionDiffStats.getStudies().add(versionStudyDiffStats);
                 }
             }
         });
