@@ -277,8 +277,10 @@ public class ConversionJaversServiceImpl implements ConversionJaversService {
                 VersionDiffStats newversionDiffStats = new VersionDiffStats();
                 newversionDiffStats.setEntity(tag);
                 AddedRemoved addedRemovedAsscns = getAssociationVersionStats(Collections.emptyList(),
-                        newstudyAscnsMap.get(tag) !=null ? newstudyAscnsMap.get(tag) : Collections.emptyList());
-                AddedRemoved addedRemovedSamples = getSampleVersionStats(Collections.emptyList(), newStudySamplesMap.get(tag) !=null ?
+                        newstudyAscnsMap.get(tag) !=null ?
+                                newstudyAscnsMap.get(tag) : Collections.emptyList());
+                AddedRemoved addedRemovedSamples = getSampleVersionStats(Collections.emptyList(),
+                        newStudySamplesMap.get(tag) !=null ?
                         newStudySamplesMap.get(tag) : Collections.emptyList());
                 newversionDiffStats.setAscnsAdded(addedRemovedAsscns.getAdded());
                 newversionDiffStats.setAscnsRemoved(addedRemovedAsscns.getRemoved());
@@ -398,8 +400,8 @@ public class ConversionJaversServiceImpl implements ConversionJaversService {
         prevSamples.forEach((sample) -> {
             log.info("Sample*****"+sample.getStage()+"|"+sample.getAncestryCategory());
             List<SampleDto> newSamplesDto = newSamples.stream()
-                    .filter((sampleGroup) -> (sampleGroup.getStage() + sample.getAncestryCategory())
-                            .equals(sampleGroup.getStage() + sample.getAncestryCategory()))
+                    .filter((sampleGroup) -> (sampleGroup.getStage() + sampleGroup.getAncestryCategory())
+                            .equals(sample.getStage() + sample.getAncestryCategory()))
                     .map(SampleDtoAssembler::assemble)
                     .collect(Collectors.toList());
             SampleDto prevSampleDto = SampleDtoAssembler.assemble(sample);
