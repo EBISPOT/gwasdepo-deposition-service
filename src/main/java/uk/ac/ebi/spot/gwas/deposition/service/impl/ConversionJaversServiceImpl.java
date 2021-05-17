@@ -182,9 +182,13 @@ public class ConversionJaversServiceImpl implements ConversionJaversService {
         VersionSummaryStats asscnStats = populateVersionSummaryAssociationStats(addedRemovedasscn.getAdded(),
                 addedRemovedasscn.getRemoved(), studyStats);
 
+        AddedRemoved addedRemovedSmpl = getSampleVersionStats(prevSamples, newSamples);
+        VersionSummaryStats sampleStats = populateVersionSummarySampleStats(addedRemovedSmpl.getAdded() ,
+                addedRemovedSmpl.getRemoved(), asscnStats);
+
         AddedRemoved traitsAddedRemoved = getReportedTraitVersionStats(prevStudies, newStudies);
         VersionSummaryStats traitsStats = populateVersionSummaryTraitsStats(traitsAddedRemoved.getAdded(), traitsAddedRemoved.getRemoved(),
-                asscnStats);
+                sampleStats);
         AddedRemoved efosAddedRemoved = getReportedEfoVersionStats(prevStudies, newStudies);
         VersionSummaryStats efoStats = populateVersionSummaryEfoStats(efosAddedRemoved.getAdded(), efosAddedRemoved.getRemoved(),
                 traitsStats);
@@ -322,6 +326,12 @@ public class ConversionJaversServiceImpl implements ConversionJaversService {
         return stats;
     }
 
+    private VersionSummaryStats populateVersionSummarySampleStats(int added, int removed, VersionSummaryStats stats) {
+        stats.setSamplesAdded(added);
+        stats.setSamplesRemoved(removed);
+        return stats;
+    }
+
     private VersionDiffStats findStudyChanges(String tag, List<Study> studyList, List<Study> newStudies) {
 
         List<StudyDto> newStudiesDTO = newStudies.stream()
@@ -401,7 +411,7 @@ public class ConversionJaversServiceImpl implements ConversionJaversService {
                     versionDiffStats.setEdited(valChanges.stream().
                             map(this::mapChangetoVersionStats)
                             .collect(Collectors.toList()));
-                    diffStats.getAssociations().add(versionDiffStats);
+                    diffStats.getSampleGroups().add(versionDiffStats);
                 }
             }
 
@@ -631,7 +641,7 @@ public class ConversionJaversServiceImpl implements ConversionJaversService {
         Javers javers = JaversBuilder.javers().build();
         Diff diff = javers.compare(dto1, dto2);
         log.info("************");
-        log.info("Diff Asscn"+ diff);
+        log.info("Diff Sample"+ diff);
         List<ValueChange> valChanges = diff.getChangesByType(ValueChange.class);
         try {
             ValueChangeWrapper[]  changes = new ObjectMapper().readValue(
