@@ -11,16 +11,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.ac.ebi.spot.gwas.deposition.domain.Association;
 import uk.ac.ebi.spot.gwas.deposition.domain.FileUpload;
+import uk.ac.ebi.spot.gwas.deposition.domain.Sample;
 import uk.ac.ebi.spot.gwas.deposition.domain.Study;
 import uk.ac.ebi.spot.gwas.deposition.dto.AssociationDto;
+import uk.ac.ebi.spot.gwas.deposition.dto.SampleDto;
 import uk.ac.ebi.spot.gwas.deposition.dto.StudyDto;
 import uk.ac.ebi.spot.gwas.deposition.javers.*;
 import uk.ac.ebi.spot.gwas.deposition.rest.dto.AssociationDtoAssembler;
+import uk.ac.ebi.spot.gwas.deposition.rest.dto.SampleDtoAssembler;
 import uk.ac.ebi.spot.gwas.deposition.rest.dto.StudyDtoAssembler;
-import uk.ac.ebi.spot.gwas.deposition.service.AssociationsService;
-import uk.ac.ebi.spot.gwas.deposition.service.ConversionJaversService;
-import uk.ac.ebi.spot.gwas.deposition.service.FileUploadsService;
-import uk.ac.ebi.spot.gwas.deposition.service.StudiesService;
+import uk.ac.ebi.spot.gwas.deposition.service.*;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -35,6 +35,9 @@ public class ConversionJaversServiceImpl implements ConversionJaversService {
 
     @Autowired
     private AssociationsService associationsService;
+
+    @Autowired
+    private SamplesService samplesService;
 
     @Autowired
     private FileUploadsService fileUploadsService;
@@ -101,16 +104,12 @@ public class ConversionJaversServiceImpl implements ConversionJaversService {
     public List<VersionSummary> mapFilesToVersionSummary(List<VersionSummary> summaries, List<FileUpload> fileUploads) {
         VersionSummary[] summaryArr = summaries.toArray(new VersionSummary[summaries.size()]);
         FileUpload[] fileUploadArr = fileUploads.toArray(new FileUpload[fileUploads.size()]);
-        for(int i = 0 ; i < fileUploadArr.length; i++) {
-            log.info("FileName is ->"+fileUploadArr[i].getFileName());
-            FileSummaryStats fileSummaryStats = new FileSummaryStats();
-            fileSummaryStats.setFileName(fileUploadArr[i].getFileName());
-            fileSummaryStats.setFileId(fileUploadArr[i].getId());
-        }
 
         for(int i = 0 ; i < summaryArr.length; i++) {
-            summaryArr[i].setNewFileName(fileUploadArr[i].getFileName());
-            summaryArr[i].setOldFileName(fileUploadArr[i+1].getFileName());
+            summaryArr[i].setOldFileDetails(new FileSummaryStats( fileUploadArr[i+1].getFileName(),
+                    fileUploadArr[i+1].getId()));
+            summaryArr[i].setNewFileDetails(new FileSummaryStats( fileUploadArr[i].getFileName(),
+                    fileUploadArr[i].getId()));
         }
 
         return Arrays.asList(summaryArr);
@@ -148,6 +147,21 @@ public class ConversionJaversServiceImpl implements ConversionJaversService {
                 .map(this::processAssociationTag)
                 .collect(Collectors.toList());
 
+        List<Sample> newSamples = newChange.stream()
+                .filter( (javersChangeWrapper) ->
+                        javersChangeWrapper.getProperty().equals("samples"))
+                .flatMap((javersChange) -> javersChange.getElementChanges().stream())
+                .map(this::processSampleTag)
+                .collect(Collectors.toList());
+
+
+        List<Sample> prevSamples = oldChange.stream()
+                .filter( (javersChangeWrapper) ->
+                        javersChangeWrapper.getProperty().equals("samples"))
+                .flatMap((javersChange) -> javersChange.getElementChanges().stream())
+                .map(this::processSampleTag)
+                .collect(Collectors.toList());
+
         log.info("newStudies****"+newStudies);
         log.info("prevStudies****"+prevStudies);
         log.info("newAssociations****"+newAssociations);
@@ -155,17 +169,26 @@ public class ConversionJaversServiceImpl implements ConversionJaversService {
 
         VersionSummary versionSummary = new VersionSummary();
         versionSummary.setCurrentVersionSummary(populateCurrentVersionSummary(
-                newStudies.size(), newAssociations.size()));
+                newStudies.size(), newAssociations.size(), newSamples.size()));
         VersionSummaryStats versionSummaryStats = new VersionSummaryStats();
         VersionDiffStats  versionDiffStats = new VersionDiffStats();
         AddedRemoved addedRemoved = getStudyVersionStats(prevStudies , newStudies, versionDiffStats);
+
         VersionSummaryStats studyStats = populateVersionSummaryStudyStats(addedRemoved.getAdded(),
                 addedRemoved.getRemoved(), versionSummaryStats);
+
 
         AddedRemoved addedRemovedasscn = getAssociationVersionStats(prevAssociations, newAssociations);
         VersionSummaryStats asscnStats = populateVersionSummaryAssociationStats(addedRemovedasscn.getAdded(),
                 addedRemovedasscn.getRemoved(), studyStats);
-        versionSummary.setVersionSummaryStats(asscnStats);
+
+        AddedRemoved traitsAddedRemoved = getReportedTraitVersionStats(prevStudies, newStudies);
+        VersionSummaryStats traitsStats = populateVersionSummaryTraitsStats(traitsAddedRemoved.getAdded(), traitsAddedRemoved.getRemoved(),
+                asscnStats);
+        AddedRemoved efosAddedRemoved = getReportedEfoVersionStats(prevStudies, newStudies);
+        VersionSummaryStats efoStats = populateVersionSummaryEfoStats(efosAddedRemoved.getAdded(), efosAddedRemoved.getRemoved(),
+                traitsStats);
+        versionSummary.setVersionSummaryStats(efoStats);
 
 
         versionDiffStats.setStudies(new ArrayList<VersionDiffStats>());
@@ -173,6 +196,10 @@ public class ConversionJaversServiceImpl implements ConversionJaversService {
                 .collect(Collectors.groupingBy(Association::getStudyTag));
         Map<String,List<Association>> newstudyAscnsMap = newAssociations.stream()
                 .collect(Collectors.groupingBy(Association::getStudyTag));
+        Map<String,List<Sample>> prevStudySamplesMap = prevSamples.stream()
+                .collect(Collectors.groupingBy(Sample::getStudyTag));
+        Map<String,List<Sample>> newStudySamplesMap = newSamples.stream()
+                .collect(Collectors.groupingBy(Sample::getStudyTag));
         Map<String, List<Study>> prevStudyMap = prevStudies.stream()
                 .collect(Collectors.groupingBy(Study::getStudyTag));
         Map<String, List<Study>> newStudyMap = newStudies.stream()
@@ -186,11 +213,12 @@ public class ConversionJaversServiceImpl implements ConversionJaversService {
                 log.info("Inside Association loop ");
                 AddedRemoved addedRemovedAsscns = getAssociationVersionStats(prevstudyAscnsMap.get(tag),
                         newstudyAscnsMap.get(tag) !=null ? newstudyAscnsMap.get(tag) : Collections.emptyList());
+
                 versionStudyDiffStats.setAscnsAdded(addedRemovedAsscns.getAdded());
                 versionStudyDiffStats.setAscnsRemoved(addedRemovedAsscns.getRemoved());
                 VersionDiffStats aggregateDiffStats = findAssociationChanges(tag, prevstudyAscnsMap.get(tag),
                         newstudyAscnsMap.get(tag) !=null ? newstudyAscnsMap.get(tag) : Collections.emptyList(), versionStudyDiffStats);
-                versionDiffStats.getStudies().add(aggregateDiffStats);
+
             }else{
                 if(newstudyAscnsMap.get(tag) != null) {
                     log.info("Inside Association loop where old study has no asscn ");
@@ -207,6 +235,32 @@ public class ConversionJaversServiceImpl implements ConversionJaversService {
                     versionDiffStats.getStudies().add(versionStudyDiffStats);
                 }
             }
+
+            if(prevStudySamplesMap.get(tag) != null  ) {
+                log.info("Inside Sample loop ");
+                AddedRemoved addedRemovedSamples = getSampleVersionStats(prevStudySamplesMap.get(tag), newStudySamplesMap.get(tag) !=null ?
+                        newStudySamplesMap.get(tag) : Collections.emptyList());
+                versionStudyDiffStats.setSamplesAdded(addedRemovedSamples.getAdded());
+                versionStudyDiffStats.setSamplesRemoved(addedRemovedSamples.getRemoved());
+                VersionDiffStats simpleDiffStats = findSampleChanges(tag, prevStudySamplesMap.get(tag), newStudySamplesMap.get(tag) !=null ?
+                        newStudySamplesMap.get(tag) : Collections.emptyList(), versionStudyDiffStats);
+                versionDiffStats.getStudies().add(simpleDiffStats);
+            }else {
+                if (newStudySamplesMap.get(tag) != null) {
+                    log.info("Inside Study loop where old study has no Sample ");
+                    AddedRemoved addedRemovedSamples = getSampleVersionStats(Collections.emptyList(), newStudySamplesMap.get(tag) !=null ?
+                            newStudySamplesMap.get(tag) : Collections.emptyList());
+                    versionStudyDiffStats.setSamplesAdded(addedRemovedSamples.getAdded());
+                    versionStudyDiffStats.setSamplesRemoved(addedRemovedSamples.getRemoved());
+                    versionDiffStats.getStudies().add(versionStudyDiffStats);
+                }else {
+                    AddedRemoved addedRemovedSamples = getSampleVersionStats(Collections.emptyList(),
+                            Collections.emptyList() );
+                    versionStudyDiffStats.setSamplesAdded(addedRemovedSamples.getAdded());
+                    versionStudyDiffStats.setSamplesRemoved(addedRemovedSamples.getRemoved());
+                    versionDiffStats.getStudies().add(versionStudyDiffStats);
+                }
+            }
         });
 
         String[] studyTagsAdded = versionDiffStats.getStudyTagsAdded().split(",");
@@ -220,27 +274,45 @@ public class ConversionJaversServiceImpl implements ConversionJaversService {
                 newversionDiffStats.setEntity(tag);
                 AddedRemoved addedRemovedAsscns = getAssociationVersionStats(Collections.emptyList(),
                         newstudyAscnsMap.get(tag) !=null ? newstudyAscnsMap.get(tag) : Collections.emptyList());
+                AddedRemoved addedRemovedSamples = getSampleVersionStats(Collections.emptyList(), newStudySamplesMap.get(tag) !=null ?
+                        newStudySamplesMap.get(tag) : Collections.emptyList());
                 newversionDiffStats.setAscnsAdded(addedRemovedAsscns.getAdded());
                 newversionDiffStats.setAscnsRemoved(addedRemovedAsscns.getRemoved());
+                newversionDiffStats.setSamplesAdded(addedRemovedSamples.getAdded());
+                newversionDiffStats.setSamplesRemoved(addedRemovedSamples.getRemoved());
                 versionDiffStats.getStudies().add(newversionDiffStats);
             }
-
-
         });
+
+
+
         versionSummary.setVersionDiffStats(versionDiffStats);
         return versionSummary;
     }
 
-    private CurrentVersionSummary populateCurrentVersionSummary(int countStudies, int countAscns) {
+    private CurrentVersionSummary populateCurrentVersionSummary(int countStudies, int countAscns, int  countSamples) {
         CurrentVersionSummary currentVersionSummary = new CurrentVersionSummary();
         currentVersionSummary.setTotalStudies(countStudies);
         currentVersionSummary.setTotalAssociations(countAscns);
+        currentVersionSummary.setTotalSamples(countSamples);
         return currentVersionSummary;
     }
 
     private VersionSummaryStats populateVersionSummaryStudyStats(int added, int removed, VersionSummaryStats stats) {
         stats.setStudiesAdded(added);
         stats.setStudiesRemoved(removed);
+        return stats;
+    }
+
+    private VersionSummaryStats populateVersionSummaryTraitsStats(int added, int removed, VersionSummaryStats stats) {
+        stats.setReportedTraitsAdded(added);
+        stats.setReportedTraitsRemoved(removed);
+        return stats;
+    }
+
+    private VersionSummaryStats populateVersionSummaryEfoStats(int added, int removed, VersionSummaryStats stats) {
+        stats.setReportedTraitsAdded(added);
+        stats.setReportedTraitsRemoved(removed);
         return stats;
     }
 
@@ -308,7 +380,39 @@ public class ConversionJaversServiceImpl implements ConversionJaversService {
 
     }
 
-    private AddedRemoved getStudyVersionStats(List<Study> prevStudies, List<Study> newStudies, VersionDiffStats versionDiffStats) {
+    private VersionDiffStats findSampleChanges(String tag, List<Sample> prevSamples, List<Sample> newSamples, VersionDiffStats diffStats) {
+
+        if(!newSamples.isEmpty())
+            diffStats.setSampleGroups(new ArrayList<VersionDiffStats>());
+
+        prevSamples.forEach((sample) -> {
+            log.info("Sample*****"+sample.getStage()+"|"+sample.getAncestryCategory());
+            List<SampleDto> newSamplesDto = newSamples.stream()
+                    .filter((sampleGroup) -> (sampleGroup.getStage() + sample.getAncestryCategory())
+                            .equals(sampleGroup.getStage() + sample.getAncestryCategory()))
+                    .map(SampleDtoAssembler::assemble)
+                    .collect(Collectors.toList());
+            SampleDto prevSampleDto = SampleDtoAssembler.assemble(sample);
+            if (!newSamplesDto.isEmpty()) {
+                List<ValueChangeWrapper> valChanges = diffSamples(newSamplesDto.get(0), prevSampleDto);
+                if(!valChanges.isEmpty()) {
+                    VersionDiffStats versionDiffStats = new VersionDiffStats();
+                    versionDiffStats.setEntity(sample.getStage()+"|"+sample.getAncestryCategory());
+                    versionDiffStats.setEdited(valChanges.stream().
+                            map(this::mapChangetoVersionStats)
+                            .collect(Collectors.toList()));
+                    diffStats.getAssociations().add(versionDiffStats);
+                }
+            }
+
+        });
+
+        return diffStats;
+
+
+    }
+
+    private AddedRemoved    getStudyVersionStats(List<Study> prevStudies, List<Study> newStudies, VersionDiffStats versionDiffStats) {
         List<String> newStudyTags = newStudies.stream()
                 .map(Study::getStudyTag)
                 .collect(Collectors.toList());
@@ -349,6 +453,75 @@ public class ConversionJaversServiceImpl implements ConversionJaversService {
 
     }
 
+    private AddedRemoved  getReportedTraitVersionStats(List<Study> prevStudies, List<Study> newStudies) {
+        List<String> newReportedTraits = newStudies.stream()
+                .map(Study::getTrait)
+                .collect(Collectors.toList());
+
+        List<String> prevReportedTraits = prevStudies.stream()
+                .map(Study::getTrait)
+                .collect(Collectors.toList());
+
+        List<Study> traitsRemoved = prevStudies.stream()
+                .filter((study) -> !newReportedTraits.contains(study.getTrait()))
+                .collect(Collectors.toList());
+
+        List<Study> traitsAdded = newStudies.stream()
+                .filter((study) -> !prevReportedTraits.contains(study.getTrait()))
+                .collect(Collectors.toList());
+
+        AddedRemoved addedRemoved = new AddedRemoved();
+        addedRemoved.setAdded(traitsAdded.size());
+        addedRemoved.setRemoved(traitsRemoved.size());
+        return addedRemoved;
+
+    }
+
+
+    private AddedRemoved  getReportedEfoVersionStats(List<Study> prevStudies, List<Study> newStudies) {
+        List<String> newEfoTraits = newStudies.stream()
+                .map(Study::getEfoTrait)
+                .flatMap((efos) -> Arrays.asList(efos.split("|")).stream())
+                .map(efo -> efo.trim())
+                .collect(Collectors.toList());
+
+        List<String> prevEfoTraits = prevStudies.stream()
+                .map(Study::getEfoTrait)
+                .flatMap((efos) -> Arrays.asList(efos.split("|")).stream())
+                .map(efo -> efo.trim())
+                .collect(Collectors.toList());
+
+       /* List<Study> efoRemoved = prevStudies.stream()
+                .filter((study) -> !newEfoTraits.contains(study.getTrait()))
+                .collect(Collectors.toList());*/
+
+        List<String> efoRemoved = prevStudies.stream()
+                .flatMap(study -> Arrays.asList(study.getEfoTrait().split("|")).stream())
+                .map(efo -> efo.trim())
+                .filter(efo ->  !newEfoTraits.contains(efo))
+                .collect(Collectors.toList());
+
+
+        /*List<Study> efoAdded = newStudies.stream()
+                .filter((study) -> !prevEfoTraits.contains(study.getTrait()))
+                .collect(Collectors.toList());*/
+        List<String> efoAdded = newStudies.stream()
+                .flatMap(study -> Arrays.asList(study.getEfoTrait().split("|")).stream())
+                .map(efo -> efo.trim())
+                .filter(efo -> !prevEfoTraits.contains(efo))
+                .collect(Collectors.toList());
+
+        log.info("newEfoTraits****"+newEfoTraits);
+        log.info("prevEfoTraits****"+prevEfoTraits);
+        log.info("efoRemoved****"+efoRemoved);
+        log.info("efoAdded****"+efoAdded);
+        AddedRemoved addedRemoved = new AddedRemoved();
+        addedRemoved.setAdded(efoAdded.size());
+        addedRemoved.setRemoved(efoRemoved.size());
+        return addedRemoved;
+
+    }
+
     private AddedRemoved getAssociationVersionStats(List<Association> prevAscns, List<Association> newAscns) {
         log.info("Inside getAssociationVersionStats() ");
 
@@ -380,6 +553,38 @@ public class ConversionJaversServiceImpl implements ConversionJaversService {
         return addedRemoved;
     }
 
+    private AddedRemoved getSampleVersionStats(List<Sample> prevSamples, List<Sample> newSamples) {
+        log.info("Inside getAssociationVersionStats() ");
+
+        List<String> newSamplesTags = newSamples.stream()
+                .map(sample -> sample.getStudyTag() + sample.getStage() +sample.getAncestryCategory())
+                .collect(Collectors.toList());
+
+        List<String> prevSamplesTags = prevSamples.stream()
+                .map(sample -> sample.getStudyTag() + sample.getStage() +sample.getAncestryCategory())
+                .collect(Collectors.toList());
+
+        List<Sample> samplesRemoved = prevSamples.stream()
+                .filter(sample -> !newSamplesTags.contains(sample.getStudyTag() + sample.getStage() +
+                        sample.getAncestryCategory()))
+                .collect(Collectors.toList());
+
+        List<Sample> samplesAdded = newSamples.stream()
+                .filter(sample -> !prevSamplesTags.contains(sample.getStudyTag() + sample.getStage() +
+                        sample.getAncestryCategory()))
+                .collect(Collectors.toList());
+
+        log.info("newAscnsTags****"+newSamplesTags);
+        log.info("prevAscnsTags****"+prevSamplesTags);
+        log.info("asscnsRemoved****"+samplesRemoved);
+        log.info("asscnsAdded****"+samplesAdded);
+
+        AddedRemoved addedRemoved = new AddedRemoved();
+        addedRemoved.setAdded(samplesAdded.size());
+        addedRemoved.setRemoved(samplesRemoved.size());
+
+        return addedRemoved;
+    }
 
     private DiffPropertyObject mapChangetoVersionStats(ValueChangeWrapper valueChangeWrapper) {
         DiffPropertyObject diffStats = new DiffPropertyObject();
@@ -422,6 +627,22 @@ public class ConversionJaversServiceImpl implements ConversionJaversService {
         }
     }
 
+    private List<ValueChangeWrapper> diffSamples(SampleDto dto1, SampleDto dto2) {
+        Javers javers = JaversBuilder.javers().build();
+        Diff diff = javers.compare(dto1, dto2);
+        log.info("************");
+        log.info("Diff Asscn"+ diff);
+        List<ValueChange> valChanges = diff.getChangesByType(ValueChange.class);
+        try {
+            ValueChangeWrapper[]  changes = new ObjectMapper().readValue(
+                    javers.getJsonConverter().toJson(valChanges), ValueChangeWrapper[].class);
+            return Arrays.asList(changes);
+        } catch(Exception ex){
+            log.error("Error in mapping Javers Changes"+ex.getMessage(),ex );
+            return null;
+        }
+    }
+
 
 
     private String processFileUploadTag(ElementChange elementChange){
@@ -445,6 +666,13 @@ public class ConversionJaversServiceImpl implements ConversionJaversService {
     private Association processAssociationTag(ElementChange elementChange){
       if (elementChange.getElementChangeType().equals("ValueAdded")){
           return associationsService.getAssociation(elementChange.getValue().toString() );
+        }
+        return null;
+    }
+
+    private Sample processSampleTag(ElementChange elementChange){
+        if (elementChange.getElementChangeType().equals("ValueAdded")){
+            return samplesService.getSample(elementChange.getValue().toString() );
         }
         return null;
     }
