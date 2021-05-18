@@ -38,7 +38,7 @@ public class SubmissionDiffController {
             produces = MediaType.APPLICATION_JSON_VALUE
     )
 
-    @ResponseStatus(HttpStatus.CREATED)
+    @ResponseStatus(HttpStatus.OK)
     @ResponseBody
     public List<VersionSummary> diffVersionSubmissions(@PathVariable String submissionId, HttpServletRequest request) {
         String jwtToken = CurationUtil.parseJwt(request);
