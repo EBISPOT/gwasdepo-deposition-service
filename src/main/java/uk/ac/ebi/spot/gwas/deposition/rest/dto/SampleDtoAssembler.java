@@ -38,6 +38,19 @@ public class SampleDtoAssembler implements ResourceAssembler<Sample, Resource<Sa
         return resource;
     }
 
+    public static SampleDto assemble(Sample sample) {
+        return new SampleDto(sample.getStudyTag(),
+                sample.getStage(),
+                sample.getSize(),
+                sample.getCases(),
+                sample.getControls(),
+                sample.getSampleDescription(),
+                sample.getAncestryCategory(),
+                sample.getAncestry(),
+                sample.getAncestryDescription(),
+                sample.getCountryRecruitement());
+    }
+
     public static Sample disassemble(SampleDto sampleDto) {
         Sample sample = new Sample();
         sample.setStudyTag(sampleDto.getStudyTag());

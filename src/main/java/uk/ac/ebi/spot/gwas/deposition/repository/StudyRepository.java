@@ -8,7 +8,7 @@ import uk.ac.ebi.spot.gwas.deposition.domain.Study;
 
 import java.util.List;
 import java.util.stream.Stream;
-@JaversSpringDataAuditable
+
 public interface StudyRepository extends MongoRepository<Study, String> {
 
     Page<Study> findBySubmissionId(String submissionId, Pageable page);
