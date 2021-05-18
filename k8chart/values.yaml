@@ -5,14 +5,14 @@
 replicaCount: 1
 
 image:
-  repository: ebispot/gwas-deposition-backend
+  repository: ebispot/gwas-deposition-backend-sajo-testing
   tag: latest
   pullPolicy: Always
   containerPort: 8080
   logMountPath: "/var/log/gwas"
   env:
     envName: "sandbox"
-    logFileName: "deposition-service"
+    logFileName: "deposition-service-sajo-testing"
     xms: "-Xms4096m"
     xmx: "-Xmx4096m"
     dbUser: ""
@@ -26,7 +26,7 @@ nameOverride: ""
 fullnameOverride: ""
 
 service:
-  name: gwas-deposition-backend
+  name: gwas-deposition-backend-sajo-testing
   type: NodePort
   port: 8080
 
@@ -37,7 +37,7 @@ ingress:
     # kubernetes.io/tls-acme: "true"
 
   host: chart-example.local
-  path: "/backend(/|$)(.*)"
+  path: "/backend-sajo-testing(/|$)(.*)"
 
   tls: []
   #  - secretName: chart-example-tls
