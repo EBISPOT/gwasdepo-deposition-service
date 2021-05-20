@@ -23,7 +23,9 @@ public class SuccessEmailBuilder extends AbstractEmailBuilder implements EmailBu
         if (content != null) {
             Context context = new Context();
             for (String variable : metadata.keySet()) {
+                log.info("Mail Key:"+variable);
                 Object variableValue = metadata.get(variable);
+                log.info("Mail Key Value:"+variableValue.toString());
                 context.setVariable(variable, variableValue);
             }
             return templateEngine.process(content, context);
