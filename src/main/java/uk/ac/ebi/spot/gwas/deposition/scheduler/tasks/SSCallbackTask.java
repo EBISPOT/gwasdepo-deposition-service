@@ -109,6 +109,7 @@ public class SSCallbackTask {
 
             metadata.put(MailConstants.SUBMISSION_ID, backendMailConfig.getSubmissionsBaseURL() + submission.getId());
             metadata.put(MailConstants.SUBMISSION_STUDIES, backendMailConfig.getSubmissionsBaseURL() + submission.getId());
+            metadata.put(MailConstants.SUBMISSION_DOCS_URL, backendMailConfig.getSubmissionsDocsURL());
 
             String userId = submission.getCreated().getUserId();
             log.info("Callback ID completed: {}", callbackId.getCallbackId());

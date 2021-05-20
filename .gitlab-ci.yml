@@ -80,7 +80,7 @@ deploy-backend-sandbox:
   environment:
     name: sandbox
   only:
-    - develop
+    - GOCI-321-AddText-Success-Email
 
 deploy-fallback:
   image: dtzar/helm-kubectl:2.13.1
