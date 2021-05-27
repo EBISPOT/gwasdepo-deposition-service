@@ -21,6 +21,7 @@ import uk.ac.ebi.spot.gwas.deposition.constants.GWASDepositionBackendConstants;
 import uk.ac.ebi.spot.gwas.deposition.constants.GeneralCommon;
 import uk.ac.ebi.spot.gwas.deposition.constants.SubmissionType;
 import uk.ac.ebi.spot.gwas.deposition.domain.FileUpload;
+import uk.ac.ebi.spot.gwas.deposition.domain.Study;
 import uk.ac.ebi.spot.gwas.deposition.domain.Submission;
 import uk.ac.ebi.spot.gwas.deposition.domain.User;
 import uk.ac.ebi.spot.gwas.deposition.dto.FileUploadDto;
@@ -88,7 +89,7 @@ public class FileUploadsController {
         if (submission.getType().equals(SubmissionType.SUMMARY_STATS.name())) {
             fileUpload = fileHandlerService.handleSummaryStatsFile(submission, file, user);
         } else {
-            fileUpload = fileHandlerService.handleMetadataFile(submission, file, user);
+            fileUpload = fileHandlerService.handleMetadataFile(submission, file, user, null);
         }
         auditProxy.addAuditEntry(AuditHelper.fileCreate(submission.getCreated().getUserId(), fileUpload, submission, true, null));
 
@@ -119,12 +120,13 @@ public class FileUploadsController {
         FileUpload fileUpload;
 
         //CompletableFuture.allOf(CompletableFuture.runAsync(() -> submissionService.deleteSubmissionChildren(submissionId)));
+        List<Study> oldStudies = submissionService.getStudies(submissionId);
         submissionService.deleteSubmissionChildren(submissionId);
         Submission submission = submissionService.editFileUploadSubmissionDetails(submissionId, user);
         if (submission.getType().equals(SubmissionType.SUMMARY_STATS.name())) {
             fileUpload = fileHandlerService.handleSummaryStatsFile(submission, file, user);
         } else {
-            fileUpload = fileHandlerService.handleMetadataFile(submission, file, user);
+            fileUpload = fileHandlerService.handleMetadataFile(submission, file, user, oldStudies);
         }
         auditProxy.addAuditEntry(AuditHelper.fileCreate(submission.getCreated().getUserId(), fileUpload, submission, true, null));
 
