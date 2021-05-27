@@ -22,6 +22,7 @@ import javax.swing.text.html.Option;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class SubmissionServiceImpl implements SubmissionService {
@@ -324,5 +325,10 @@ public class SubmissionServiceImpl implements SubmissionService {
                 submission.setLockDetails(null);
         });
         return saveSubmission(submission, user.getId());
+    }
+
+    public List<Study> getStudies(String submissionId) {
+        return studyRepository.readBySubmissionId(submissionId)
+        .collect(Collectors.toList());
     }
 }
