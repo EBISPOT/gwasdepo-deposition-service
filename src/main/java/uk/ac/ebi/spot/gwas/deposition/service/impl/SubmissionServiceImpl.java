@@ -63,6 +63,9 @@ public class SubmissionServiceImpl implements SubmissionService {
     private NoteRepository noteRepository;
 
     @Autowired
+    private PublicationRepository publicationRepository;
+
+    @Autowired
     PublicationService publicationService;
 
     @Autowired
@@ -327,8 +330,27 @@ public class SubmissionServiceImpl implements SubmissionService {
         return saveSubmission(submission, user.getId());
     }
 
+    /**
+     * Get List of Studies for previous submission & Publication
+     * @param submissionId
+     * @return
+     */
     public List<Study> getStudies(String submissionId) {
-        return studyRepository.readBySubmissionId(submissionId)
+       List<Study> studies = studyRepository.readBySubmissionId(submissionId)
         .collect(Collectors.toList());
+       List<String> studyTags = studies.stream().map(study -> study.getStudyTag())
+               .collect(Collectors.toList());
+        Submission submission = submissionRepository.findById(submissionId).get();
+        if(submission.getPublicationId() != null && !submission.getPublicationId().isEmpty()) {
+            Publication publication = publicationRepository.findById(submission.getPublicationId()).get();
+            List<Study> pmIdStudies = studyRepository.findByPmidsContains(publication.getPmid());
+          List<Study> uniqueStudies = pmIdStudies.stream().filter(study -> !studyTags.contains(study.getStudyTag()))
+                    .collect(Collectors.groupingBy(Study::getStudyTag))
+                    .values().stream()
+                    .map((studyArr) -> studyArr.stream().findFirst().get())
+                    .collect(Collectors.toList());
+            studies.addAll(uniqueStudies);
+        }
+    return studies;
     }
 }

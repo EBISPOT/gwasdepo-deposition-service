@@ -20,4 +20,6 @@ public interface StudyRepository extends MongoRepository<Study, String> {
     List<Study> findByIdIn(List<String> ids);
 
     List<Study> findByBodyOfWorkListContains(String bowId);
+
+    List<Study> findByPmidsContains(String pmId);
 }
