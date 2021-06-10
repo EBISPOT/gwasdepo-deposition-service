@@ -32,5 +32,5 @@ public interface SubmissionService {
 
     Submission lockSubmission(Submission submission,User user, String status);
 
-    Submission createGlobusFolderForReopenedSubmission(String submissionId, User apiCaller, SSGlobusFolderDto folderDto);
+    Submission createGlobusFolderForReopenedSubmission(String submissionId, User apiCaller, String globusEmail);
 }

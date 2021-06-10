@@ -26,6 +26,7 @@ import uk.ac.ebi.spot.gwas.deposition.dto.SubmissionDto;
 import uk.ac.ebi.spot.gwas.deposition.dto.summarystats.SSGlobusFolderDto;
 import uk.ac.ebi.spot.gwas.deposition.exception.*;
 import uk.ac.ebi.spot.gwas.deposition.rest.dto.BodyOfWorkDtoDisassembler;
+import uk.ac.ebi.spot.gwas.deposition.rest.dto.SubmissionPatchDto;
 import uk.ac.ebi.spot.gwas.deposition.service.*;
 import uk.ac.ebi.spot.gwas.deposition.service.impl.SubmissionAssemblyService;
 import uk.ac.ebi.spot.gwas.deposition.util.BackendUtil;
@@ -302,20 +303,23 @@ public class SubmissionsController {
     }
 
     /**
-     * POST /v1/submissions/{submissionId}/globus
-     * used to create Globus folder if a user requests to reopen a stale submission
-     * that was archived
+     * PATCH /v1/submissions/{submissionId}
+     * used to patch a submission (extend for fields as needed) and to create Globus folder if a user requests to reopen
+     * a stale submission that was archived
      */
-    @PostMapping(value = "/{submissionId}/globus",
+    @PatchMapping(value = "/{submissionId}",
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseStatus(HttpStatus.CREATED)
-    public Resource<SubmissionDto> createGlobusFolderForReopenedSubmission(@PathVariable String submissionId,
-                                                                           HttpServletRequest request,
-                                                                           @RequestBody SSGlobusFolderDto folderDto) {
+    @ResponseStatus(HttpStatus.OK)
+    public Resource<SubmissionDto> patchSubmission(@PathVariable String submissionId,
+                                                   HttpServletRequest request,
+                                                   @RequestBody SubmissionPatchDto patchDto) {
         User user = userService.findUser(jwtService.extractUser(HeadersUtil.extractJWT(request)), false);
-        Submission submission = submissionService
-                .createGlobusFolderForReopenedSubmission(submissionId, user, folderDto);
+        Submission submission = new Submission();
+        if (patchDto.getGlobusEmail() != null) {
+            submission = submissionService
+                    .createGlobusFolderForReopenedSubmission(submissionId, user, patchDto.getGlobusEmail());
+        }
         return submissionAssemblyService.toResource(submission);
     }
 

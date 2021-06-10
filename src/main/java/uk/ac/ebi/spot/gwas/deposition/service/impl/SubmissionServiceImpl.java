@@ -319,14 +319,14 @@ public class SubmissionServiceImpl implements SubmissionService {
     }
 
     @Override
-    public Submission createGlobusFolderForReopenedSubmission(String submissionId, User apiCaller, SSGlobusFolderDto folderDto) {
+    public Submission createGlobusFolderForReopenedSubmission(String submissionId, User apiCaller, String globusEmail) {
         if (!curatorAuthService.isCurator(apiCaller)) {
             log.error("Unauthorized access: {}", apiCaller.getId());
             throw new AuthorizationException("User [" + apiCaller.getId() + "] does not have access to perform Globus folder creation.");
         }
         String globusFolder = UUID.randomUUID().toString();
         SSGlobusResponse outcome = sumStatsService.createGlobusFolder(
-                new SSGlobusFolderDto(globusFolder, folderDto.getEmail())
+                new SSGlobusFolderDto(globusFolder, globusEmail)
         );
         if (outcome != null) {
             if (!outcome.isValid()) {
