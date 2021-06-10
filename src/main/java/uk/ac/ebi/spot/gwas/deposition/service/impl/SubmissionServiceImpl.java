@@ -26,6 +26,7 @@ import javax.swing.text.html.Option;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import java.util.UUID;
 
 @Service
@@ -65,6 +66,9 @@ public class SubmissionServiceImpl implements SubmissionService {
 
     @Autowired
     private NoteRepository noteRepository;
+
+    @Autowired
+    private PublicationRepository publicationRepository;
 
     @Autowired
     PublicationService publicationService;
@@ -243,19 +247,35 @@ public class SubmissionServiceImpl implements SubmissionService {
 
         log.info("Reached Deleting Study Stage");
         Optional.ofNullable(studyRepository.findBySubmissionId(submissionId, Pageable.unpaged())).
-                ifPresent((studies) ->  studies.forEach((study) -> studyRepository.delete(study)));
+                ifPresent((studies) ->  studies.forEach((study) ->  {
+                    study.setSubmissionId("");
+                    studyRepository.save(study);
+
+                }));
         log.info("Reached Deleting Association Stage");
         Optional.ofNullable(associationRepository.findBySubmissionId(submissionId, Pageable.unpaged())).
                 ifPresent((associations) ->
-                        associations.forEach((association) -> associationRepository.delete(association)));
+                        associations.forEach((association) -> {
+                            association.setSubmissionId("");
+                            associationRepository.save(association);
+
+                        }));
 
         log.info("Reached Deleting Sample Stage");
         Optional.ofNullable(sampleRepository.findBySubmissionId(submissionId, Pageable.unpaged())).
-                ifPresent((samples) ->  samples.forEach((sample) -> sampleRepository.delete(sample)));
+                ifPresent((samples) ->  samples.forEach((sample) -> {
+                            sample.setSubmissionId("");
+                            sampleRepository.save(sample);
+                        }
+                ));
 
         log.info("Reached Deleting Note Stage");
         Optional.ofNullable(noteRepository.findBySubmissionId(submissionId, Pageable.unpaged())).
-                ifPresent((notes) ->  notes.forEach((note) -> noteRepository.delete(note)));
+                ifPresent((notes) ->  notes.forEach((note) -> {
+                            note.setSubmissionId("");
+                            noteRepository.save(note);
+                        }
+                ));
 
     }
 
@@ -341,5 +361,29 @@ public class SubmissionServiceImpl implements SubmissionService {
         } else {
             throw new SSGlobusFolderCreatioException("An error occurred when communicating with SS/Globus.");
         }
+    }
+
+    /**
+     * Get List of Studies for previous submission & Publication
+     * @param submissionId
+     * @return
+     */
+    public List<Study> getStudies(String submissionId) {
+       List<Study> studies = studyRepository.readBySubmissionId(submissionId)
+        .collect(Collectors.toList());
+       List<String> studyTags = studies.stream().map(study -> study.getStudyTag())
+               .collect(Collectors.toList());
+        Submission submission = submissionRepository.findById(submissionId).get();
+        if(submission.getPublicationId() != null && !submission.getPublicationId().isEmpty()) {
+            Publication publication = publicationRepository.findById(submission.getPublicationId()).get();
+            List<Study> pmIdStudies = studyRepository.findByPmidsContains(publication.getPmid());
+          List<Study> uniqueStudies = pmIdStudies.stream().filter(study -> !studyTags.contains(study.getStudyTag()))
+                    .collect(Collectors.groupingBy(Study::getStudyTag))
+                    .values().stream()
+                    .map((studyArr) -> studyArr.stream().findFirst().get())
+                    .collect(Collectors.toList());
+            studies.addAll(uniqueStudies);
+        }
+    return studies;
     }
 }

@@ -44,6 +44,24 @@ public class AssociationDtoAssembler implements ResourceAssembler<Association, R
         return resource;
     }
 
+    public static AssociationDto assemble(Association association) {
+       return new AssociationDto(association.getStudyTag(),
+                association.getHaplotypeId(),
+                association.getVariantId(),
+                association.getPvalue(),
+                association.getPvalueText(),
+                association.getProxyVariant(),
+                association.getEffectAllele(),
+                association.getOtherAllele(),
+                association.getEffectAlleleFrequency(),
+                association.getOddsRatio(),
+                association.getBeta(),
+                association.getBetaUnit(),
+                association.getCiLower(),
+                association.getCiUpper(),
+                association.getStandardError());
+    }
+
     public static Association disassemble(AssociationDto associationDto) {
         Association association = new Association();
         association.setStudyTag(associationDto.getStudyTag());
