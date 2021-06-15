@@ -350,6 +350,16 @@ public class SubmissionServiceImpl implements SubmissionService {
                     .map((studyArr) -> studyArr.stream().findFirst().get())
                     .collect(Collectors.toList());
             studies.addAll(uniqueStudies);
+        } else {
+            if(submission.getBodyOfWorks() != null && !submission.getBodyOfWorks().isEmpty()) {
+                List<Study> bowStudies = studyRepository.findByBodyOfWorkListContains(submission.getBodyOfWorks().get(0));
+                List<Study> uniqueStudies = bowStudies.stream().filter(study -> !studyTags.contains(study.getStudyTag()))
+                        .collect(Collectors.groupingBy(Study::getStudyTag))
+                        .values().stream()
+                        .map((studyArr) -> studyArr.stream().findFirst().get())
+                        .collect(Collectors.toList());
+                studies.addAll(uniqueStudies);
+            }
         }
     return studies;
     }
