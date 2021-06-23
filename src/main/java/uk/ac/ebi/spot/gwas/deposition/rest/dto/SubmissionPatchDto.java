@@ -1,6 +1,7 @@
 package uk.ac.ebi.spot.gwas.deposition.rest.dto;
 
 public class SubmissionPatchDto {
+
     private String globusEmail;
 
     public String getGlobusEmail() {
