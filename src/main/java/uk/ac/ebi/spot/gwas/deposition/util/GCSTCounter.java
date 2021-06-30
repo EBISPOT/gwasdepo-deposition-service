@@ -18,7 +18,7 @@ public class GCSTCounter {
     @Autowired
     private GCSTCounterItemRepository gcstCounterItemRepository;
 
-    public String getNext() {
+    public synchronized String getNext() {
         int counter = 90000000;
         List<GCSTCounterItem> gcstCounterItemList = gcstCounterItemRepository.findAll();
         if (!gcstCounterItemList.isEmpty()) {
