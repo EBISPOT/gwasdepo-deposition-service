@@ -28,7 +28,7 @@ public class GCSTCounter {
 
         List<GCSTCounterItem> gcstCounterItemList = gcstCounterItemRepository.findAll();
         if (gcstCounterItemList.isEmpty()) {
-            if (environment.acceptsProfiles(Profiles.of("dev"))) {
+            if (environment.acceptsProfiles(Profiles.of("dev", "test"))) {
                 log.info("Current counter: not found in db");
                 int counter = 90000001;
                 GCSTCounterItem gcstCounterItem = gcstCounterItemRepository.insert(new GCSTCounterItem(counter));
