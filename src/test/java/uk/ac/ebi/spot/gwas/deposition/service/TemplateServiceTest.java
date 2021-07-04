@@ -117,7 +117,7 @@ public class TemplateServiceTest {
     public void shouldRetrievePrefilledTemplate() {
         String endpoint = templateServiceUrl + prefilledTemplateEndpoint;
 
-        SSTemplateRequestDto ssTemplateRequestDto = new SSTemplateRequestDto(true,
+        SSTemplateRequestDto ssTemplateRequestDto = new SSTemplateRequestDto(true, true,
                 new SSTemplateRequestStudyDto(
                         Arrays.asList(new SSTemplateEntryDto[]{
                                 new SSTemplateEntryDto(RandomStringUtils.randomAlphanumeric(10),
