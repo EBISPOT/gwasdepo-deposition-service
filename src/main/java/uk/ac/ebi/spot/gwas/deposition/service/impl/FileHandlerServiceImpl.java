@@ -58,6 +58,9 @@ public class FileHandlerServiceImpl implements FileHandlerService {
     @Autowired
     private BackendEmailService backendEmailService;
 
+    @Autowired
+    private CuratorAuthService curatorAuthService;
+
     @Override
     @Async
     public void handleSummaryStatsTemplate(Submission submission, Publication publication, User user) {
@@ -96,7 +99,7 @@ public class FileHandlerServiceImpl implements FileHandlerService {
             markInvalidFile(fileUpload, submission, ErrorType.NO_TEMPLATE_SERVICE, null, user);
         } else {
             FileObject fileObject = templateService.retrievePrefilledTemplate(new SSTemplateRequestDto(true,
-                    new SSTemplateRequestStudyDto(summaryStatsEntries)));
+                    curatorAuthService.isCurator(user), new SSTemplateRequestStudyDto(summaryStatsEntries)));
             if (fileObject == null) {
                 log.error("No file object received from the template service!");
                 backendEmailService.sendErrorsEmail("SS File Handler", "[" + publication.getPmid() + "] No file object received from the template service!");
