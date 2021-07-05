@@ -39,6 +39,7 @@ gwas-deposition:
     enabled: true
   email-config:
     base-url: http://193.62.54.159/gwas/deposition/submission/
+    docs-url: http://snoopy.ebi.ac.uk:9680/gwas/docs/submission#link-15
 
 email:
   enabled: true
