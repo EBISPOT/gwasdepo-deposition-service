@@ -11,7 +11,13 @@ import org.springframework.stereotype.Service;
 import uk.ac.ebi.spot.gwas.deposition.components.BodyOfWorkListener;
 import uk.ac.ebi.spot.gwas.deposition.constants.Status;
 import uk.ac.ebi.spot.gwas.deposition.constants.SubmissionProvenanceType;
-import uk.ac.ebi.spot.gwas.deposition.domain.*;
+import uk.ac.ebi.spot.gwas.deposition.domain.ArchivedSubmission;
+import uk.ac.ebi.spot.gwas.deposition.domain.CallbackId;
+import uk.ac.ebi.spot.gwas.deposition.domain.FileUpload;
+import uk.ac.ebi.spot.gwas.deposition.domain.Provenance;
+import uk.ac.ebi.spot.gwas.deposition.domain.Submission;
+import uk.ac.ebi.spot.gwas.deposition.domain.SummaryStatsEntry;
+import uk.ac.ebi.spot.gwas.deposition.domain.User;
 import uk.ac.ebi.spot.gwas.deposition.exception.EntityNotFoundException;
 import uk.ac.ebi.spot.gwas.deposition.repository.ArchivedSubmissionRepository;
 import uk.ac.ebi.spot.gwas.deposition.repository.CallbackIdRepository;
@@ -20,7 +26,6 @@ import uk.ac.ebi.spot.gwas.deposition.repository.SummaryStatsEntryRepository;
 import uk.ac.ebi.spot.gwas.deposition.service.CuratorAuthService;
 import uk.ac.ebi.spot.gwas.deposition.service.FileUploadsService;
 import uk.ac.ebi.spot.gwas.deposition.service.SubmissionService;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -97,7 +102,7 @@ public class SubmissionServiceImpl implements SubmissionService {
 
     @Override
     public Page<Submission> getSubmissions(String publicationId, String bowId, Pageable page, User user) {
-        log.info("Retrieving submissions: {} - {} - {}", page.getPageNumber(), page.getPageSize(), page.getSort().toString());
+        log.info("Retrieving submissions: {} - {} - {}", page.getPageNumber(), page.getPageSize(), page.getSort());
         if (curatorAuthService.isCurator(user)) {
             if (publicationId != null) {
                 return submissionRepository.findByPublicationIdAndArchived(publicationId, false, page);

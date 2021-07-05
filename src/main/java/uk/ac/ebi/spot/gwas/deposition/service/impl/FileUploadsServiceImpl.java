@@ -22,7 +22,6 @@ import uk.ac.ebi.spot.gwas.deposition.exception.FileProcessingException;
 import uk.ac.ebi.spot.gwas.deposition.repository.FileUploadRepository;
 import uk.ac.ebi.spot.gwas.deposition.service.FileUploadsService;
 import uk.ac.ebi.spot.gwas.deposition.util.BackendUtil;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -48,7 +47,7 @@ public class FileUploadsServiceImpl implements FileUploadsService {
                                 long fileSize, String fileType) {
         log.info("Storing new file: {}", fileName);
         ObjectId objectId = is == null ? null : gridFsOperations.store(is, fileName, contentType);
-        log.info("File successfully stored: {}", objectId.toString());
+        log.info("File successfully stored: {}", objectId);
         FileUpload fileUpload = new FileUpload(
                 objectId != null ? objectId.toString() : null, fileName,
                 fileSize, FileUploadStatus.PROCESSING.name(),
@@ -62,9 +61,8 @@ public class FileUploadsServiceImpl implements FileUploadsService {
     public FileUpload storeFile(MultipartFile file, String fileType) {
         try {
             String fileName = BackendUtil.normalize(file.getOriginalFilename());
-            FileUpload fileUpload = storeFile(file.getInputStream(), fileName,
+            return storeFile(file.getInputStream(), fileName,
                     file.getContentType(), file.getSize(), fileType);
-            return fileUpload;
         } catch (IOException e) {
             log.error("Unable to store file [{}]: {}", file.getOriginalFilename(), e.getMessage(), e);
         }
@@ -178,10 +176,10 @@ public class FileUploadsServiceImpl implements FileUploadsService {
     }
 
     private InputStream getFileDownloadStream(ObjectId objectId) {
-        log.info("Retrieving file for download: {}", objectId.toString());
+        log.info("Retrieving file for download: {}", objectId);
         GridFSDownloadStream stream = GridFSBuckets.create(mongoTemplate.getDb())
                 .openDownloadStream(objectId);
-        log.info("Retrieved download stream {}", objectId.toString());
+        log.info("Retrieved download stream {}", objectId);
         return stream;
 
     }

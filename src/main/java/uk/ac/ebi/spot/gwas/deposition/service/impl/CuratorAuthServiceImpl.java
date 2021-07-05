@@ -10,7 +10,6 @@ import uk.ac.ebi.spot.gwas.deposition.domain.CuratorWhitelist;
 import uk.ac.ebi.spot.gwas.deposition.domain.User;
 import uk.ac.ebi.spot.gwas.deposition.repository.CuratorWhitelistRepository;
 import uk.ac.ebi.spot.gwas.deposition.service.CuratorAuthService;
-
 import java.util.Collections;
 import java.util.Optional;
 
@@ -28,10 +27,8 @@ public class CuratorAuthServiceImpl implements CuratorAuthService {
     @Override
     public boolean isCurator(User user) {
         log.info("Checking user for curator permissions: {}", user.getEmail());
-        if (gwasDepositionBackendConfig.getAutoCuratorServiceAccount() != null) {
-            if (user.getEmail().equalsIgnoreCase(gwasDepositionBackendConfig.getAutoCuratorServiceAccount())) {
-                return true;
-            }
+        if (gwasDepositionBackendConfig.getAutoCuratorServiceAccount() != null && user.getEmail().equalsIgnoreCase(gwasDepositionBackendConfig.getAutoCuratorServiceAccount())) {
+            return true;
         }
         if (gwasDepositionBackendConfig.getCuratorAuthMechanism().equalsIgnoreCase(IDPConstants.CURATOR_AUTH_JWT_DOMAIN)) {
             return !Collections.disjoint(gwasDepositionBackendConfig.getCuratorDomains(), user.getDomains());

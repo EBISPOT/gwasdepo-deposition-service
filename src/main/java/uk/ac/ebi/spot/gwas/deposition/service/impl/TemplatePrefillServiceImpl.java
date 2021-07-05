@@ -48,7 +48,7 @@ public class TemplatePrefillServiceImpl implements TemplatePrefillService {
 
         StudyCollector studyCollector = new StudyCollector();
         Stream<Study> studyStream = studyRepository.readBySubmissionId(submissionId);
-        studyStream.forEach(study -> studyCollector.add(study));
+        studyStream.forEach(studyCollector::add);
         studyStream.close();
 
         try {
@@ -80,7 +80,7 @@ public class TemplatePrefillServiceImpl implements TemplatePrefillService {
         StudyCollector studyCollector = new StudyCollector();
         Stream<Study> studyStream = studyRepository.readByIdIn(submission.getStudies());
 //        Stream<Study> studyStream = studyRepository.readBySubmissionId(submission.getId());
-        studyStream.forEach(study -> studyCollector.add(study));
+        studyStream.forEach(studyCollector::add);
         studyStream.close();
 
         try {

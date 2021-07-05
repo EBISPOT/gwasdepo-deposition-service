@@ -1,5 +1,6 @@
 package uk.ac.ebi.spot.gwas.deposition.service.impl;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,7 +10,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import uk.ac.ebi.spot.gwas.deposition.components.BodyOfWorkListener;
 import uk.ac.ebi.spot.gwas.deposition.constants.PublicationStatus;
-import uk.ac.ebi.spot.gwas.deposition.domain.*;
+import uk.ac.ebi.spot.gwas.deposition.domain.BodyOfWork;
+import uk.ac.ebi.spot.gwas.deposition.domain.Provenance;
+import uk.ac.ebi.spot.gwas.deposition.domain.Publication;
+import uk.ac.ebi.spot.gwas.deposition.domain.Study;
+import uk.ac.ebi.spot.gwas.deposition.domain.User;
 import uk.ac.ebi.spot.gwas.deposition.exception.AuthorizationException;
 import uk.ac.ebi.spot.gwas.deposition.exception.EntityNotFoundException;
 import uk.ac.ebi.spot.gwas.deposition.repository.BodyOfWorkRepository;
@@ -19,7 +24,6 @@ import uk.ac.ebi.spot.gwas.deposition.service.BodyOfWorkService;
 import uk.ac.ebi.spot.gwas.deposition.service.CuratorAuthService;
 import uk.ac.ebi.spot.gwas.deposition.service.UserService;
 import uk.ac.ebi.spot.gwas.deposition.util.GCPCounter;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -154,28 +158,26 @@ public class BodyOfWorkServiceImpl implements BodyOfWorkService {
         existing.setUrl(bodyOfWork.getUrl());
 
         String publicationId = null;
-        if (existing.getPmids() != null) {
-            if (!existing.getPmids().isEmpty()) {
-                List<Study> studyList = studyRepository.findByBodyOfWorkListContains(bodyofworkId);
-                for (Study study : studyList) {
-                    List<String> pmids = study.getPmids() != null ? study.getPmids() : new ArrayList<>();
-                    for (String pmid : existing.getPmids()) {
-                        if (!pmids.contains(pmid)) {
-                            pmids.add(pmid);
-                        }
+        if (CollectionUtils.isNotEmpty(existing.getPmids())) {
+            List<Study> studyList = studyRepository.findByBodyOfWorkListContains(bodyofworkId);
+            for (Study study : studyList) {
+                List<String> pmids = study.getPmids() != null ? study.getPmids() : new ArrayList<>();
+                for (String pmid : existing.getPmids()) {
+                    if (!pmids.contains(pmid)) {
+                        pmids.add(pmid);
                     }
-
-                    study.setPmids(pmids);
-                    studyRepository.save(study);
                 }
 
-                Optional<Publication> publicationOptional = publicationRepository.findByPmid(existing.getPmids().get(0));
-                if (publicationOptional.isPresent()) {
-                    Publication publication = publicationOptional.get();
-                    publicationId = publication.getId();
-                    publication.setStatus(PublicationStatus.UNDER_SUBMISSION.name());
-                    publicationRepository.save(publication);
-                }
+                study.setPmids(pmids);
+                studyRepository.save(study);
+            }
+
+            Optional<Publication> publicationOptional = publicationRepository.findByPmid(existing.getPmids().get(0));
+            if (publicationOptional.isPresent()) {
+                Publication publication = publicationOptional.get();
+                publicationId = publication.getId();
+                publication.setStatus(PublicationStatus.UNDER_SUBMISSION.name());
+                publicationRepository.save(publication);
             }
         }
 

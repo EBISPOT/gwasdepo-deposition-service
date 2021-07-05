@@ -12,7 +12,6 @@ import uk.ac.ebi.spot.gwas.deposition.domain.Submission;
 import uk.ac.ebi.spot.gwas.deposition.repository.StudyRepository;
 import uk.ac.ebi.spot.gwas.deposition.service.StudiesService;
 import uk.ac.ebi.spot.gwas.deposition.util.IdCollector;
-
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -27,7 +26,7 @@ public class StudiesServiceImpl implements StudiesService {
 
     @Override
     public Page<Study> getStudies(Submission submission, Pageable page) {
-        log.info("Retrieving studies: {} - {} - {}", page.getPageNumber(), page.getPageSize(), page.getSort().toString());
+        log.info("Retrieving studies: {} - {} - {}", page.getPageNumber(), page.getPageSize(), page.getSort());
         return studyRepository.findBySubmissionId(submission.getId(), page);
     }
 

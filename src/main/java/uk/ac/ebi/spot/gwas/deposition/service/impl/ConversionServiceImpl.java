@@ -9,10 +9,27 @@ import uk.ac.ebi.spot.gwas.deposition.audit.AuditProxy;
 import uk.ac.ebi.spot.gwas.deposition.constants.FileUploadStatus;
 import uk.ac.ebi.spot.gwas.deposition.constants.Status;
 import uk.ac.ebi.spot.gwas.deposition.constants.SubmissionProvenanceType;
-import uk.ac.ebi.spot.gwas.deposition.domain.*;
-import uk.ac.ebi.spot.gwas.deposition.dto.*;
+import uk.ac.ebi.spot.gwas.deposition.domain.Association;
+import uk.ac.ebi.spot.gwas.deposition.domain.BodyOfWork;
+import uk.ac.ebi.spot.gwas.deposition.domain.FileUpload;
+import uk.ac.ebi.spot.gwas.deposition.domain.Note;
+import uk.ac.ebi.spot.gwas.deposition.domain.Publication;
+import uk.ac.ebi.spot.gwas.deposition.domain.Sample;
+import uk.ac.ebi.spot.gwas.deposition.domain.Study;
+import uk.ac.ebi.spot.gwas.deposition.domain.Submission;
+import uk.ac.ebi.spot.gwas.deposition.domain.SummaryStatsEntry;
+import uk.ac.ebi.spot.gwas.deposition.dto.AssociationDto;
+import uk.ac.ebi.spot.gwas.deposition.dto.NoteDto;
+import uk.ac.ebi.spot.gwas.deposition.dto.SampleDto;
+import uk.ac.ebi.spot.gwas.deposition.dto.StudyDto;
+import uk.ac.ebi.spot.gwas.deposition.dto.SubmissionDataDto;
 import uk.ac.ebi.spot.gwas.deposition.dto.templateschema.TemplateSchemaDto;
-import uk.ac.ebi.spot.gwas.deposition.repository.*;
+import uk.ac.ebi.spot.gwas.deposition.repository.AssociationRepository;
+import uk.ac.ebi.spot.gwas.deposition.repository.BodyOfWorkRepository;
+import uk.ac.ebi.spot.gwas.deposition.repository.NoteRepository;
+import uk.ac.ebi.spot.gwas.deposition.repository.PublicationRepository;
+import uk.ac.ebi.spot.gwas.deposition.repository.SampleRepository;
+import uk.ac.ebi.spot.gwas.deposition.repository.StudyRepository;
 import uk.ac.ebi.spot.gwas.deposition.rest.dto.AssociationDtoAssembler;
 import uk.ac.ebi.spot.gwas.deposition.rest.dto.NoteDtoAssembler;
 import uk.ac.ebi.spot.gwas.deposition.rest.dto.SampleDtoAssembler;
@@ -26,7 +43,6 @@ import uk.ac.ebi.spot.gwas.deposition.util.GCSTCounter;
 import uk.ac.ebi.spot.gwas.template.validator.service.TemplateConverterService;
 import uk.ac.ebi.spot.gwas.template.validator.util.StreamSubmissionTemplateReader;
 import uk.ac.ebi.spot.gwas.template.validator.util.SubmissionConverter;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -97,10 +113,8 @@ public class ConversionServiceImpl implements ConversionService {
                     study.setBodyOfWorkList(submission.getBodyOfWorks());
 
                     Optional<BodyOfWork> bodyOfWorkOptional = bodyOfWorkRepository.findByBowIdAndArchived(submission.getBodyOfWorks().get(0), false);
-                    if (bodyOfWorkOptional.isPresent()) {
-                        if (bodyOfWorkOptional.get().getPmids() != null) {
-                            study.setPmids(bodyOfWorkOptional.get().getPmids());
-                        }
+                    if (bodyOfWorkOptional.isPresent() && bodyOfWorkOptional.get().getPmids() != null) {
+                        study.setPmids(bodyOfWorkOptional.get().getPmids());
                     }
                 }
             } else {

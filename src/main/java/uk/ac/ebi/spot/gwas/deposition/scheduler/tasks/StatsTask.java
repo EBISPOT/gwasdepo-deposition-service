@@ -11,7 +11,6 @@ import uk.ac.ebi.spot.gwas.deposition.repository.DailyStatsRepository;
 import uk.ac.ebi.spot.gwas.deposition.repository.SubmissionRepository;
 import uk.ac.ebi.spot.gwas.deposition.util.StatsBuilder;
 import uk.ac.ebi.spot.gwas.deposition.util.StatsConstants;
-
 import java.util.stream.Stream;
 
 @Component
@@ -36,7 +35,7 @@ public class StatsTask {
 
         StatsBuilder statsBuilder = new StatsBuilder(dailyStats);
         Stream<Submission> submissionStream = submissionRepository.readByArchived(false);
-        submissionStream.forEach(submission -> statsBuilder.processSubmission(submission));
+        submissionStream.forEach(statsBuilder::processSubmission);
         submissionStream.close();
         dailyStats = statsBuilder.getDailyStats();
         dailyStats = dailyStatsRepository.insert(dailyStats);

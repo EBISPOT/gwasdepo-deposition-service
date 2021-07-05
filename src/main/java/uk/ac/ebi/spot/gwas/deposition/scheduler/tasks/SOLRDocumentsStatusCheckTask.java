@@ -43,15 +43,11 @@ public class SOLRDocumentsStatusCheckTask {
         for (PublicationIngestEntry publicationIngestEntry : publicationIngestEntries) {
             try {
                 Publication publication = publicationService.retrievePublication(publicationIngestEntry.getPublicationId(), true);
-                if (publicationIngestEntry.getStatus().equalsIgnoreCase(PublicationIngestStatus.CREATED.name())) {
-                    if (solrService != null) {
-                        solrService.addPublication(publication);
-                    }
+                if (publicationIngestEntry.getStatus().equalsIgnoreCase(PublicationIngestStatus.CREATED.name()) && solrService != null) {
+                    solrService.addPublication(publication);
                 }
-                if (publicationIngestEntry.getStatus().equalsIgnoreCase(PublicationIngestStatus.UPDATED.name())) {
-                    if (solrService != null) {
-                        solrService.updatePublication(publication);
-                    }
+                if (publicationIngestEntry.getStatus().equalsIgnoreCase(PublicationIngestStatus.UPDATED.name()) && solrService != null) {
+                    solrService.updatePublication(publication);
                 }
                 idsToDelete.add(publicationIngestEntry.getId());
             } catch (Exception e) {

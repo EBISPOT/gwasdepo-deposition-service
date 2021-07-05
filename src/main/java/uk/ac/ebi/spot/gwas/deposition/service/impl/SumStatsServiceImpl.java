@@ -13,7 +13,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import uk.ac.ebi.spot.gwas.deposition.domain.SSGlobusResponse;
-import uk.ac.ebi.spot.gwas.deposition.dto.summarystats.*;
+import uk.ac.ebi.spot.gwas.deposition.dto.summarystats.SSGlobusFolderDto;
+import uk.ac.ebi.spot.gwas.deposition.dto.summarystats.SSGlobusFolderRequestResponseDto;
+import uk.ac.ebi.spot.gwas.deposition.dto.summarystats.SSWrapUpRequestDto;
+import uk.ac.ebi.spot.gwas.deposition.dto.summarystats.SummaryStatsAckDto;
+import uk.ac.ebi.spot.gwas.deposition.dto.summarystats.SummaryStatsRequestDto;
+import uk.ac.ebi.spot.gwas.deposition.dto.summarystats.SummaryStatsResponseDto;
 import uk.ac.ebi.spot.gwas.deposition.service.BackendEmailService;
 import uk.ac.ebi.spot.gwas.deposition.service.SumStatsService;
 
@@ -71,7 +76,6 @@ public class SumStatsServiceImpl extends GatewayService implements SumStatsServi
 
             if (response.getStatusCode().equals(HttpStatus.OK)) {
                 log.info("SS call successfully completed.");
-                return;
             }
         } catch (Exception e) {
             log.error("Unable to call gwas-sumstats-service: {}", e.getMessage(), e);
@@ -140,12 +144,10 @@ public class SumStatsServiceImpl extends GatewayService implements SumStatsServi
                         ssGlobusFolderDto.getUniqueId(), ssGlobusFolderDto.getEmail());
                 return new SSGlobusResponse(true, responseDto.getGlobusOriginID());
             }
-            if (response.getStatusCode().equals(HttpStatus.OK)) {
-                if (responseDto.getError() != null) {
-                    backendEmailService.sendErrorsEmail("SummaryStats Service",
-                            "[" + ssGlobusFolderDto.getUniqueId() + " | " + ssGlobusFolderDto.getEmail() + "]: " + responseDto.getError());
-                    return new SSGlobusResponse(false, responseDto.getError());
-                }
+            if (response.getStatusCode().equals(HttpStatus.OK) && responseDto.getError() != null) {
+                backendEmailService.sendErrorsEmail("SummaryStats Service",
+                        "[" + ssGlobusFolderDto.getUniqueId() + " | " + ssGlobusFolderDto.getEmail() + "]: " + responseDto.getError());
+                return new SSGlobusResponse(false, responseDto.getError());
             }
             log.info("SS Service returned an unexpected code: {}", response.getStatusCode());
             backendEmailService.sendErrorsEmail("SummaryStats Service", response.getStatusCode().toString());

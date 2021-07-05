@@ -14,22 +14,54 @@ import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.mvc.ControllerLinkBuilder;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
 import uk.ac.ebi.spot.gwas.deposition.audit.AuditHelper;
 import uk.ac.ebi.spot.gwas.deposition.audit.AuditProxy;
 import uk.ac.ebi.spot.gwas.deposition.config.GWASDepositionBackendConfig;
-import uk.ac.ebi.spot.gwas.deposition.constants.*;
-import uk.ac.ebi.spot.gwas.deposition.domain.*;
+import uk.ac.ebi.spot.gwas.deposition.constants.BodyOfWorkStatus;
+import uk.ac.ebi.spot.gwas.deposition.constants.GWASDepositionBackendConstants;
+import uk.ac.ebi.spot.gwas.deposition.constants.GeneralCommon;
+import uk.ac.ebi.spot.gwas.deposition.constants.PublicationStatus;
+import uk.ac.ebi.spot.gwas.deposition.constants.Status;
+import uk.ac.ebi.spot.gwas.deposition.constants.SubmissionProvenanceType;
+import uk.ac.ebi.spot.gwas.deposition.constants.SubmissionType;
+import uk.ac.ebi.spot.gwas.deposition.domain.BodyOfWork;
+import uk.ac.ebi.spot.gwas.deposition.domain.Provenance;
+import uk.ac.ebi.spot.gwas.deposition.domain.Publication;
+import uk.ac.ebi.spot.gwas.deposition.domain.SSGlobusResponse;
+import uk.ac.ebi.spot.gwas.deposition.domain.Submission;
+import uk.ac.ebi.spot.gwas.deposition.domain.User;
 import uk.ac.ebi.spot.gwas.deposition.dto.SubmissionCreationDto;
 import uk.ac.ebi.spot.gwas.deposition.dto.SubmissionDto;
 import uk.ac.ebi.spot.gwas.deposition.dto.summarystats.SSGlobusFolderDto;
-import uk.ac.ebi.spot.gwas.deposition.exception.*;
+import uk.ac.ebi.spot.gwas.deposition.exception.CannotCreateSubmissionOnExistingBodyOfWork;
+import uk.ac.ebi.spot.gwas.deposition.exception.DeleteOnSubmittedSubmissionNotAllowedException;
+import uk.ac.ebi.spot.gwas.deposition.exception.EmailAccountNotLinkedToGlobusException;
+import uk.ac.ebi.spot.gwas.deposition.exception.InvalidSubmissionTypeException;
+import uk.ac.ebi.spot.gwas.deposition.exception.SSGlobusFolderCreatioException;
+import uk.ac.ebi.spot.gwas.deposition.exception.SubmissionOnUnacceptedPublicationTypeException;
 import uk.ac.ebi.spot.gwas.deposition.rest.dto.BodyOfWorkDtoDisassembler;
-import uk.ac.ebi.spot.gwas.deposition.service.*;
+import uk.ac.ebi.spot.gwas.deposition.service.BodyOfWorkService;
+import uk.ac.ebi.spot.gwas.deposition.service.FileHandlerService;
+import uk.ac.ebi.spot.gwas.deposition.service.JWTService;
+import uk.ac.ebi.spot.gwas.deposition.service.PublicationService;
+import uk.ac.ebi.spot.gwas.deposition.service.SubmissionService;
+import uk.ac.ebi.spot.gwas.deposition.service.SumStatsService;
+import uk.ac.ebi.spot.gwas.deposition.service.SummaryStatsProcessingService;
+import uk.ac.ebi.spot.gwas.deposition.service.UserService;
 import uk.ac.ebi.spot.gwas.deposition.service.impl.SubmissionAssemblyService;
 import uk.ac.ebi.spot.gwas.deposition.util.BackendUtil;
 import uk.ac.ebi.spot.gwas.deposition.util.HeadersUtil;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.util.UUID;
@@ -72,7 +104,6 @@ public class SubmissionsController {
 
     @Autowired
     private AuditProxy auditProxy;
-
 
     /**
      * POST /v1/submissions
@@ -271,7 +302,7 @@ public class SubmissionsController {
                                                         PagedResourcesAssembler assembler) {
         User user = userService.findUser(jwtService.extractUser(HeadersUtil.extractJWT(request)), false);
         log.info("[{}] Request to retrieve submissions: {} - {} - {} - {} - {}", user.getName(),
-                pmid, bowId, pageable.getPageNumber(), pageable.getPageSize(), pageable.getSort().toString());
+                pmid, bowId, pageable.getPageNumber(), pageable.getPageSize(), pageable.getSort());
         Publication publication = pmid != null ? publicationService.retrievePublication(pmid, false) : null;
         Page<Submission> facetedSearchSubmissions = submissionService.getSubmissions(publication != null ?
                 publication.getId() : null, bowId, pageable, user);

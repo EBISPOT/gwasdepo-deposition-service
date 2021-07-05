@@ -14,13 +14,11 @@ import uk.ac.ebi.spot.gwas.deposition.domain.User;
 import uk.ac.ebi.spot.gwas.deposition.exception.AuthorizationException;
 import uk.ac.ebi.spot.gwas.deposition.repository.AuthTokenRepository;
 import uk.ac.ebi.spot.gwas.deposition.service.JWTService;
-
 import javax.annotation.PostConstruct;
 import java.io.InputStream;
 import java.security.PublicKey;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -106,7 +104,7 @@ public class JWTServiceImpl implements JWTService {
                 user.setDomains(domains);
             }
 
-            log.info("Found user: {}", user.toString());
+            log.info("Found user: {}", user);
             return user;
         }
 

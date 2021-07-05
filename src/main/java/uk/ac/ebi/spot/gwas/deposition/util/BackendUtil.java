@@ -1,17 +1,16 @@
 package uk.ac.ebi.spot.gwas.deposition.util;
 
+import static uk.ac.ebi.spot.gwas.deposition.constants.GWASDepositionBackendConstants.VALUE_NR;
+
 import org.springframework.data.rest.webmvc.support.BaseUriLinkBuilder;
 import org.springframework.hateoas.LinkBuilder;
 import org.springframework.hateoas.mvc.ControllerLinkBuilder;
 import uk.ac.ebi.spot.gwas.deposition.domain.Author;
 import uk.ac.ebi.spot.gwas.deposition.domain.Study;
-
 import java.net.URI;
 import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.List;
-
-import static uk.ac.ebi.spot.gwas.deposition.constants.GWASDepositionBackendConstants.VALUE_NR;
 
 public class BackendUtil {
 
@@ -73,11 +72,6 @@ public class BackendUtil {
     }
 
     private static boolean sssIsNR(String entry) {
-        if (entry != null) {
-            if (entry.equalsIgnoreCase(VALUE_NR)) {
-                return true;
-            }
-        }
-        return false;
+        return entry != null && entry.equalsIgnoreCase(VALUE_NR);
     }
 }

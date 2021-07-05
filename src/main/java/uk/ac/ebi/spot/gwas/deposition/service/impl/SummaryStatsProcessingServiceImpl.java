@@ -1,5 +1,6 @@
 package uk.ac.ebi.spot.gwas.deposition.service.impl;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,8 +14,14 @@ import uk.ac.ebi.spot.gwas.deposition.config.GWASDepositionBackendConfig;
 import uk.ac.ebi.spot.gwas.deposition.constants.FileUploadStatus;
 import uk.ac.ebi.spot.gwas.deposition.constants.MailConstants;
 import uk.ac.ebi.spot.gwas.deposition.constants.Status;
-import uk.ac.ebi.spot.gwas.deposition.constants.SubmissionProvenanceType;
-import uk.ac.ebi.spot.gwas.deposition.domain.*;
+import uk.ac.ebi.spot.gwas.deposition.domain.BodyOfWork;
+import uk.ac.ebi.spot.gwas.deposition.domain.CallbackId;
+import uk.ac.ebi.spot.gwas.deposition.domain.FileUpload;
+import uk.ac.ebi.spot.gwas.deposition.domain.Publication;
+import uk.ac.ebi.spot.gwas.deposition.domain.Study;
+import uk.ac.ebi.spot.gwas.deposition.domain.Submission;
+import uk.ac.ebi.spot.gwas.deposition.domain.SummaryStatsEntry;
+import uk.ac.ebi.spot.gwas.deposition.domain.User;
 import uk.ac.ebi.spot.gwas.deposition.dto.summarystats.SSWrapUpRequestDto;
 import uk.ac.ebi.spot.gwas.deposition.dto.summarystats.SSWrapUpRequestEntryDto;
 import uk.ac.ebi.spot.gwas.deposition.dto.summarystats.SummaryStatsRequestDto;
@@ -23,11 +30,20 @@ import uk.ac.ebi.spot.gwas.deposition.repository.CallbackIdRepository;
 import uk.ac.ebi.spot.gwas.deposition.repository.StudyRepository;
 import uk.ac.ebi.spot.gwas.deposition.repository.SummaryStatsEntryRepository;
 import uk.ac.ebi.spot.gwas.deposition.rest.dto.SummaryStatsRequestEntryDtoAssembler;
-import uk.ac.ebi.spot.gwas.deposition.service.*;
+import uk.ac.ebi.spot.gwas.deposition.service.BackendEmailService;
+import uk.ac.ebi.spot.gwas.deposition.service.FileUploadsService;
+import uk.ac.ebi.spot.gwas.deposition.service.SubmissionService;
+import uk.ac.ebi.spot.gwas.deposition.service.SumStatsService;
+import uk.ac.ebi.spot.gwas.deposition.service.SummaryStatsProcessingService;
+import uk.ac.ebi.spot.gwas.deposition.service.UserService;
 import uk.ac.ebi.spot.gwas.deposition.util.AccessionMapUtil;
 import uk.ac.ebi.spot.gwas.deposition.util.BackendUtil;
-
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 @Service
 public class SummaryStatsProcessingServiceImpl implements SummaryStatsProcessingService {
@@ -95,10 +111,8 @@ public class SummaryStatsProcessingServiceImpl implements SummaryStatsProcessing
                     metadata.put(MailConstants.PMID, bodyOfWork.getBowId());
                     metadata.put(MailConstants.FIRST_AUTHOR, "N/A");
                     if (bodyOfWork.getFirstAuthor() == null) {
-                        if (bodyOfWork.getCorrespondingAuthors() != null) {
-                            if (!bodyOfWork.getCorrespondingAuthors().isEmpty()) {
-                                metadata.put(MailConstants.FIRST_AUTHOR, BackendUtil.extractName(bodyOfWork.getCorrespondingAuthors().get(0)));
-                            }
+                        if (CollectionUtils.isNotEmpty(bodyOfWork.getCorrespondingAuthors())) {
+                            metadata.put(MailConstants.FIRST_AUTHOR, BackendUtil.extractName(bodyOfWork.getCorrespondingAuthors().get(0)));
                         }
                     } else {
                         metadata.put(MailConstants.FIRST_AUTHOR, BackendUtil.extractName(bodyOfWork.getFirstAuthor()));
@@ -138,7 +152,7 @@ public class SummaryStatsProcessingServiceImpl implements SummaryStatsProcessing
             submission.setSummaryStatsStatus(Status.INVALID.name());
             submissionService.saveSubmission(submission, userId);
 
-            List<String> errors = Arrays.asList(new String[]{"Sorry! There is a fault on our end. Please contact gwas-subs@ebi.ac.uk for help."});
+            List<String> errors = Arrays.asList("Sorry! There is a fault on our end. Please contact gwas-subs@ebi.ac.uk for help.");
             fileUpload.setStatus(FileUploadStatus.INVALID.name());
             fileUpload.setErrors(errors);
             fileUploadsService.save(fileUpload);

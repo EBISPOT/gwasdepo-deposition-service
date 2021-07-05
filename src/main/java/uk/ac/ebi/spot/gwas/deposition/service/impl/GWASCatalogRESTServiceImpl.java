@@ -15,7 +15,6 @@ import uk.ac.ebi.spot.gwas.deposition.dto.gwas.GWASCatalogStudyDto;
 import uk.ac.ebi.spot.gwas.deposition.dto.summarystats.SSTemplateEntryDto;
 import uk.ac.ebi.spot.gwas.deposition.rest.dto.SSTemplateEntryRequestDtoAssembler;
 import uk.ac.ebi.spot.gwas.deposition.service.GWASCatalogRESTService;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -37,7 +36,7 @@ public class GWASCatalogRESTServiceImpl extends GatewayService implements GWASCa
                 templateList.addAll(processEntries(initialResponse.getEmbedded().getStudies()));
             }
             GWASCatalogLinksDto links = initialResponse.getLinks();
-            while (links.getNext() != null) {
+            while (links != null && links.getNext() != null) {
                 String nextEndpoint = links.getNext().getHref();
                 GWASCatalogSSResponseDto nextResponse = retrieveSSData(nextEndpoint);
                 if (nextResponse == null) {
