@@ -17,7 +17,6 @@ import uk.ac.ebi.spot.gwas.deposition.repository.SubmissionRepository;
 import uk.ac.ebi.spot.gwas.deposition.service.BackendEmailService;
 import uk.ac.ebi.spot.gwas.deposition.service.BodyOfWorkService;
 import uk.ac.ebi.spot.gwas.deposition.service.PublicationService;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Stream;
@@ -45,11 +44,11 @@ public class StalledSubmissionsCheckTask {
     public void check() {
         log.info("Verifying stalled submissions.");
         Stream<Submission> startedSubmissionStream = submissionRepository.readByOverallStatusAndArchivedOrderByLastUpdatedDesc(Status.STARTED.name(), false);
-        startedSubmissionStream.forEach(submission -> verifySubmission(submission));
+        startedSubmissionStream.forEach(this::verifySubmission);
         startedSubmissionStream.close();
 
         Stream<Submission> invalidSubmissionStream = submissionRepository.readByOverallStatusAndArchivedOrderByLastUpdatedDesc(Status.INVALID.name(), false);
-        invalidSubmissionStream.forEach(submission -> verifySubmission(submission));
+        invalidSubmissionStream.forEach(this::verifySubmission);
         invalidSubmissionStream.close();
         /**
          * USER_NAME
@@ -117,7 +116,6 @@ public class StalledSubmissionsCheckTask {
                 submission.setReminderStatus(ReminderStatus.FIRST.name());
                 submissionRepository.save(submission);
             }
-            return;
         }
     }
 

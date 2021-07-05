@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import uk.ac.ebi.spot.gwas.deposition.constants.GWASDepositionBackendConstants;
 import uk.ac.ebi.spot.gwas.deposition.constants.GeneralCommon;
-import uk.ac.ebi.spot.gwas.deposition.domain.DailyStats;
 import uk.ac.ebi.spot.gwas.deposition.domain.User;
 import uk.ac.ebi.spot.gwas.deposition.dto.DailyStatsDto;
 import uk.ac.ebi.spot.gwas.deposition.rest.dto.DailyStatsDtoAssembler;
@@ -20,7 +19,6 @@ import uk.ac.ebi.spot.gwas.deposition.service.JWTService;
 import uk.ac.ebi.spot.gwas.deposition.service.StatsService;
 import uk.ac.ebi.spot.gwas.deposition.service.UserService;
 import uk.ac.ebi.spot.gwas.deposition.util.HeadersUtil;
-
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -46,9 +44,7 @@ public class DailyStatsController {
     public List<DailyStatsDto> getStats(HttpServletRequest request) {
         User user = userService.findUser(jwtService.extractUser(HeadersUtil.extractJWT(request)), false);
         log.info("[{}] Request to retrieve daily stats.", user.getName());
-        List<DailyStats> dailyStats = statsService.getDailyStats();
-        List<DailyStatsDto> dailyStatsDtos = dailyStats.stream().map(DailyStatsDtoAssembler::assemble).collect(Collectors.toList());
-        return dailyStatsDtos;
+        return statsService.getDailyStats().stream().map(DailyStatsDtoAssembler::assemble).collect(Collectors.toList());
     }
 
 }

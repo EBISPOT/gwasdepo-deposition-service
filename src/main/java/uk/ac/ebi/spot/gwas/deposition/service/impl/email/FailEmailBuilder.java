@@ -27,10 +27,7 @@ public class FailEmailBuilder extends AbstractEmailBuilder implements EmailBuild
         String content = super.readEmailContent();
         if (content != null) {
             Context context = new Context();
-            for (String variable : metadata.keySet()) {
-                Object variableValue = metadata.get(variable);
-                context.setVariable(variable, variableValue);
-            }
+            context.setVariables(metadata);
             context.setVariable(MailConstants.ERRORS, errors);
 
             return templateEngine.process(content, context);

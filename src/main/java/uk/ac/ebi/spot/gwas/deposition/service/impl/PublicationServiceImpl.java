@@ -15,7 +15,6 @@ import uk.ac.ebi.spot.gwas.deposition.repository.PublicationRepository;
 import uk.ac.ebi.spot.gwas.deposition.repository.SSTemplateEntryPlaceholderRepository;
 import uk.ac.ebi.spot.gwas.deposition.service.PublicationService;
 import uk.ac.ebi.spot.gwas.deposition.service.SOLRService;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -57,10 +56,9 @@ public class PublicationServiceImpl implements PublicationService {
             if (solrService != null) {
                 return author != null ? solrService.findPublicationsByAuthor(author, page) :
                         solrService.findPublicationsByTitle(title, page);
-            } else {
-                return publicationRepository.findBy(TextCriteria.forDefaultLanguage().caseSensitive(false).matching(author),
-                        page);
             }
+            return publicationRepository.findBy(TextCriteria.forDefaultLanguage().caseSensitive(false).matching(author),
+                    page);
         }
 
         return publicationRepository.findAll(page);

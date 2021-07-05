@@ -2,10 +2,10 @@ package uk.ac.ebi.spot.gwas.deposition.util;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.lang3.StringUtils;
 import uk.ac.ebi.spot.gwas.deposition.domain.CorrespondingAuthor;
 import uk.ac.ebi.spot.gwas.deposition.domain.Publication;
 import uk.ac.ebi.spot.gwas.deposition.domain.SOLRPublication;
-
 import java.io.IOException;
 
 public class SOLRPublicationAssembler {
@@ -32,12 +32,10 @@ public class SOLRPublicationAssembler {
     public static Publication disassemble(SOLRPublication solrPublication) {
         CorrespondingAuthor correspondingAuthor = null;
         try {
-            if (solrPublication.getCorrespondingAuthor() != null) {
-                if (!solrPublication.getCorrespondingAuthor().equalsIgnoreCase("") &&
-                        !solrPublication.getCorrespondingAuthor().equalsIgnoreCase("null")) {
-                    correspondingAuthor = new ObjectMapper().readValue(
-                            solrPublication.getCorrespondingAuthor(), CorrespondingAuthor.class);
-                }
+            if (StringUtils.isNotBlank(solrPublication.getCorrespondingAuthor()) &&
+                    !solrPublication.getCorrespondingAuthor().equalsIgnoreCase("null")) {
+                correspondingAuthor = new ObjectMapper().readValue(
+                        solrPublication.getCorrespondingAuthor(), CorrespondingAuthor.class);
             }
         } catch (IOException e) {
             e.printStackTrace();

@@ -12,7 +12,6 @@ import uk.ac.ebi.spot.gwas.deposition.domain.Submission;
 import uk.ac.ebi.spot.gwas.deposition.repository.SampleRepository;
 import uk.ac.ebi.spot.gwas.deposition.service.SamplesService;
 import uk.ac.ebi.spot.gwas.deposition.util.IdCollector;
-
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -27,7 +26,7 @@ public class SamplesServiceImpl implements SamplesService {
 
     @Override
     public Page<Sample> getSamples(Submission submission, Pageable page) {
-        log.info("Retrieving samples: {} - {} - {}", page.getPageNumber(), page.getPageSize(), page.getSort().toString());
+        log.info("Retrieving samples: {} - {} - {}", page.getPageNumber(), page.getPageSize(), page.getSort());
         return sampleRepository.findBySubmissionId(submission.getId(), page);
     }
 

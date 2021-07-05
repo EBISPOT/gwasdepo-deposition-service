@@ -1,5 +1,8 @@
 package uk.ac.ebi.spot.gwas.deposition.service.impl;
 
+import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
+import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.Resource;
@@ -15,19 +18,23 @@ import uk.ac.ebi.spot.gwas.deposition.domain.Publication;
 import uk.ac.ebi.spot.gwas.deposition.domain.Submission;
 import uk.ac.ebi.spot.gwas.deposition.dto.FileUploadDto;
 import uk.ac.ebi.spot.gwas.deposition.dto.SubmissionDto;
-import uk.ac.ebi.spot.gwas.deposition.rest.controllers.*;
-import uk.ac.ebi.spot.gwas.deposition.rest.dto.*;
+import uk.ac.ebi.spot.gwas.deposition.rest.controllers.AssociationsController;
+import uk.ac.ebi.spot.gwas.deposition.rest.controllers.FileUploadsController;
+import uk.ac.ebi.spot.gwas.deposition.rest.controllers.SamplesController;
+import uk.ac.ebi.spot.gwas.deposition.rest.controllers.StudiesController;
+import uk.ac.ebi.spot.gwas.deposition.rest.controllers.SubmissionsController;
+import uk.ac.ebi.spot.gwas.deposition.rest.dto.BodyOfWorkDtoAssembler;
+import uk.ac.ebi.spot.gwas.deposition.rest.dto.FileUploadDtoAssembler;
+import uk.ac.ebi.spot.gwas.deposition.rest.dto.ProvenanceDtoAssembler;
+import uk.ac.ebi.spot.gwas.deposition.rest.dto.PublicationDtoAssembler;
+import uk.ac.ebi.spot.gwas.deposition.rest.dto.SubmissionDtoAssembler;
 import uk.ac.ebi.spot.gwas.deposition.service.BodyOfWorkService;
 import uk.ac.ebi.spot.gwas.deposition.service.FileUploadsService;
 import uk.ac.ebi.spot.gwas.deposition.service.PublicationService;
 import uk.ac.ebi.spot.gwas.deposition.service.UserService;
 import uk.ac.ebi.spot.gwas.deposition.util.BackendUtil;
-
 import java.util.ArrayList;
 import java.util.List;
-
-import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
-import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 
 @Service
 public class SubmissionAssemblyService implements ResourceAssembler<Submission, Resource<SubmissionDto>> {
@@ -83,7 +90,7 @@ public class SubmissionAssemblyService implements ResourceAssembler<Submission, 
 
         Resource<SubmissionDto> resource = new Resource<>(submissionDto);
         resource.add(BackendUtil.underBasePath(lb, gwasDepositionBackendConfig.getProxyPrefix()).withSelfRel());
-        if (fileUploads.size() > 0) {
+        if (!fileUploads.isEmpty()) {
             Link fileUploadsLink = linkTo(methodOn(FileUploadsController.class)
                     .getFileUploads(submission.getId(), null))
                     .withRel(GWASDepositionBackendConstants.LINKS_FILES);

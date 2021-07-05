@@ -7,8 +7,7 @@ import org.springframework.stereotype.Service;
 import uk.ac.ebi.spot.gwas.deposition.constants.GWASDepositionBackendConstants;
 import uk.ac.ebi.spot.gwas.deposition.domain.GCPCounterItem;
 import uk.ac.ebi.spot.gwas.deposition.repository.GCPCounterItemRepository;
-import uk.ac.ebi.spot.gwas.deposition.service.BodyOfWorkService;
-
+import java.util.Arrays;
 import java.util.List;
 
 @Service
@@ -39,10 +38,8 @@ public class GCPCounter {
     private String padCounter(int value) {
         String sValue = Integer.toString(value);
         int padding = PADDING_LENGTH - sValue.length();
-        String sPadding = "";
-        for (int i = 0; i < padding; i++) {
-            sPadding += "0";
-        }
-        return sPadding + sValue;
+        char[] pad = new char[padding];
+        Arrays.fill(pad, '0');
+        return String.valueOf(pad) + sValue;
     }
 }

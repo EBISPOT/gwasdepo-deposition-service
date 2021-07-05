@@ -5,7 +5,6 @@ import org.slf4j.LoggerFactory;
 import org.thymeleaf.context.Context;
 import uk.ac.ebi.spot.gwas.deposition.messaging.email.AbstractEmailBuilder;
 import uk.ac.ebi.spot.gwas.deposition.messaging.email.EmailBuilder;
-
 import java.util.Map;
 
 public class ErrorsEmailBuilder extends AbstractEmailBuilder implements EmailBuilder {
@@ -22,10 +21,7 @@ public class ErrorsEmailBuilder extends AbstractEmailBuilder implements EmailBui
         String content = super.readEmailContent();
         if (content != null) {
             Context context = new Context();
-            for (String variable : metadata.keySet()) {
-                Object variableValue = metadata.get(variable);
-                context.setVariable(variable, variableValue);
-            }
+            context.setVariables(metadata);
             return templateEngine.process(content, context);
         }
         return null;

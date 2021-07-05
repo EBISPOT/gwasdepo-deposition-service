@@ -7,7 +7,6 @@ import org.springframework.stereotype.Component;
 import uk.ac.ebi.spot.gwas.deposition.domain.Submission;
 import uk.ac.ebi.spot.gwas.deposition.repository.SubmissionRepository;
 import uk.ac.ebi.spot.gwas.deposition.service.SubmissionDataCleaningService;
-
 import java.util.List;
 
 @Component
@@ -24,10 +23,9 @@ public class SubmissionsCleanUpTask {
     public void cleanUp() {
         log.info("Cleaning up deleted submissions.");
         List<Submission> submissionList = submissionRepository.findByArchived(true);
-        log.info("Found {} submissions to be deleted.", submissionList.size()); {
-            for (Submission submission : submissionList) {
-                submissionDataCleaningService.deleteSubmission(submission);
-            }
+        log.info("Found {} submissions to be deleted.", submissionList.size());
+        for (Submission submission : submissionList) {
+            submissionDataCleaningService.deleteSubmission(submission);
         }
     }
 

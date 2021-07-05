@@ -12,7 +12,6 @@ import uk.ac.ebi.spot.gwas.deposition.domain.Submission;
 import uk.ac.ebi.spot.gwas.deposition.repository.AssociationRepository;
 import uk.ac.ebi.spot.gwas.deposition.service.AssociationsService;
 import uk.ac.ebi.spot.gwas.deposition.util.IdCollector;
-
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -27,7 +26,7 @@ public class AssociationsServiceImpl implements AssociationsService {
 
     @Override
     public Page<Association> getAssociations(Submission submission, Pageable page) {
-        log.info("Retrieving associations: {} - {} - {}", page.getPageNumber(), page.getPageSize(), page.getSort().toString());
+        log.info("Retrieving associations: {} - {} - {}", page.getPageNumber(), page.getPageSize(), page.getSort());
         return associationRepository.findBySubmissionId(submission.getId(), page);
     }
 

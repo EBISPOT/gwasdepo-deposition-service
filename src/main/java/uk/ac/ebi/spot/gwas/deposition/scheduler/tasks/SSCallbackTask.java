@@ -1,5 +1,6 @@
 package uk.ac.ebi.spot.gwas.deposition.scheduler.tasks;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,16 +9,37 @@ import uk.ac.ebi.spot.gwas.deposition.audit.AuditHelper;
 import uk.ac.ebi.spot.gwas.deposition.audit.AuditProxy;
 import uk.ac.ebi.spot.gwas.deposition.config.BackendMailConfig;
 import uk.ac.ebi.spot.gwas.deposition.config.GWASDepositionBackendConfig;
-import uk.ac.ebi.spot.gwas.deposition.constants.*;
-import uk.ac.ebi.spot.gwas.deposition.domain.*;
+import uk.ac.ebi.spot.gwas.deposition.constants.FileUploadStatus;
+import uk.ac.ebi.spot.gwas.deposition.constants.MailConstants;
+import uk.ac.ebi.spot.gwas.deposition.constants.Status;
+import uk.ac.ebi.spot.gwas.deposition.constants.SubmissionProvenanceType;
+import uk.ac.ebi.spot.gwas.deposition.constants.SummaryStatsEntryStatus;
+import uk.ac.ebi.spot.gwas.deposition.constants.SummaryStatsResponseConstants;
+import uk.ac.ebi.spot.gwas.deposition.domain.BodyOfWork;
+import uk.ac.ebi.spot.gwas.deposition.domain.CallbackId;
+import uk.ac.ebi.spot.gwas.deposition.domain.FileUpload;
+import uk.ac.ebi.spot.gwas.deposition.domain.Publication;
+import uk.ac.ebi.spot.gwas.deposition.domain.Submission;
+import uk.ac.ebi.spot.gwas.deposition.domain.SummaryStatsEntry;
+import uk.ac.ebi.spot.gwas.deposition.domain.User;
 import uk.ac.ebi.spot.gwas.deposition.dto.summarystats.SummaryStatsResponseDto;
 import uk.ac.ebi.spot.gwas.deposition.dto.summarystats.SummaryStatsStatusDto;
 import uk.ac.ebi.spot.gwas.deposition.repository.CallbackIdRepository;
 import uk.ac.ebi.spot.gwas.deposition.repository.SummaryStatsEntryRepository;
-import uk.ac.ebi.spot.gwas.deposition.service.*;
+import uk.ac.ebi.spot.gwas.deposition.service.BackendEmailService;
+import uk.ac.ebi.spot.gwas.deposition.service.BodyOfWorkService;
+import uk.ac.ebi.spot.gwas.deposition.service.FileUploadsService;
+import uk.ac.ebi.spot.gwas.deposition.service.PublicationService;
+import uk.ac.ebi.spot.gwas.deposition.service.SubmissionService;
+import uk.ac.ebi.spot.gwas.deposition.service.SumStatsService;
+import uk.ac.ebi.spot.gwas.deposition.service.SummaryStatsProcessingService;
+import uk.ac.ebi.spot.gwas.deposition.service.UserService;
 import uk.ac.ebi.spot.gwas.deposition.util.BackendUtil;
-
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 @Component
 public class SSCallbackTask {
@@ -96,10 +118,8 @@ public class SSCallbackTask {
                 metadata.put(MailConstants.PMID, bodyOfWork.getBowId());
                 metadata.put(MailConstants.FIRST_AUTHOR, "N/A");
                 if (bodyOfWork.getFirstAuthor() == null) {
-                    if (bodyOfWork.getCorrespondingAuthors() != null) {
-                        if (!bodyOfWork.getCorrespondingAuthors().isEmpty()) {
-                            metadata.put(MailConstants.FIRST_AUTHOR, BackendUtil.extractName(bodyOfWork.getCorrespondingAuthors().get(0)));
-                        }
+                    if (CollectionUtils.isNotEmpty(bodyOfWork.getCorrespondingAuthors())) {
+                        metadata.put(MailConstants.FIRST_AUTHOR, BackendUtil.extractName(bodyOfWork.getCorrespondingAuthors().get(0)));
                     }
                 } else {
                     metadata.put(MailConstants.FIRST_AUTHOR, BackendUtil.extractName(bodyOfWork.getFirstAuthor()));
@@ -117,18 +137,16 @@ public class SSCallbackTask {
 
             if (summaryStatsResponseDto.getStatus().equalsIgnoreCase(SummaryStatsResponseConstants.INVALID)) {
                 List<String> allErrors = new ArrayList<>();
-                if (summaryStatsResponseDto.getMetadataErrors() != null) {
-                    if (!summaryStatsResponseDto.getMetadataErrors().isEmpty()) {
-                        FileUpload fileUpload = fileUploadsService.getFileUploadByCallbackId(callbackId.getCallbackId());
-                        List<String> fileErrors = fileUpload.getErrors() != null ? fileUpload.getErrors() : new ArrayList<>();
-                        fileErrors.addAll(summaryStatsResponseDto.getMetadataErrors());
-                        allErrors.addAll(summaryStatsResponseDto.getMetadataErrors());
-                        fileUpload.setErrors(fileErrors);
-                        fileUpload.setStatus(FileUploadStatus.INVALID.name());
-                        fileUploadsService.save(fileUpload);
+                if (CollectionUtils.isNotEmpty(summaryStatsResponseDto.getMetadataErrors())) {
+                    FileUpload fileUpload = fileUploadsService.getFileUploadByCallbackId(callbackId.getCallbackId());
+                    List<String> fileErrors = fileUpload.getErrors() != null ? fileUpload.getErrors() : new ArrayList<>();
+                    fileErrors.addAll(summaryStatsResponseDto.getMetadataErrors());
+                    allErrors.addAll(summaryStatsResponseDto.getMetadataErrors());
+                    fileUpload.setErrors(fileErrors);
+                    fileUpload.setStatus(FileUploadStatus.INVALID.name());
+                    fileUploadsService.save(fileUpload);
 
-                        auditProxy.addAuditEntry(AuditHelper.fileValidate(submission.getCreated().getUserId(), fileUpload, submission, true, false, fileErrors));
-                    }
+                    auditProxy.addAuditEntry(AuditHelper.fileValidate(submission.getCreated().getUserId(), fileUpload, submission, true, false, fileErrors));
                 }
 
                 for (SummaryStatsStatusDto summaryStatsStatusDto : summaryStatsResponseDto.getStatusList()) {
