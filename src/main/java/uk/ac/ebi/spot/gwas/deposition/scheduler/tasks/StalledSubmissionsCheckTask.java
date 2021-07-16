@@ -6,13 +6,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import uk.ac.ebi.spot.gwas.deposition.config.BackendSubmissionChecksConfig;
-import uk.ac.ebi.spot.gwas.deposition.constants.MailConstants;
-import uk.ac.ebi.spot.gwas.deposition.constants.ReminderStatus;
-import uk.ac.ebi.spot.gwas.deposition.constants.Status;
-import uk.ac.ebi.spot.gwas.deposition.constants.SubmissionProvenanceType;
+import uk.ac.ebi.spot.gwas.deposition.constants.*;
 import uk.ac.ebi.spot.gwas.deposition.domain.BodyOfWork;
 import uk.ac.ebi.spot.gwas.deposition.domain.Publication;
 import uk.ac.ebi.spot.gwas.deposition.domain.Submission;
+import uk.ac.ebi.spot.gwas.deposition.exception.EntityNotFoundException;
+import uk.ac.ebi.spot.gwas.deposition.repository.PublicationRepository;
 import uk.ac.ebi.spot.gwas.deposition.repository.SubmissionRepository;
 import uk.ac.ebi.spot.gwas.deposition.service.BackendEmailService;
 import uk.ac.ebi.spot.gwas.deposition.service.BodyOfWorkService;
@@ -29,6 +28,9 @@ public class StalledSubmissionsCheckTask {
 
     @Autowired
     private SubmissionRepository submissionRepository;
+
+    @Autowired
+    private PublicationRepository publicationRepository;
 
     @Autowired
     private BackendSubmissionChecksConfig backendSubmissionChecksConfig;
@@ -90,6 +92,19 @@ public class StalledSubmissionsCheckTask {
             submission.setReminderStatus(ReminderStatus.ARCHIVED.name());
             submission.setArchived(true);
             submission.setDeletedOn(DateTime.now());
+            if (submission.getProvenanceType().equalsIgnoreCase(SubmissionProvenanceType.PUBLICATION.name())) {
+                Publication publication = publicationRepository
+                    .findById(submission.getPublicationId())
+                    .orElseThrow(() -> new EntityNotFoundException("Error archiving submission:" + submission.getId() + ". Assigned publication not found."));
+                if (submission.getType().equalsIgnoreCase(SubmissionType.METADATA.name())) {
+                    publication.setStatus(PublicationStatus.ELIGIBLE.name());
+                }
+                else if (submission.getType().equalsIgnoreCase(SubmissionType.SUMMARY_STATS.name())) {
+                    publication.setStatus(PublicationStatus.PUBLISHED.name());
+                }
+                publicationRepository.save(publication);
+            }
+            // check GCP close?
             submissionRepository.save(submission);
             return;
         }
