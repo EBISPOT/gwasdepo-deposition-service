@@ -26,6 +26,7 @@ import uk.ac.ebi.spot.gwas.deposition.dto.SubmissionDto;
 import uk.ac.ebi.spot.gwas.deposition.dto.summarystats.SSGlobusFolderDto;
 import uk.ac.ebi.spot.gwas.deposition.exception.*;
 import uk.ac.ebi.spot.gwas.deposition.rest.dto.BodyOfWorkDtoDisassembler;
+import uk.ac.ebi.spot.gwas.deposition.rest.dto.SubmissionPatchDto;
 import uk.ac.ebi.spot.gwas.deposition.service.*;
 import uk.ac.ebi.spot.gwas.deposition.service.impl.SubmissionAssemblyService;
 import uk.ac.ebi.spot.gwas.deposition.util.BackendUtil;
@@ -73,6 +74,9 @@ public class SubmissionsController {
 
     @Autowired
     private AuditProxy auditProxy;
+
+    @Autowired
+    private CuratorAuthService curatorAuthService;
 
 
     /**
@@ -297,6 +301,27 @@ public class SubmissionsController {
         Submission submission = submissionService.getSubmission(submissionId, user);
         Submission lockSubmission = submissionService.lockSubmission(submission, user, lockStatus);
         return submissionAssemblyService.toResource(lockSubmission);
+    }
+
+    /**
+     * PATCH /v1/submissions/{submissionId}
+     * used to patch a submission (extend for fields as needed) and to create Globus folder if a user requests to reopen
+     * a stale submission that was archived
+     */
+    @PatchMapping(value = "/{submissionId}",
+            consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseStatus(HttpStatus.OK)
+    public Resource<SubmissionDto> patchSubmission(@PathVariable String submissionId,
+                                                   HttpServletRequest request,
+                                                   @RequestBody SubmissionPatchDto patchDto) {
+        User user = userService.findUser(jwtService.extractUser(HeadersUtil.extractJWT(request)), false);
+        Submission submission = new Submission();
+        if (patchDto.getGlobusEmail() != null) {
+            submission = submissionService
+                    .createGlobusFolderForReopenedSubmission(submissionId, user, patchDto.getGlobusEmail());
+        }
+        return submissionAssemblyService.toResource(submission);
     }
 
 }

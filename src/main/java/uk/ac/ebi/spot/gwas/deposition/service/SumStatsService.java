@@ -2,6 +2,7 @@ package uk.ac.ebi.spot.gwas.deposition.service;
 
 
 import uk.ac.ebi.spot.gwas.deposition.domain.SSGlobusResponse;
+import uk.ac.ebi.spot.gwas.deposition.domain.Submission;
 import uk.ac.ebi.spot.gwas.deposition.dto.summarystats.SSGlobusFolderDto;
 import uk.ac.ebi.spot.gwas.deposition.dto.summarystats.SSWrapUpRequestDto;
 import uk.ac.ebi.spot.gwas.deposition.dto.summarystats.SummaryStatsRequestDto;
@@ -16,6 +17,8 @@ public interface SumStatsService {
     String registerStatsForProcessing(SummaryStatsRequestDto summaryStatsRequestDto);
 
     void cleanUp(String callbackId);
+
+    void deleteGlobusFolder(Submission submission);
 
     SSGlobusResponse createGlobusFolder(SSGlobusFolderDto ssGlobusFolderDto);
 }

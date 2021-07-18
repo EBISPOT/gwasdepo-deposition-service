@@ -84,6 +84,7 @@ gwas-sumstats-service:
   endpoints:
     sum-stats: /v1/sum-stats
     globus-mkdir: /v1/sum-stats/globus/mkdir
+    globus: /v1/sum-stats/globus
   callback-schedule:
     enabled: true
 

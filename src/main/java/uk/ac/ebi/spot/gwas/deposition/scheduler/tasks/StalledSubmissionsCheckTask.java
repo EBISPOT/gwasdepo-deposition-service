@@ -17,6 +17,7 @@ import uk.ac.ebi.spot.gwas.deposition.repository.SubmissionRepository;
 import uk.ac.ebi.spot.gwas.deposition.service.BackendEmailService;
 import uk.ac.ebi.spot.gwas.deposition.service.BodyOfWorkService;
 import uk.ac.ebi.spot.gwas.deposition.service.PublicationService;
+import uk.ac.ebi.spot.gwas.deposition.service.SumStatsService;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -41,6 +42,9 @@ public class StalledSubmissionsCheckTask {
 
     @Autowired
     private BodyOfWorkService bodyOfWorkService;
+
+    @Autowired
+    private SumStatsService sumStatsService;
 
     public void check() {
         log.info("Verifying stalled submissions.");
@@ -89,6 +93,7 @@ public class StalledSubmissionsCheckTask {
             backendEmailService.sendReminderEmail(submission.getCreated().getUserId(), metadata, backendSubmissionChecksConfig.getLastEmail());
             submission.setReminderStatus(ReminderStatus.ARCHIVED.name());
             submission.setArchived(true);
+            sumStatsService.deleteGlobusFolder(submission);
             submission.setDeletedOn(DateTime.now());
             submissionRepository.save(submission);
             return;
