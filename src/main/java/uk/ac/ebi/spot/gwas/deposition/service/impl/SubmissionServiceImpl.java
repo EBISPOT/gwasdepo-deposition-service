@@ -14,7 +14,11 @@ import uk.ac.ebi.spot.gwas.deposition.constants.PublicationStatus;
 import uk.ac.ebi.spot.gwas.deposition.constants.Status;
 import uk.ac.ebi.spot.gwas.deposition.constants.SubmissionProvenanceType;
 import uk.ac.ebi.spot.gwas.deposition.domain.*;
+import uk.ac.ebi.spot.gwas.deposition.dto.summarystats.SSGlobusFolderDto;
+import uk.ac.ebi.spot.gwas.deposition.exception.AuthorizationException;
+import uk.ac.ebi.spot.gwas.deposition.exception.EmailAccountNotLinkedToGlobusException;
 import uk.ac.ebi.spot.gwas.deposition.exception.EntityNotFoundException;
+import uk.ac.ebi.spot.gwas.deposition.exception.SSGlobusFolderCreatioException;
 import uk.ac.ebi.spot.gwas.deposition.repository.*;
 import uk.ac.ebi.spot.gwas.deposition.service.*;
 
@@ -23,6 +27,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.UUID;
 
 @Service
 public class SubmissionServiceImpl implements SubmissionService {
@@ -70,6 +75,9 @@ public class SubmissionServiceImpl implements SubmissionService {
 
     @Autowired
     BodyOfWorkService bodyOfWorkService;
+
+    @Autowired
+    SumStatsService sumStatsService;
 
     @Override
     public Submission createSubmission(Submission submission) {
@@ -328,6 +336,31 @@ public class SubmissionServiceImpl implements SubmissionService {
                 submission.setLockDetails(null);
         });
         return saveSubmission(submission, user.getId());
+    }
+
+    @Override
+    public Submission createGlobusFolderForReopenedSubmission(String submissionId, User apiCaller, String globusEmail) {
+        if (!curatorAuthService.isCurator(apiCaller)) {
+            log.error("Unauthorized access: {}", apiCaller.getId());
+            throw new AuthorizationException("User [" + apiCaller.getId() + "] does not have access to perform Globus folder creation.");
+        }
+        String globusFolder = UUID.randomUUID().toString();
+        SSGlobusResponse outcome = sumStatsService.createGlobusFolder(
+                new SSGlobusFolderDto(globusFolder, globusEmail)
+        );
+        if (outcome != null) {
+            if (!outcome.isValid()) {
+                log.error("Unable to create Globus folder: {}", outcome.getOutcome());
+                throw new EmailAccountNotLinkedToGlobusException(outcome.getOutcome());
+            }
+            Submission submission = getSubmission(submissionId);
+            submission.setGlobusFolderId(globusFolder);
+            submission.setGlobusOriginId(outcome.getOutcome());
+            saveSubmission(submission, apiCaller.getId());
+            return submission;
+        } else {
+            throw new SSGlobusFolderCreatioException("An error occurred when communicating with SS/Globus.");
+        }
     }
 
     /**
