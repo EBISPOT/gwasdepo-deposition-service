@@ -15,6 +15,9 @@ public class RestInteractionConfig {
     @Value("${gwas-sumstats-service.endpoints.globus-mkdir}")
     private String globusMkdirEndpoint;
 
+    @Value("${gwas-sumstats-service.endpoints.globus}")
+    private String globusEndpoint;
+
     @Value("${gwas-template-service.url}")
     private String templateServiceUrl;
 
@@ -29,6 +32,10 @@ public class RestInteractionConfig {
 
     public String getSumStatsEndpoint() {
         return sumStatsServiceUrl + sumStatsEndpoint;
+    }
+
+    public String getGlobusEndpoint() {
+        return sumStatsServiceUrl + globusEndpoint;
     }
 
     public String getGlobusMkdirEndpoint() {

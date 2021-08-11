@@ -9,21 +9,25 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import uk.ac.ebi.spot.gwas.deposition.components.BodyOfWorkListener;
+import uk.ac.ebi.spot.gwas.deposition.constants.BodyOfWorkStatus;
+import uk.ac.ebi.spot.gwas.deposition.constants.PublicationStatus;
 import uk.ac.ebi.spot.gwas.deposition.constants.Status;
 import uk.ac.ebi.spot.gwas.deposition.constants.SubmissionProvenanceType;
 import uk.ac.ebi.spot.gwas.deposition.domain.*;
+import uk.ac.ebi.spot.gwas.deposition.dto.summarystats.SSGlobusFolderDto;
+import uk.ac.ebi.spot.gwas.deposition.exception.AuthorizationException;
+import uk.ac.ebi.spot.gwas.deposition.exception.EmailAccountNotLinkedToGlobusException;
 import uk.ac.ebi.spot.gwas.deposition.exception.EntityNotFoundException;
-import uk.ac.ebi.spot.gwas.deposition.repository.ArchivedSubmissionRepository;
-import uk.ac.ebi.spot.gwas.deposition.repository.CallbackIdRepository;
-import uk.ac.ebi.spot.gwas.deposition.repository.SubmissionRepository;
-import uk.ac.ebi.spot.gwas.deposition.repository.SummaryStatsEntryRepository;
-import uk.ac.ebi.spot.gwas.deposition.service.CuratorAuthService;
-import uk.ac.ebi.spot.gwas.deposition.service.FileUploadsService;
-import uk.ac.ebi.spot.gwas.deposition.service.SubmissionService;
+import uk.ac.ebi.spot.gwas.deposition.exception.SSGlobusFolderCreatioException;
+import uk.ac.ebi.spot.gwas.deposition.repository.*;
+import uk.ac.ebi.spot.gwas.deposition.service.*;
 
+import javax.swing.text.html.Option;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.UUID;
 
 @Service
 public class SubmissionServiceImpl implements SubmissionService {
@@ -50,6 +54,30 @@ public class SubmissionServiceImpl implements SubmissionService {
 
     @Autowired
     private BodyOfWorkListener bodyOfWorkListener;
+
+    @Autowired
+    private StudyRepository studyRepository;
+
+    @Autowired
+    private AssociationRepository associationRepository;
+
+    @Autowired
+    private SampleRepository sampleRepository;
+
+    @Autowired
+    private NoteRepository noteRepository;
+
+    @Autowired
+    private PublicationRepository publicationRepository;
+
+    @Autowired
+    PublicationService publicationService;
+
+    @Autowired
+    BodyOfWorkService bodyOfWorkService;
+
+    @Autowired
+    SumStatsService sumStatsService;
 
     @Override
     public Submission createSubmission(Submission submission) {
@@ -146,6 +174,7 @@ public class SubmissionServiceImpl implements SubmissionService {
         return null;
     }
 
+
     @Override
     public void deleteSubmission(String submissionId, User user) {
         log.info("Deleting submission: {}", submissionId);
@@ -156,7 +185,10 @@ public class SubmissionServiceImpl implements SubmissionService {
                 deleteCallbackId(fileUpload.getCallbackId());
             }
             List<SummaryStatsEntry> summaryStatsEntries = summaryStatsEntryRepository.findByFileUploadId(fileId);
-            summaryStatsEntryRepository.deleteAll(summaryStatsEntries);
+            /* Modifying fo Javers Bug with DeleteALl operation */
+            //summaryStatsEntryRepository.deleteAll(summaryStatsEntries);
+            Optional.ofNullable(summaryStatsEntries).ifPresent((sumstats) ->
+                    sumstats.forEach((sumstat) -> summaryStatsEntryRepository.delete(sumstat)));
         }
 
         ArchivedSubmission archivedSubmission = ArchivedSubmission.fromSubmission(submission);
@@ -171,6 +203,84 @@ public class SubmissionServiceImpl implements SubmissionService {
         submission.setLastUpdated(new Provenance(DateTime.now(), user.getId()));
         submissionRepository.save(submission);
     }
+
+    /**
+     *
+     * @param submissionId
+     * @param user
+     * Reset the Submission related Child objects for Uploading new template
+     */
+    public Submission editFileUploadSubmissionDetails(String submissionId, User user) {
+        log.info("Updating submission with new File Content: {}", submissionId);
+        Submission submission = this.getSubmission(submissionId, user);
+        log.info("Reached Callback & Sumstats Stage");
+        Optional.ofNullable(submission.getFileUploads()).ifPresent((fileUploadIds) -> {
+            fileUploadIds.forEach((fileUploadId) -> {
+                Optional.ofNullable(fileUploadsService.getFileUpload(fileUploadId)).ifPresent((fileUpload) -> {
+                    Optional.ofNullable(fileUpload.getCallbackId()).ifPresent((callbackId) ->
+                            deleteCallbackId(callbackId));
+                    Optional.ofNullable(summaryStatsEntryRepository.findByFileUploadId(fileUploadId)).ifPresent((sumstats) ->
+                           sumstats.forEach((sumstat) -> summaryStatsEntryRepository.delete(sumstat)));
+
+                });
+            });
+        });
+            submission.setAssociations(new ArrayList<>());
+            submission.setSamples(new ArrayList<>());
+            submission.setNotes(new ArrayList<>());
+            submission.setStudies(new ArrayList<>());
+            submission.setFileUploads(new ArrayList<>());
+            submission.setLastUpdated(new Provenance(DateTime.now(), user.getId()));
+            submission.setEditTemplate(new Provenance(DateTime.now(), user.getId()));
+            return saveSubmission(submission, user.getId());
+
+    }
+
+    /**
+     *
+     * @param submissionId
+     * Delete Old submission related child objects
+     */
+    @Override
+    public void deleteSubmissionChildren(String submissionId) {
+        log.info("Deleting Old Submission related object for new File Content: {}", submissionId);
+
+        log.info("Reached Deleting Study Stage");
+        Optional.ofNullable(studyRepository.findBySubmissionId(submissionId, Pageable.unpaged())).
+                ifPresent((studies) ->  studies.forEach((study) ->  {
+                    study.setSubmissionId("");
+                    studyRepository.save(study);
+
+                }));
+        log.info("Reached Deleting Association Stage");
+        Optional.ofNullable(associationRepository.findBySubmissionId(submissionId, Pageable.unpaged())).
+                ifPresent((associations) ->
+                        associations.forEach((association) -> {
+                            association.setSubmissionId("");
+                            associationRepository.save(association);
+
+                        }));
+
+        log.info("Reached Deleting Sample Stage");
+        Optional.ofNullable(sampleRepository.findBySubmissionId(submissionId, Pageable.unpaged())).
+                ifPresent((samples) ->  samples.forEach((sample) -> {
+                            sample.setSubmissionId("");
+                            sampleRepository.save(sample);
+                        }
+                ));
+
+        log.info("Reached Deleting Note Stage");
+        Optional.ofNullable(noteRepository.findBySubmissionId(submissionId, Pageable.unpaged())).
+                ifPresent((notes) ->  notes.forEach((note) -> {
+                            note.setSubmissionId("");
+                            noteRepository.save(note);
+                        }
+                ));
+
+    }
+
+
+
 
     @Override
     public void deleteSubmissionFile(Submission submission, String fileUploadId, String userId) {
@@ -192,8 +302,10 @@ public class SubmissionServiceImpl implements SubmissionService {
             deleteCallbackId(fileUpload.getCallbackId());
         }
         List<SummaryStatsEntry> summaryStatsEntries = summaryStatsEntryRepository.findByFileUploadId(fileUploadId);
-        summaryStatsEntryRepository.deleteAll(summaryStatsEntries);
-
+        /* Modifying due to Javers Bug for DeleteAll operation */
+        //summaryStatsEntryRepository.deleteAll(summaryStatsEntries);
+        Optional.ofNullable(summaryStatsEntries).ifPresent((sumstats) ->
+                sumstats.forEach((sumstat) -> summaryStatsEntryRepository.delete(sumstat)));
         ArchivedSubmission archivedSubmission = ArchivedSubmission.fromSubmission(submission);
         archivedSubmissionRepository.insert(archivedSubmission);
         submission.removeFileUpload(fileUploadId);
@@ -213,5 +325,75 @@ public class SubmissionServiceImpl implements SubmissionService {
         if (callbackIdOptional.isPresent()) {
             callbackIdRepository.delete(callbackIdOptional.get());
         }
+    }
+
+    public Submission lockSubmission(Submission submission,User user, String status){
+        Optional.ofNullable(status).ifPresent((lockstatus) -> {
+            if (lockstatus.equals("lock"))
+                submission.setLockDetails(new LockDetails(new Provenance(DateTime.now(),
+                        user.getId()), Status.LOCKED_FOR_EDITING.name()));
+            else
+                submission.setLockDetails(null);
+        });
+        return saveSubmission(submission, user.getId());
+    }
+
+    @Override
+    public Submission createGlobusFolderForReopenedSubmission(String submissionId, User apiCaller, String globusEmail) {
+        if (!curatorAuthService.isCurator(apiCaller)) {
+            log.error("Unauthorized access: {}", apiCaller.getId());
+            throw new AuthorizationException("User [" + apiCaller.getId() + "] does not have access to perform Globus folder creation.");
+        }
+        String globusFolder = UUID.randomUUID().toString();
+        SSGlobusResponse outcome = sumStatsService.createGlobusFolder(
+                new SSGlobusFolderDto(globusFolder, globusEmail)
+        );
+        if (outcome != null) {
+            if (!outcome.isValid()) {
+                log.error("Unable to create Globus folder: {}", outcome.getOutcome());
+                throw new EmailAccountNotLinkedToGlobusException(outcome.getOutcome());
+            }
+            Submission submission = getSubmission(submissionId);
+            submission.setGlobusFolderId(globusFolder);
+            submission.setGlobusOriginId(outcome.getOutcome());
+            saveSubmission(submission, apiCaller.getId());
+            return submission;
+        } else {
+            throw new SSGlobusFolderCreatioException("An error occurred when communicating with SS/Globus.");
+        }
+    }
+
+    /**
+     * Get List of Studies for previous submission & Publication
+     * @param submissionId
+     * @return
+     */
+    public List<Study> getStudies(String submissionId) {
+       List<Study> studies = studyRepository.readBySubmissionId(submissionId)
+        .collect(Collectors.toList());
+       List<String> studyTags = studies.stream().map(study -> study.getStudyTag())
+               .collect(Collectors.toList());
+        Submission submission = submissionRepository.findById(submissionId).get();
+        if(submission.getPublicationId() != null && !submission.getPublicationId().isEmpty()) {
+            Publication publication = publicationRepository.findById(submission.getPublicationId()).get();
+            List<Study> pmIdStudies = studyRepository.findByPmidsContains(publication.getPmid());
+          List<Study> uniqueStudies = pmIdStudies.stream().filter(study -> !studyTags.contains(study.getStudyTag()))
+                    .collect(Collectors.groupingBy(Study::getStudyTag))
+                    .values().stream()
+                    .map((studyArr) -> studyArr.stream().findFirst().get())
+                    .collect(Collectors.toList());
+            studies.addAll(uniqueStudies);
+        } else {
+            if(submission.getBodyOfWorks() != null && !submission.getBodyOfWorks().isEmpty()) {
+                List<Study> bowStudies = studyRepository.findByBodyOfWorkListContains(submission.getBodyOfWorks().get(0));
+                List<Study> uniqueStudies = bowStudies.stream().filter(study -> !studyTags.contains(study.getStudyTag()))
+                        .collect(Collectors.groupingBy(Study::getStudyTag))
+                        .values().stream()
+                        .map((studyArr) -> studyArr.stream().findFirst().get())
+                        .collect(Collectors.toList());
+                studies.addAll(uniqueStudies);
+            }
+        }
+    return studies;
     }
 }

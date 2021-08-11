@@ -14,6 +14,7 @@ import uk.ac.ebi.spot.gwas.deposition.domain.FileUpload;
 import uk.ac.ebi.spot.gwas.deposition.domain.Publication;
 import uk.ac.ebi.spot.gwas.deposition.domain.Submission;
 import uk.ac.ebi.spot.gwas.deposition.dto.FileUploadDto;
+import uk.ac.ebi.spot.gwas.deposition.dto.LockDetailsDto;
 import uk.ac.ebi.spot.gwas.deposition.dto.SubmissionDto;
 import uk.ac.ebi.spot.gwas.deposition.rest.controllers.*;
 import uk.ac.ebi.spot.gwas.deposition.rest.dto.*;
@@ -75,7 +76,13 @@ public class SubmissionAssemblyService implements ResourceAssembler<Submission, 
                 ProvenanceDtoAssembler.assemble(submission.getCreated(), userService.getUser(submission.getCreated().getUserId())),
                 submission.getLastUpdated() != null ?
                         ProvenanceDtoAssembler.assemble(submission.getLastUpdated(), userService.getUser(submission.getLastUpdated().getUserId())) :
-                        ProvenanceDtoAssembler.assemble(submission.getCreated(), userService.getUser(submission.getCreated().getUserId()))
+                        ProvenanceDtoAssembler.assemble(submission.getCreated(), userService.getUser(submission.getCreated().getUserId())),
+                submission.getEditTemplate() !=null ?
+                        ProvenanceDtoAssembler.assemble(submission.getEditTemplate(), userService.getUser(submission.getEditTemplate().getUserId())):null,
+                submission.getLockDetails() !=null?
+                        new LockDetailsDto(ProvenanceDtoAssembler.assemble(submission.getLockDetails().getLockedBy(),
+                                userService.getUser(submission.getLockDetails().getLockedBy().getUserId())),
+                                submission.getLockDetails().getStatus()):null
         );
 
         final ControllerLinkBuilder lb = linkTo(
@@ -105,6 +112,7 @@ public class SubmissionAssemblyService implements ResourceAssembler<Submission, 
         }
 
         if (!submission.getAssociations().isEmpty()) {
+
             Link associationsLink = linkTo(methodOn(AssociationsController.class)
                     .getAssociations(submission.getId(), null, null, null))
                     .withRel(GWASDepositionBackendConstants.LINKS_ASSOCIATIONS);

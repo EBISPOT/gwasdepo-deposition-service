@@ -11,6 +11,7 @@ import uk.ac.ebi.spot.gwas.deposition.constants.FileUploadStatus;
 import uk.ac.ebi.spot.gwas.deposition.constants.Status;
 import uk.ac.ebi.spot.gwas.deposition.constants.SubmissionType;
 import uk.ac.ebi.spot.gwas.deposition.domain.FileUpload;
+import uk.ac.ebi.spot.gwas.deposition.domain.Study;
 import uk.ac.ebi.spot.gwas.deposition.domain.Submission;
 import uk.ac.ebi.spot.gwas.deposition.domain.User;
 import uk.ac.ebi.spot.gwas.deposition.dto.templateschema.TemplateSchemaDto;
@@ -53,7 +54,7 @@ public class MetadataValidationServiceImpl implements MetadataValidationService 
 
     @Override
     @Async
-    public void validateTemplate(String submissionId, FileUpload fileUpload, byte[] fileContent, User user) {
+    public void validateTemplate(String submissionId, FileUpload fileUpload, byte[] fileContent, User user, List<Study> oldStudies) {
         log.info("[{}] Starting validation for file: {}", submissionId, fileUpload.getId());
         Submission submission = submissionService.getSubmission(submissionId, user);
 
@@ -108,7 +109,7 @@ public class MetadataValidationServiceImpl implements MetadataValidationService 
                 if (validationOutcome.getErrorMessages().isEmpty()) {
                     auditProxy.addAuditEntry(AuditHelper.fileValidate(submission.getCreated().getUserId(), fileUpload, submission,
                             false, true, null));
-                    conversionService.convertData(submission, fileUpload, streamSubmissionTemplateReader, schema, user.getId());
+                    conversionService.convertData(submission, fileUpload, streamSubmissionTemplateReader, schema, user.getId(), oldStudies);
                 } else {
                     submission.setOverallStatus(Status.INVALID.name());
                     submission.setMetadataStatus(Status.INVALID.name());

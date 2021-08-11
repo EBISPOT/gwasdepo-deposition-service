@@ -3,6 +3,8 @@ package uk.ac.ebi.spot.gwas.deposition.rest.controllers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.hateoas.Link;
+import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.Resources;
 import org.springframework.hateoas.mvc.ControllerLinkBuilder;
@@ -19,6 +21,7 @@ import uk.ac.ebi.spot.gwas.deposition.constants.GWASDepositionBackendConstants;
 import uk.ac.ebi.spot.gwas.deposition.constants.GeneralCommon;
 import uk.ac.ebi.spot.gwas.deposition.constants.SubmissionType;
 import uk.ac.ebi.spot.gwas.deposition.domain.FileUpload;
+import uk.ac.ebi.spot.gwas.deposition.domain.Study;
 import uk.ac.ebi.spot.gwas.deposition.domain.Submission;
 import uk.ac.ebi.spot.gwas.deposition.domain.User;
 import uk.ac.ebi.spot.gwas.deposition.dto.FileUploadDto;
@@ -31,6 +34,7 @@ import uk.ac.ebi.spot.gwas.deposition.util.HeadersUtil;
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
@@ -85,7 +89,7 @@ public class FileUploadsController {
         if (submission.getType().equals(SubmissionType.SUMMARY_STATS.name())) {
             fileUpload = fileHandlerService.handleSummaryStatsFile(submission, file, user);
         } else {
-            fileUpload = fileHandlerService.handleMetadataFile(submission, file, user);
+            fileUpload = fileHandlerService.handleMetadataFile(submission, file, user, null);
         }
         auditProxy.addAuditEntry(AuditHelper.fileCreate(submission.getCreated().getUserId(), fileUpload, submission, true, null));
 
@@ -96,6 +100,49 @@ public class FileUploadsController {
         resource.add(BackendUtil.underBasePath(lb, gwasDepositionBackendConfig.getProxyPrefix()).withSelfRel());
         return resource;
     }
+
+    /*
+     * POST /v1/submissions/{submissionId}/edituploads
+     */
+    @PostMapping(
+            value = "/{submissionId}" + GWASDepositionBackendConstants.API_EDIT_UPLOADS,
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
+            produces = MediaTypes.HAL_JSON_VALUE
+    )
+    @ResponseStatus(HttpStatus.CREATED)
+    @ResponseBody
+    public Resource<FileUploadDto> uploadEditedFile(@RequestParam MultipartFile file,
+                                              @PathVariable String submissionId,
+                                              HttpServletRequest request) {
+        User user = userService.findUser(jwtService.extractUser(HeadersUtil.extractJWT(request)), false);
+        log.info("[{}] Request to upload a new file [{}] to submission: {}", user.getName(), file.getOriginalFilename(), submissionId);
+
+        FileUpload fileUpload;
+
+        //CompletableFuture.allOf(CompletableFuture.runAsync(() -> submissionService.deleteSubmissionChildren(submissionId)));
+        List<Study> oldStudies = submissionService.getStudies(submissionId);
+        submissionService.deleteSubmissionChildren(submissionId);
+        Submission submission = submissionService.editFileUploadSubmissionDetails(submissionId, user);
+        if (submission.getType().equals(SubmissionType.SUMMARY_STATS.name())) {
+            fileUpload = fileHandlerService.handleSummaryStatsFile(submission, file, user);
+        } else {
+            fileUpload = fileHandlerService.handleMetadataFile(submission, file, user, oldStudies);
+        }
+        auditProxy.addAuditEntry(AuditHelper.fileCreate(submission.getCreated().getUserId(), fileUpload, submission, true, null));
+
+        final ControllerLinkBuilder lb = linkTo(
+                methodOn(FileUploadsController.class).getFileUpload(submissionId, fileUpload.getId(), null));
+/*
+        Link javersLink = linkTo(methodOn(JaversAuditController.class)
+                    .getSubmissionChanges(submissionId, null)).withSelfRel();*/
+
+        Resource<FileUploadDto> resource = new Resource<>(FileUploadDtoAssembler.assemble(fileUpload, null));
+        resource.add(BackendUtil.underBasePath(lb, gwasDepositionBackendConfig.getProxyPrefix()).withSelfRel());
+       // resource.add(javersLink);
+        return resource;
+    }
+
+
 
     /**
      * GET /v1/submissions/{submissionId}/uploads/{fileUploadId}

@@ -1,5 +1,6 @@
 package uk.ac.ebi.spot.gwas.deposition.repository;
 
+import org.javers.spring.annotation.JaversSpringDataAuditable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.repository.MongoRepository;
@@ -19,4 +20,6 @@ public interface StudyRepository extends MongoRepository<Study, String> {
     List<Study> findByIdIn(List<String> ids);
 
     List<Study> findByBodyOfWorkListContains(String bowId);
+
+    List<Study> findByPmidsContains(String pmId);
 }

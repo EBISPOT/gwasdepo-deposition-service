@@ -3,6 +3,7 @@ package uk.ac.ebi.spot.gwas.deposition.service.impl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import uk.ac.ebi.spot.gwas.deposition.audit.AuditProxy;
@@ -30,6 +31,7 @@ import uk.ac.ebi.spot.gwas.template.validator.util.SubmissionConverter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class ConversionServiceImpl implements ConversionService {
@@ -76,19 +78,27 @@ public class ConversionServiceImpl implements ConversionService {
     @Override
     public void convertData(Submission submission, FileUpload fileUpload,
                             StreamSubmissionTemplateReader streamSubmissionTemplateReader,
-                            TemplateSchemaDto schema, String userId) {
+                            TemplateSchemaDto schema, String userId, List<Study> oldStudies) {
         log.info("Converting data ...");
         SubmissionDataDto submissionDataDto = SubmissionConverter.fromSubmissionDocument(
                 templateConverterService.convert(streamSubmissionTemplateReader, schema)
         );
         streamSubmissionTemplateReader.close();
-
         List<SummaryStatsEntry> summaryStatsEntries = new ArrayList<>();
         log.info("Found {} studies.", submissionDataDto.getStudies().size());
         for (StudyDto studyDto : submissionDataDto.getStudies()) {
             Study study = StudyDtoAssembler.disassemble(studyDto);
+            List<Study> oldStudyList = null;
+
+             if(oldStudies != null)
+             oldStudyList = oldStudies.stream().filter((oldStudy) -> oldStudy.getStudyTag().equals(studyDto.getStudyTag()))
+                    .collect(Collectors.toList());
+
             if (study.getAccession() == null) {
-                study.setAccession(gcstCounter.getNext());
+                if(oldStudyList != null && !oldStudyList.isEmpty() && oldStudyList.get(0) != null)
+                    study.setAccession(oldStudyList.get(0).getAccession());
+                else
+                    study.setAccession(gcstCounter.getNext());
             }
             study.setSubmissionId(submission.getId());
             study.setAgreedToCc0(submission.isAgreedToCc0());
@@ -121,10 +131,11 @@ public class ConversionServiceImpl implements ConversionService {
                         study.getReadmeFile(), submission.getGlobusFolderId()));
             }
         }
-        if (!summaryStatsEntries.isEmpty()) {
+        //Moving code block to avoid repeated changing of Submission Object to capture Javers correctly
+        /*if (!summaryStatsEntries.isEmpty()) {
             submission.setSummaryStatsStatus(Status.VALIDATING.name());
             submissionService.saveSubmission(submission, userId);
-        }
+        }*/
 
         log.info("Found {} associations.", submissionDataDto.getAssociations().size());
         for (AssociationDto associationDto : submissionDataDto.getAssociations()) {
@@ -151,6 +162,11 @@ public class ConversionServiceImpl implements ConversionService {
         }
 
         log.info("Data conversion finalised.");
+
+        if (!summaryStatsEntries.isEmpty()) {
+            submission.setSummaryStatsStatus(Status.VALIDATING.name());
+            //submissionService.saveSubmission(submission, userId);
+        }
         submission.setOverallStatus(Status.VALIDATING.name());
         submission.setMetadataStatus(Status.VALID.name());
         submissionService.saveSubmission(submission, userId);

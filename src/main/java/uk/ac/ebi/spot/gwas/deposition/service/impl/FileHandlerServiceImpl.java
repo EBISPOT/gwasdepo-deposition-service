@@ -58,6 +58,9 @@ public class FileHandlerServiceImpl implements FileHandlerService {
     @Autowired
     private BackendEmailService backendEmailService;
 
+    @Autowired
+    private CuratorAuthService curatorAuthService;
+
     @Override
     @Async
     public void handleSummaryStatsTemplate(Submission submission, Publication publication, User user) {
@@ -96,7 +99,7 @@ public class FileHandlerServiceImpl implements FileHandlerService {
             markInvalidFile(fileUpload, submission, ErrorType.NO_TEMPLATE_SERVICE, null, user);
         } else {
             FileObject fileObject = templateService.retrievePrefilledTemplate(new SSTemplateRequestDto(true,
-                    new SSTemplateRequestStudyDto(summaryStatsEntries)));
+                    false /*curatorAuthService.isCurator(user)*/, new SSTemplateRequestStudyDto(summaryStatsEntries)));
             if (fileObject == null) {
                 log.error("No file object received from the template service!");
                 backendEmailService.sendErrorsEmail("SS File Handler", "[" + publication.getPmid() + "] No file object received from the template service!");
@@ -122,7 +125,7 @@ public class FileHandlerServiceImpl implements FileHandlerService {
     }
 
     @Override
-    public FileUpload handleMetadataFile(Submission submission, MultipartFile file, User user) {
+    public FileUpload handleMetadataFile(Submission submission, MultipartFile file, User user, List<Study> oldStudies) {
         log.info("Started metadata submission [{}] handling for PMID: {}", submission.getId(),
                 submission.getPublicationId());
 
@@ -131,7 +134,7 @@ public class FileHandlerServiceImpl implements FileHandlerService {
         submission.addFileUpload(fileUpload.getId());
         submissionService.saveSubmission(submission, user.getId());
         metadataValidationService.validateTemplate(submission.getId(), fileUpload,
-                fileUploadsService.retrieveFileContent(fileUpload.getId()), user);
+                fileUploadsService.retrieveFileContent(fileUpload.getId()), user, oldStudies);
         return fileUpload;
     }
 

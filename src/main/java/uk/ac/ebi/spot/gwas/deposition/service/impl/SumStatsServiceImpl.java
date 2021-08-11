@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import uk.ac.ebi.spot.gwas.deposition.domain.SSGlobusResponse;
+import uk.ac.ebi.spot.gwas.deposition.domain.Submission;
 import uk.ac.ebi.spot.gwas.deposition.dto.summarystats.*;
 import uk.ac.ebi.spot.gwas.deposition.service.BackendEmailService;
 import uk.ac.ebi.spot.gwas.deposition.service.SumStatsService;
@@ -119,6 +120,24 @@ public class SumStatsServiceImpl extends GatewayService implements SumStatsServi
                     new ParameterizedTypeReference<Void>() {
                     });
         } catch (Exception e) {
+            log.error("Unable to call gwas-sumstats-service: {}", e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public void deleteGlobusFolder(Submission submission) {
+        log.info("Deleting Globus folder ID: {} for Submission ID: {}",
+                submission.getGlobusFolderId(), submission.getId());
+        String endpoint = restInteractionConfig.getGlobusEndpoint() + "/" + submission.getGlobusFolderId();
+        try {
+            HttpEntity httpEntity = restRequestUtil.httpEntity()
+                    .build();
+            restTemplate.exchange(endpoint,
+                    HttpMethod.DELETE, httpEntity,
+                    new ParameterizedTypeReference<Void>() {
+                    });
+        }
+        catch (Exception e) {
             log.error("Unable to call gwas-sumstats-service: {}", e.getMessage(), e);
         }
     }
