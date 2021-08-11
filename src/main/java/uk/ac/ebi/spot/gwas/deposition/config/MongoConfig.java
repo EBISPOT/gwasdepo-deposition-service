@@ -171,6 +171,23 @@ public class MongoConfig {
 
             return new MongoClient(new MongoClientURI("mongodb://" + credentials + mongoUri));
         }
+
+        @Bean
+        public Javers javers() {
+            MongoRepository mongoRepository = new MongoRepository(mongoClient().getDatabase(getDatabaseName()));
+            return JaversBuilder.javers().registerJaversRepository(mongoRepository).build();
+        }
+
+        @Bean
+        public JaversSpringDataAuditableRepositoryAspect javersSpringDataAuditableAspect() {
+            return new JaversSpringDataAuditableRepositoryAspect(javers(), provideJaversAuthor(),
+                    new EmptyPropertiesProvider());
+        }
+
+        @Bean
+        public AuthorProvider provideJaversAuthor(){
+            return new SimpleAuthorProvider();
+        }
     }
 
     @Configuration
