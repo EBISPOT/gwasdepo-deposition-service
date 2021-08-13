@@ -104,7 +104,6 @@ public class StalledSubmissionsCheckTask {
                 }
                 publicationRepository.save(publication);
             }
-            // check GCP close?
             submissionRepository.save(submission);
             return;
         }
