@@ -99,7 +99,7 @@ public class FileHandlerServiceImpl implements FileHandlerService {
             markInvalidFile(fileUpload, submission, ErrorType.NO_TEMPLATE_SERVICE, null, user);
         } else {
             FileObject fileObject = templateService.retrievePrefilledTemplate(new SSTemplateRequestDto(true,
-                    false /*curatorAuthService.isCurator(user)*/, new SSTemplateRequestStudyDto(summaryStatsEntries)));
+                    curatorAuthService.isCurator(user), new SSTemplateRequestStudyDto(summaryStatsEntries)));
             if (fileObject == null) {
                 log.error("No file object received from the template service!");
                 backendEmailService.sendErrorsEmail("SS File Handler", "[" + publication.getPmid() + "] No file object received from the template service!");
