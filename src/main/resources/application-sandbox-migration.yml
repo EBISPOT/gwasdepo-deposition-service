@@ -35,6 +35,7 @@ quartz:
 gwas-deposition:
   auth:
     enabled: true
+    unauthenticated-endpoints: /gwas/deposition/api/v1/publications
   db: deposition-backend-sandbox
   proxy-prefix: /gwas/deposition/api
   solr:
