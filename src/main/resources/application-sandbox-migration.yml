@@ -1,0 +1,56 @@
+server:
+  port: 8080
+  servlet:
+    context-path: /gwas/deposition/api
+
+spring:
+  main:
+    allow-bean-definition-overriding: true
+  data:
+    mongodb:
+      uri: mongo-0.mongo.gwas-dev.svc.cluster.local,mongo-1.mongo.gwas-dev.svc.cluster.local,mongo-2.mongo.gwas-dev.svc.cluster.local:27017
+    solr:
+      host: http://solr-svc.gwas-dev.svc.cluster.local:8983/solr/
+  mail:
+    host: outgoing.ebi.ac.uk
+    port: 587
+    properties:
+      mail:
+        smtp:
+          connectiontimeout: 5000
+          timeout: 3000
+          writetimeout: 5000
+          auth: false
+          sendpartial: true
+          starttls:
+            enable: true
+
+audit:
+  enabled: true
+
+quartz:
+  scheduler:
+    dbName: deposition-backend-sandbox
+
+gwas-deposition:
+  auth:
+    enabled: true
+  db: deposition-backend-sandbox
+  proxy-prefix: /gwas/deposition/api
+  solr:
+    enabled: true
+  email-config:
+    base-url: http://193.62.54.159/gwas/deposition/submission/
+
+email:
+  enabled: true
+
+gwas-template-service:
+  enabled: true
+
+gwas-catalog-service:
+  enabled: false
+
+solr:
+  enable:
+    alias: true

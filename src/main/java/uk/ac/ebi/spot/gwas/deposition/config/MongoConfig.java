@@ -89,7 +89,7 @@ public class MongoConfig {
     @Configuration
     @EnableMongoRepositories(basePackages = {"uk.ac.ebi.spot.gwas.deposition.repository"})
     @EnableTransactionManagement
-    @Profile({"sandbox"})
+    @Profile({"sandbox","sandbox-migration"})
     public static class MongoConfigSandbox extends AbstractMongoConfiguration {
 
         @Autowired
