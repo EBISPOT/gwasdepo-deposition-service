@@ -27,6 +27,7 @@ spring:
 
 audit:
   enabled: true
+  url: http://gwas-audit-service-dev:8080
 
 quartz:
   scheduler:
@@ -46,8 +47,15 @@ gwas-deposition:
 email:
   enabled: true
 
+gwas-sumstats-service:
+  url: http://gwas-ss-service-dev:8000
+
 gwas-template-service:
   enabled: true
+  url: http://gwas-template-service-dev:8080
+
+
+
 
 gwas-catalog-service:
   enabled: false
