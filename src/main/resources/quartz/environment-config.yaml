@@ -11,6 +11,10 @@ environments:
   config: application-sandbox.yml
   dev: false
   gcp: false
+- name: sandbox-migration
+  config: application-sandbox-migration.yml
+  dev: false
+  gcp: false
 - name: prod
   config: application-prod.yml
   dev: false
