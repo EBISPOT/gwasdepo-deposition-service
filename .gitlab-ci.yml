@@ -81,7 +81,7 @@ deploy-backend-sandbox:
   environment:
     name: sandbox
   only:
-    - develop
+    - gwasdepo#477-sandbox-migration
 
 deploy-backend-sandbox-migration:
   image: dtzar/helm-kubectl:2.13.1
@@ -96,7 +96,7 @@ deploy-backend-sandbox-migration:
   environment:
     name: sandbox-migration
   only:
-    - gwasdepo#477-sandbox-migration
+    - develop
 
 deploy-fallback:
   image: dtzar/helm-kubectl:2.13.1
