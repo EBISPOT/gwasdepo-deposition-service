@@ -44,7 +44,8 @@ public class StudyDtoAssembler implements ResourceAssembler<Study, Resource<Stud
                 null,
                 null,
                 null,
-                study.isAgreedToCc0());
+                study.isAgreedToCc0(),
+                null);
 
         final ControllerLinkBuilder lb = ControllerLinkBuilder.linkTo(
                 ControllerLinkBuilder.methodOn(SubmissionsController.class).getSubmission(study.getSubmissionId(), null));
@@ -79,7 +80,8 @@ public class StudyDtoAssembler implements ResourceAssembler<Study, Resource<Stud
                 null,
                 null,
                 null,
-                study.isAgreedToCc0());
+                study.isAgreedToCc0(),
+                null);
     }
 
     public static Study disassemble(StudyDto studyDto) {
