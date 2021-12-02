@@ -8,7 +8,8 @@ spring:
     allow-bean-definition-overriding: true
   data:
     mongodb:
-      uri: mongo-0.mongo.gwas-dev.svc.cluster.local,mongo-1.mongo.gwas-dev.svc.cluster.local,mongo-2.mongo.gwas-dev.svc.cluster.local:27017
+      #uri: mongo-0.mongo.gwas-dev.svc.cluster.local,mongo-1.mongo.gwas-dev.svc.cluster.local,mongo-2.mongo.gwas-dev.svc.cluster.local:27017
+      uri: mongodb-hx-gwasdepopro-001:27017,mongodb-hl-gwasdepopro-002:27017/admin?replicaSet=gwasdepoprors080
     solr:
       host: http://solr-svc.gwas-dev.svc.cluster.local:8983/solr/
   mail:
