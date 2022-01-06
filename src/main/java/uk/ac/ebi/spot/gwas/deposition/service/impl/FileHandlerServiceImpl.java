@@ -125,7 +125,7 @@ public class FileHandlerServiceImpl implements FileHandlerService {
     }
 
     @Override
-    public FileUpload handleMetadataFile(Submission submission, MultipartFile file, User user, List<Study> oldStudies) {
+    public FileUpload handleMetadataFile(Submission submission, MultipartFile file, User user, List<Study> oldStudies, String appType) {
         log.info("Started metadata submission [{}] handling for PMID: {}", submission.getId(),
                 submission.getPublicationId());
 
@@ -134,7 +134,7 @@ public class FileHandlerServiceImpl implements FileHandlerService {
         submission.addFileUpload(fileUpload.getId());
         submissionService.saveSubmission(submission, user.getId());
         metadataValidationService.validateTemplate(submission.getId(), fileUpload,
-                fileUploadsService.retrieveFileContent(fileUpload.getId()), user, oldStudies);
+                fileUploadsService.retrieveFileContent(fileUpload.getId()), user, oldStudies, appType);
         return fileUpload;
     }
 

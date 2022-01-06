@@ -9,5 +9,5 @@ import uk.ac.ebi.spot.gwas.template.validator.util.StreamSubmissionTemplateReade
 import java.util.List;
 
 public interface ConversionService {
-    void convertData(Submission submission, FileUpload fileUpload, StreamSubmissionTemplateReader streamSubmissionTemplateReader, TemplateSchemaDto schema, String userId, List<Study> oldStudies);
+    void convertData(Submission submission, FileUpload fileUpload, StreamSubmissionTemplateReader streamSubmissionTemplateReader, TemplateSchemaDto schema, String userId, List<Study> oldStudies, String appType);
 }
