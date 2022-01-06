@@ -54,7 +54,7 @@ public class MetadataValidationServiceImpl implements MetadataValidationService 
 
     @Override
     @Async
-    public void validateTemplate(String submissionId, FileUpload fileUpload, byte[] fileContent, User user, List<Study> oldStudies) {
+    public void validateTemplate(String submissionId, FileUpload fileUpload, byte[] fileContent, User user, List<Study> oldStudies, String appType) {
         log.info("[{}] Starting validation for file: {}", submissionId, fileUpload.getId());
         Submission submission = submissionService.getSubmission(submissionId, user);
 
@@ -109,7 +109,7 @@ public class MetadataValidationServiceImpl implements MetadataValidationService 
                 if (validationOutcome.getErrorMessages().isEmpty()) {
                     auditProxy.addAuditEntry(AuditHelper.fileValidate(submission.getCreated().getUserId(), fileUpload, submission,
                             false, true, null));
-                    conversionService.convertData(submission, fileUpload, streamSubmissionTemplateReader, schema, user.getId(), oldStudies);
+                    conversionService.convertData(submission, fileUpload, streamSubmissionTemplateReader, schema, user.getId(), oldStudies, appType);
                 } else {
                     submission.setOverallStatus(Status.INVALID.name());
                     submission.setMetadataStatus(Status.INVALID.name());
