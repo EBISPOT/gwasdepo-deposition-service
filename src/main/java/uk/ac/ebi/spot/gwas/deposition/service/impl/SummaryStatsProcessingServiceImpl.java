@@ -130,13 +130,11 @@ public class SummaryStatsProcessingServiceImpl implements SummaryStatsProcessing
             list.add(SummaryStatsRequestEntryDtoAssembler.assemble(summaryStatsEntry));
         }
 
-        String skipValidation = null;
+        Boolean skipValidation = false;
 
-        if(appType != null && appType.equals("depo-curation")) {
-            skipValidation = "yes";
-        } else {
-            skipValidation = "no";
-        }
+        if(appType != null && appType.equals("depo-curation"))
+            skipValidation = true;
+
         String callbackId = sumStatsService.registerStatsForProcessing(new SummaryStatsRequestDto(list, skipValidation));
         FileUpload fileUpload = fileUploadsService.getFileUpload(fileUploadId);
 

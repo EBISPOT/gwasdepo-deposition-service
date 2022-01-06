@@ -124,7 +124,7 @@ public class TestUtil {
                         RandomStringUtils.randomAlphanumeric(10),
                         RandomStringUtils.randomAlphanumeric(10),
                         RandomStringUtils.randomAlphanumeric(10))
-        }),"no");
+        }),false);
     }
 
     public static SummaryStatsSchemaDto summaryStatsSchemaDto() {
