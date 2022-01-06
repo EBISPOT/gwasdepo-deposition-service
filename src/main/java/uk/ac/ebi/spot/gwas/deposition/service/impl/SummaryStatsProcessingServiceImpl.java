@@ -71,7 +71,7 @@ public class SummaryStatsProcessingServiceImpl implements SummaryStatsProcessing
     @Override
     @Async
     public void processSummaryStats(Submission submission, String fileUploadId, List<SummaryStatsEntry> summaryStatsEntries,
-                                    Publication publication, BodyOfWork bodyOfWork, String userId) {
+                                    Publication publication, BodyOfWork bodyOfWork, String userId, String appType) {
         log.info("Processing {} summary stats.", summaryStatsEntries.size());
         log.info("Summary stats service enabled: {}", (sumStatsService != null));
 
@@ -129,7 +129,15 @@ public class SummaryStatsProcessingServiceImpl implements SummaryStatsProcessing
             summaryStatsEntry = summaryStatsEntryRepository.insert(summaryStatsEntry);
             list.add(SummaryStatsRequestEntryDtoAssembler.assemble(summaryStatsEntry));
         }
-        String callbackId = sumStatsService.registerStatsForProcessing(new SummaryStatsRequestDto(list));
+
+        String skipValidation = null;
+
+        if(appType != null && appType.equals("depo-curation")) {
+            skipValidation = "yes";
+        } else {
+            skipValidation = "no";
+        }
+        String callbackId = sumStatsService.registerStatsForProcessing(new SummaryStatsRequestDto(list, skipValidation));
         FileUpload fileUpload = fileUploadsService.getFileUpload(fileUploadId);
 
         if (callbackId == null) {

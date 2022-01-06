@@ -9,7 +9,7 @@ public interface FileHandlerService {
 
     void handleSummaryStatsTemplate(Submission submission, Publication publication, User user);
 
-    FileUpload handleMetadataFile(Submission submission, MultipartFile file, User user, List<Study> oldStudies);
+    FileUpload handleMetadataFile(Submission submission, MultipartFile file, User user, List<Study> oldStudies,String appType);
 
     FileUpload handleSummaryStatsFile(Submission submission, MultipartFile file, User user);
 }

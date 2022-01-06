@@ -78,7 +78,7 @@ public class ConversionServiceImpl implements ConversionService {
     @Override
     public void convertData(Submission submission, FileUpload fileUpload,
                             StreamSubmissionTemplateReader streamSubmissionTemplateReader,
-                            TemplateSchemaDto schema, String userId, List<Study> oldStudies) {
+                            TemplateSchemaDto schema, String userId, List<Study> oldStudies,String appType) {
         log.info("Converting data ...");
         SubmissionDataDto submissionDataDto = SubmissionConverter.fromSubmissionDocument(
                 templateConverterService.convert(streamSubmissionTemplateReader, schema)
@@ -187,7 +187,7 @@ public class ConversionServiceImpl implements ConversionService {
                 bodyOfWork = bodyOfWorkOptional.get();
             }
         }
-        summaryStatsProcessingService.processSummaryStats(submission, fileUpload.getId(), summaryStatsEntries, publication, bodyOfWork, userId);
+        summaryStatsProcessingService.processSummaryStats(submission, fileUpload.getId(), summaryStatsEntries, publication, bodyOfWork, userId, appType);
     }
 
 }

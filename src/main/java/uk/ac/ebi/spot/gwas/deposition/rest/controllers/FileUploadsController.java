@@ -89,7 +89,7 @@ public class FileUploadsController {
         if (submission.getType().equals(SubmissionType.SUMMARY_STATS.name())) {
             fileUpload = fileHandlerService.handleSummaryStatsFile(submission, file, user);
         } else {
-            fileUpload = fileHandlerService.handleMetadataFile(submission, file, user, null);
+            fileUpload = fileHandlerService.handleMetadataFile(submission, file, user, null,null);
         }
         auditProxy.addAuditEntry(AuditHelper.fileCreate(submission.getCreated().getUserId(), fileUpload, submission, true, null));
 
@@ -126,7 +126,7 @@ public class FileUploadsController {
         if (submission.getType().equals(SubmissionType.SUMMARY_STATS.name())) {
             fileUpload = fileHandlerService.handleSummaryStatsFile(submission, file, user);
         } else {
-            fileUpload = fileHandlerService.handleMetadataFile(submission, file, user, oldStudies);
+            fileUpload = fileHandlerService.handleMetadataFile(submission, file, user, oldStudies,"depo-curation");
         }
         auditProxy.addAuditEntry(AuditHelper.fileCreate(submission.getCreated().getUserId(), fileUpload, submission, true, null));
 
