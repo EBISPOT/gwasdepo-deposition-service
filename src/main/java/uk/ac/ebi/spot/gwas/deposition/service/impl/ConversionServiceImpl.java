@@ -85,7 +85,7 @@ public class ConversionServiceImpl implements ConversionService {
                 templateConverterService.convert(streamSubmissionTemplateReader, schema)
         );*/
         SubmissionDocument submissionDocument;
-        SubmissionDataDto submissionDataDto;
+        SubmissionDataDto submissionDataDto = null;
 
          try {
              log.info("Before Template service call");
