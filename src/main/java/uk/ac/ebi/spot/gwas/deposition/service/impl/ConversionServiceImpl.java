@@ -24,6 +24,7 @@ import uk.ac.ebi.spot.gwas.deposition.service.SubmissionService;
 import uk.ac.ebi.spot.gwas.deposition.service.SummaryStatsProcessingService;
 import uk.ac.ebi.spot.gwas.deposition.util.BackendUtil;
 import uk.ac.ebi.spot.gwas.deposition.util.GCSTCounter;
+import uk.ac.ebi.spot.gwas.template.validator.domain.SubmissionDocument;
 import uk.ac.ebi.spot.gwas.template.validator.service.TemplateConverterService;
 import uk.ac.ebi.spot.gwas.template.validator.util.StreamSubmissionTemplateReader;
 import uk.ac.ebi.spot.gwas.template.validator.util.SubmissionConverter;
@@ -80,9 +81,23 @@ public class ConversionServiceImpl implements ConversionService {
                             StreamSubmissionTemplateReader streamSubmissionTemplateReader,
                             TemplateSchemaDto schema, String userId, List<Study> oldStudies,String appType) {
         log.info("Converting data ...");
-        SubmissionDataDto submissionDataDto = SubmissionConverter.fromSubmissionDocument(
+      /*  SubmissionDataDto submissionDataDto = SubmissionConverter.fromSubmissionDocument(
                 templateConverterService.convert(streamSubmissionTemplateReader, schema)
-        );
+        );*/
+        SubmissionDocument submissionDocument;
+        SubmissionDataDto submissionDataDto;
+
+         try {
+             log.info("Before Template service call");
+             submissionDocument = templateConverterService.convert(streamSubmissionTemplateReader, schema);
+             log.info("After Template service call");
+             log.info("Before Submission Converter call");
+             submissionDataDto = SubmissionConverter.fromSubmissionDocument(submissionDocument);
+             log.info("After Submission Converter call");
+         }catch (Exception ex){
+             log.error("Inside Exception Block");
+             log.error("Exception in Template service call "+ex.getMessage(),ex);
+         }
         streamSubmissionTemplateReader.close();
         List<SummaryStatsEntry> summaryStatsEntries = new ArrayList<>();
         log.info("Found {} studies.", submissionDataDto.getStudies().size());
