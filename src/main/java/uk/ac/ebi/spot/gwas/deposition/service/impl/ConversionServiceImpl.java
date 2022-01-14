@@ -90,10 +90,10 @@ public class ConversionServiceImpl implements ConversionService {
          try {
              log.info("Before Template service call");
              submissionDocument = templateConverterService.convert(streamSubmissionTemplateReader, schema);
-             submissionDocument.getStudyEntries().stream().forEach(study ->  log.debug("Study in template file:" +study.getStudy_tag()));
-             submissionDocument.getAssociationEntries().stream().forEach(asscn -> log.debug("Asscn in template file:" +asscn.getStudy_tag()+"-"+asscn.getVariant_id()));
-             submissionDocument.getSampleEntries().stream().forEach(sample -> log.debug("Sample in template file:" +sample.getStudy_tag()+"-"+sample.getSample_description()));
-             submissionDocument.getNoteEntries().stream().forEach(note -> log.debug("Note in template file:" +note.getStudy_tag()+"-"+note.getNote()));
+             submissionDocument.getStudyEntries().stream().forEach(study ->  log.info("Study in template file:" +study.getStudy_tag()));
+             submissionDocument.getAssociationEntries().stream().forEach(asscn -> log.info("Asscn in template file:" +asscn.getStudy_tag()+"-"+asscn.getVariant_id()));
+             submissionDocument.getSampleEntries().stream().forEach(sample -> log.info("Sample in template file:" +sample.getStudy_tag()+"-"+sample.getSample_description()));
+             submissionDocument.getNoteEntries().stream().forEach(note -> log.info("Note in template file:" +note.getStudy_tag()+"-"+note.getNote()));
              log.info("After Template service call");
              log.info("Before Submission Converter call");
              submissionDataDto = SubmissionConverter.fromSubmissionDocument(submissionDocument);
