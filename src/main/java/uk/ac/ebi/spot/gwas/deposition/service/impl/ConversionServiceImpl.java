@@ -81,27 +81,10 @@ public class ConversionServiceImpl implements ConversionService {
                             StreamSubmissionTemplateReader streamSubmissionTemplateReader,
                             TemplateSchemaDto schema, String userId, List<Study> oldStudies,String appType) {
         log.info("Converting data ...");
-      /*  SubmissionDataDto submissionDataDto = SubmissionConverter.fromSubmissionDocument(
+         SubmissionDataDto submissionDataDto = SubmissionConverter.fromSubmissionDocument(
                 templateConverterService.convert(streamSubmissionTemplateReader, schema)
-        );*/
-        SubmissionDocument submissionDocument;
-        SubmissionDataDto submissionDataDto = null;
-
-         try {
-             log.info("Before Template service call");
-             submissionDocument = templateConverterService.convert(streamSubmissionTemplateReader, schema);
-             submissionDocument.getStudyEntries().stream().forEach(study ->  log.info("Study in template file:" +study.getStudy_tag()));
-             submissionDocument.getAssociationEntries().stream().forEach(asscn -> log.info("Asscn in template file:" +asscn.getStudy_tag()+"-"+asscn.getVariant_id()));
-             submissionDocument.getSampleEntries().stream().forEach(sample -> log.info("Sample in template file:" +sample.getStudy_tag()+"-"+sample.getSample_description()));
-             submissionDocument.getNoteEntries().stream().forEach(note -> log.info("Note in template file:" +note.getStudy_tag()+"-"+note.getNote()));
-             log.info("After Template service call");
-             log.info("Before Submission Converter call");
-             submissionDataDto = SubmissionConverter.fromSubmissionDocument(submissionDocument);
-             log.info("After Submission Converter call");
-         }catch (Exception ex){
-             log.error("Inside Exception Block");
-             log.error("Exception in Template service call "+ex.getMessage(),ex);
-         }
+        );
+      
         streamSubmissionTemplateReader.close();
         List<SummaryStatsEntry> summaryStatsEntries = new ArrayList<>();
         log.info("Found {} studies.", submissionDataDto.getStudies().size());
