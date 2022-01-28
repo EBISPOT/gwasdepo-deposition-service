@@ -84,7 +84,7 @@ public class ConversionServiceImpl implements ConversionService {
          SubmissionDataDto submissionDataDto = SubmissionConverter.fromSubmissionDocument(
                 templateConverterService.convert(streamSubmissionTemplateReader, schema)
         );
-      
+
         streamSubmissionTemplateReader.close();
         List<SummaryStatsEntry> summaryStatsEntries = new ArrayList<>();
         log.info("Found {} studies.", submissionDataDto.getStudies().size());
