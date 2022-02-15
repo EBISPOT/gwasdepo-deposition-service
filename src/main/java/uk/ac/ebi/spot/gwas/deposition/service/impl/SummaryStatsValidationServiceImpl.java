@@ -159,7 +159,7 @@ public class SummaryStatsValidationServiceImpl implements SummaryStatsValidation
                         }
                         if (validationOutcome.getErrorMessages().isEmpty()) {
                             auditProxy.addAuditEntry(AuditHelper.fileValidate(submission.getCreated().getUserId(), dataFile, submission, true, true, null));
-                            conversionService.convertData(submission, dataFile, dataReader, schema, user.getId(), null);
+                            conversionService.convertData(submission, dataFile, dataReader, schema, user.getId(), null,null);
                         } else {
                             submission.setOverallStatus(Status.INVALID.name());
                             submission.setSummaryStatsStatus(Status.INVALID.name());
@@ -174,7 +174,7 @@ public class SummaryStatsValidationServiceImpl implements SummaryStatsValidation
                         }
                     } else {
                         auditProxy.addAuditEntry(AuditHelper.fileValidate(submission.getCreated().getUserId(), dataFile, submission, true, true, null));
-                        conversionService.convertData(submission, dataFile, dataReader, schema, user.getId(), null);
+                        conversionService.convertData(submission, dataFile, dataReader, schema, user.getId(), null,null);
                     }
                 } else {
                     submission.setOverallStatus(Status.INVALID.name());

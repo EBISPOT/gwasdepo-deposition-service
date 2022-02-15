@@ -24,6 +24,7 @@ import uk.ac.ebi.spot.gwas.deposition.service.SubmissionService;
 import uk.ac.ebi.spot.gwas.deposition.service.SummaryStatsProcessingService;
 import uk.ac.ebi.spot.gwas.deposition.util.BackendUtil;
 import uk.ac.ebi.spot.gwas.deposition.util.GCSTCounter;
+import uk.ac.ebi.spot.gwas.template.validator.domain.SubmissionDocument;
 import uk.ac.ebi.spot.gwas.template.validator.service.TemplateConverterService;
 import uk.ac.ebi.spot.gwas.template.validator.util.StreamSubmissionTemplateReader;
 import uk.ac.ebi.spot.gwas.template.validator.util.SubmissionConverter;
@@ -78,11 +79,12 @@ public class ConversionServiceImpl implements ConversionService {
     @Override
     public void convertData(Submission submission, FileUpload fileUpload,
                             StreamSubmissionTemplateReader streamSubmissionTemplateReader,
-                            TemplateSchemaDto schema, String userId, List<Study> oldStudies) {
+                            TemplateSchemaDto schema, String userId, List<Study> oldStudies,String appType) {
         log.info("Converting data ...");
-        SubmissionDataDto submissionDataDto = SubmissionConverter.fromSubmissionDocument(
+         SubmissionDataDto submissionDataDto = SubmissionConverter.fromSubmissionDocument(
                 templateConverterService.convert(streamSubmissionTemplateReader, schema)
         );
+
         streamSubmissionTemplateReader.close();
         List<SummaryStatsEntry> summaryStatsEntries = new ArrayList<>();
         log.info("Found {} studies.", submissionDataDto.getStudies().size());
@@ -187,7 +189,7 @@ public class ConversionServiceImpl implements ConversionService {
                 bodyOfWork = bodyOfWorkOptional.get();
             }
         }
-        summaryStatsProcessingService.processSummaryStats(submission, fileUpload.getId(), summaryStatsEntries, publication, bodyOfWork, userId);
+        summaryStatsProcessingService.processSummaryStats(submission, fileUpload.getId(), summaryStatsEntries, publication, bodyOfWork, userId, appType);
     }
 
 }
