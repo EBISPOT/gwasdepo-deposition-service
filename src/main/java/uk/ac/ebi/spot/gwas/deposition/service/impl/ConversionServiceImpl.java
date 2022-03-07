@@ -18,10 +18,7 @@ import uk.ac.ebi.spot.gwas.deposition.rest.dto.AssociationDtoAssembler;
 import uk.ac.ebi.spot.gwas.deposition.rest.dto.NoteDtoAssembler;
 import uk.ac.ebi.spot.gwas.deposition.rest.dto.SampleDtoAssembler;
 import uk.ac.ebi.spot.gwas.deposition.rest.dto.StudyDtoAssembler;
-import uk.ac.ebi.spot.gwas.deposition.service.ConversionService;
-import uk.ac.ebi.spot.gwas.deposition.service.FileUploadsService;
-import uk.ac.ebi.spot.gwas.deposition.service.SubmissionService;
-import uk.ac.ebi.spot.gwas.deposition.service.SummaryStatsProcessingService;
+import uk.ac.ebi.spot.gwas.deposition.service.*;
 import uk.ac.ebi.spot.gwas.deposition.util.BackendUtil;
 import uk.ac.ebi.spot.gwas.deposition.util.GCSTCounter;
 import uk.ac.ebi.spot.gwas.template.validator.domain.SubmissionDocument;
@@ -47,6 +44,9 @@ public class ConversionServiceImpl implements ConversionService {
 
     @Autowired
     private SubmissionService submissionService;
+
+    @Autowired
+    private SampleDescriptionService sampleDescriptionService;
 
     @Autowired
     private StudyRepository studyRepository;
@@ -89,6 +89,8 @@ public class ConversionServiceImpl implements ConversionService {
         List<SummaryStatsEntry> summaryStatsEntries = new ArrayList<>();
         log.info("Found {} studies.", submissionDataDto.getStudies().size());
         for (StudyDto studyDto : submissionDataDto.getStudies()) {
+
+            sampleDescriptionService.buildSampleDescription(submissionDataDto, studyDto);
             Study study = StudyDtoAssembler.disassemble(studyDto);
             List<Study> oldStudyList = null;
 

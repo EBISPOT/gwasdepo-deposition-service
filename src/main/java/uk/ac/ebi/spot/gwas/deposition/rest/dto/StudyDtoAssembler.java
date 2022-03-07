@@ -45,7 +45,10 @@ public class StudyDtoAssembler implements ResourceAssembler<Study, Resource<Stud
                 null,
                 null,
                 null,
-                study.isAgreedToCc0(), null);
+                study.isAgreedToCc0(), null,
+                null,
+                study.getInitialSampleDescription(),
+                study.getReplicateSampleDescription());
 
         final ControllerLinkBuilder lb = ControllerLinkBuilder.linkTo(
                 ControllerLinkBuilder.methodOn(SubmissionsController.class).getSubmission(study.getSubmissionId(), null));
@@ -81,7 +84,10 @@ public class StudyDtoAssembler implements ResourceAssembler<Study, Resource<Stud
                 null,
                 null,
                 null,
-                study.isAgreedToCc0(), null);
+                study.isAgreedToCc0(), null,
+                null,
+                study.getInitialSampleDescription(),
+                study.getReplicateSampleDescription());
     }
 
     public static Study disassemble(StudyDto studyDto) {
@@ -107,6 +113,8 @@ public class StudyDtoAssembler implements ResourceAssembler<Study, Resource<Stud
         study.setChecksum(studyDto.getChecksum());
         study.setCohort(studyDto.getCohort());
         study.setCohortId(studyDto.getCohortId());
+        study.setInitialSampleDescription(studyDto.getInitialSampleDescription());
+        study.setReplicateSampleDescription(studyDto.getReplicateSampleDescription());
 
         return study;
     }
