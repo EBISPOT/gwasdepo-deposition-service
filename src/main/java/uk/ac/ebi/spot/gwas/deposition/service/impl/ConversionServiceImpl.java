@@ -1,5 +1,6 @@
 package uk.ac.ebi.spot.gwas.deposition.service.impl;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -90,8 +91,10 @@ public class ConversionServiceImpl implements ConversionService {
         log.info("Found {} studies.", submissionDataDto.getStudies().size());
         for (StudyDto studyDto : submissionDataDto.getStudies()) {
 
-            sampleDescriptionService.buildSampleDescription(submissionDataDto, studyDto);
+            Pair<String, String>  sampleDescPair = sampleDescriptionService.buildSampleDescription(submissionDataDto, studyDto);
             Study study = StudyDtoAssembler.disassemble(studyDto);
+            study.setInitialSampleDescription(sampleDescPair.getLeft());
+            study.setReplicateSampleDescription(sampleDescPair.getRight());
             List<Study> oldStudyList = null;
 
              if(oldStudies != null)

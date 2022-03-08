@@ -1,5 +1,7 @@
 package uk.ac.ebi.spot.gwas.deposition.service.impl;
 
+
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -20,7 +22,7 @@ public class SampleDescriptionServiceImpl implements SampleDescriptionService {
     private static final Logger log = LoggerFactory.getLogger(SampleDescriptionServiceImpl.class);
 
     @Override
-    public void  buildSampleDescription(SubmissionDataDto submissionDataDto, StudyDto studyDto) {
+    public Pair<String, String> buildSampleDescription(SubmissionDataDto submissionDataDto, StudyDto studyDto) {
 
 
         List<SampleDto> sampleDtos = submissionDataDto.getSamples();
@@ -43,8 +45,9 @@ public class SampleDescriptionServiceImpl implements SampleDescriptionService {
 
             log.info("Initial SampleDescription for Study Tag {} is {}",studyDto.getStudyTag(),sbInitialSampleDesc.toString());
             log.info("Replicated SampleDescription for Study Tag {} is {}",studyDto.getStudyTag(),sbReplicateSampleDesc.toString());
-            studyDto.builder().initialSampleDescription(sbInitialSampleDesc.toString()).build();
-            studyDto.builder().replicateSampleDescription(sbReplicateSampleDesc.toString()).build();
+            //studyDto.builder().initialSampleDescription(sbInitialSampleDesc.toString()).build();
+           // studyDto.builder().replicateSampleDescription(sbReplicateSampleDesc.toString()).build();
+            return Pair.of(sbInitialSampleDesc.toString(), sbReplicateSampleDesc.toString());
 
     }
 
