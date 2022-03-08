@@ -91,8 +91,9 @@ public class ConversionServiceImpl implements ConversionService {
         log.info("Found {} studies.", submissionDataDto.getStudies().size());
         for (StudyDto studyDto : submissionDataDto.getStudies()) {
 
-            Pair<String, String>  sampleDescPair = sampleDescriptionService.buildSampleDescription(submissionDataDto, studyDto);
+
             Study study = StudyDtoAssembler.disassemble(studyDto);
+            Pair<String, String>  sampleDescPair = sampleDescriptionService.buildSampleDescription(submissionDataDto, studyDto);
             study.setInitialSampleDescription(sampleDescPair.getLeft());
             study.setReplicateSampleDescription(sampleDescPair.getRight());
             List<Study> oldStudyList = null;
