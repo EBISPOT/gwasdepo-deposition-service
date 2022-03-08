@@ -9,12 +9,10 @@ import uk.ac.ebi.spot.gwas.deposition.constants.AncestryConstants;
 import uk.ac.ebi.spot.gwas.deposition.dto.SampleDto;
 import uk.ac.ebi.spot.gwas.deposition.dto.StudyDto;
 import uk.ac.ebi.spot.gwas.deposition.dto.SubmissionDataDto;
-import uk.ac.ebi.spot.gwas.deposition.service.ConversionService;
 import uk.ac.ebi.spot.gwas.deposition.service.SampleDescriptionService;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class SampleDescriptionServiceImpl implements SampleDescriptionService {
@@ -26,28 +24,43 @@ public class SampleDescriptionServiceImpl implements SampleDescriptionService {
 
 
         List<SampleDto> sampleDtos = submissionDataDto.getSamples();
+        String initialSampleSize;
+        String replicateSampleSize;
 
-            final StringBuilder sbInitialSampleDesc = new StringBuilder();
-            final StringBuilder sbReplicateSampleDesc = new StringBuilder();
-            if(sampleDtos != null ) {
-                sampleDtos.stream().filter((sampleDto -> sampleDto.getStudyTag().equalsIgnoreCase(studyDto.getStudyTag())))
-                        .forEach(sampleDto -> {
+        final StringBuilder sbInitialSampleDesc = new StringBuilder();
+        final StringBuilder sbReplicateSampleDesc = new StringBuilder();
+        if(sampleDtos != null ) {
+            sampleDtos.stream().filter((sampleDto -> sampleDto.getStudyTag().equalsIgnoreCase(studyDto.getStudyTag())))
+                    .forEach(sampleDto -> {
 
-                            if (sampleDto.getStage().equalsIgnoreCase(AncestryConstants.DISCOVERY)) {
-                                sbInitialSampleDesc.append(buildDescription(sampleDto));
-                                sbInitialSampleDesc.append(",");
-                            } else if (sampleDto.getStage().equalsIgnoreCase(AncestryConstants.REPLICATION)) {
-                                sbReplicateSampleDesc.append(buildDescription(sampleDto));
-                                sbReplicateSampleDesc.append(",");
-                            }
-                        });
-            }
+                        if (sampleDto.getStage().equalsIgnoreCase(AncestryConstants.DISCOVERY)) {
+                            sbInitialSampleDesc.append(buildDescription(sampleDto));
+                            sbInitialSampleDesc.append(",");
+                        } else if (sampleDto.getStage().equalsIgnoreCase(AncestryConstants.REPLICATION)) {
+                            sbReplicateSampleDesc.append(buildDescription(sampleDto));
+                            sbReplicateSampleDesc.append(",");
+                        }
+                    });
+        }
 
-            log.info("Initial SampleDescription for Study Tag {} is {}",studyDto.getStudyTag(),sbInitialSampleDesc.toString());
-            log.info("Replicated SampleDescription for Study Tag {} is {}",studyDto.getStudyTag(),sbReplicateSampleDesc.toString());
-            //studyDto.builder().initialSampleDescription(sbInitialSampleDesc.toString()).build();
-           // studyDto.builder().replicateSampleDescription(sbReplicateSampleDesc.toString()).build();
-            return Pair.of(sbInitialSampleDesc.toString(), sbReplicateSampleDesc.toString());
+        initialSampleSize = sbInitialSampleDesc.toString().trim();
+        replicateSampleSize = sbReplicateSampleDesc.toString().trim();
+
+        if (initialSampleSize.endsWith(",")) {
+            initialSampleSize = initialSampleSize.substring(0, initialSampleSize.length() - 1);
+        }
+        if (replicateSampleSize.endsWith(",")) {
+            replicateSampleSize = replicateSampleSize.substring(0, replicateSampleSize.length() - 1);
+        }
+        if (replicateSampleSize.equalsIgnoreCase("")) {
+            replicateSampleSize = "NA";
+        }
+
+        log.info("Initial SampleDescription for Study Tag {} is {}",studyDto.getStudyTag(),initialSampleSize);
+        log.info("Replicated SampleDescription for Study Tag {} is {}",studyDto.getStudyTag(),replicateSampleSize);
+        //studyDto.builder().initialSampleDescription(sbInitialSampleDesc.toString()).build();
+        // studyDto.builder().replicateSampleDescription(sbReplicateSampleDesc.toString()).build();
+        return Pair.of(initialSampleSize, replicateSampleSize);
 
     }
 
