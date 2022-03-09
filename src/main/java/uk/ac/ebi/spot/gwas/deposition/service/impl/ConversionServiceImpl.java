@@ -1,5 +1,6 @@
 package uk.ac.ebi.spot.gwas.deposition.service.impl;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,10 +19,7 @@ import uk.ac.ebi.spot.gwas.deposition.rest.dto.AssociationDtoAssembler;
 import uk.ac.ebi.spot.gwas.deposition.rest.dto.NoteDtoAssembler;
 import uk.ac.ebi.spot.gwas.deposition.rest.dto.SampleDtoAssembler;
 import uk.ac.ebi.spot.gwas.deposition.rest.dto.StudyDtoAssembler;
-import uk.ac.ebi.spot.gwas.deposition.service.ConversionService;
-import uk.ac.ebi.spot.gwas.deposition.service.FileUploadsService;
-import uk.ac.ebi.spot.gwas.deposition.service.SubmissionService;
-import uk.ac.ebi.spot.gwas.deposition.service.SummaryStatsProcessingService;
+import uk.ac.ebi.spot.gwas.deposition.service.*;
 import uk.ac.ebi.spot.gwas.deposition.util.BackendUtil;
 import uk.ac.ebi.spot.gwas.deposition.util.GCSTCounter;
 import uk.ac.ebi.spot.gwas.template.validator.domain.SubmissionDocument;
@@ -47,6 +45,9 @@ public class ConversionServiceImpl implements ConversionService {
 
     @Autowired
     private SubmissionService submissionService;
+
+    @Autowired
+    private SampleDescriptionService sampleDescriptionService;
 
     @Autowired
     private StudyRepository studyRepository;
@@ -89,7 +90,12 @@ public class ConversionServiceImpl implements ConversionService {
         List<SummaryStatsEntry> summaryStatsEntries = new ArrayList<>();
         log.info("Found {} studies.", submissionDataDto.getStudies().size());
         for (StudyDto studyDto : submissionDataDto.getStudies()) {
+
+
             Study study = StudyDtoAssembler.disassemble(studyDto);
+            Pair<String, String>  sampleDescPair = sampleDescriptionService.buildSampleDescription(submissionDataDto, studyDto);
+            study.setInitialSampleDescription(sampleDescPair.getLeft());
+            study.setReplicateSampleDescription(sampleDescPair.getRight());
             List<Study> oldStudyList = null;
 
              if(oldStudies != null)

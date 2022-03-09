@@ -48,6 +48,8 @@ public class StudyDtoAssembler implements ResourceAssembler<Study, Resource<Stud
                 study.isAgreedToCc0(),
                 null,
                 null,
+                study.getInitialSampleDescription(),
+                study.getReplicateSampleDescription(),
                 study.getSumstatsFlag(),
                 study.getPooledFlag(),
                 study.getGxeFlag());
@@ -89,6 +91,8 @@ public class StudyDtoAssembler implements ResourceAssembler<Study, Resource<Stud
                 study.isAgreedToCc0(),
                 null,
                 null,
+                study.getInitialSampleDescription(),
+                study.getReplicateSampleDescription(),
                 study.getSumstatsFlag(),
                 study.getPooledFlag(),
                 study.getGxeFlag());
@@ -117,6 +121,8 @@ public class StudyDtoAssembler implements ResourceAssembler<Study, Resource<Stud
         study.setChecksum(studyDto.getChecksum());
         study.setCohort(studyDto.getCohort());
         study.setCohortId(studyDto.getCohortId());
+        study.setInitialSampleDescription(studyDto.getInitialSampleDescription());
+        study.setReplicateSampleDescription(studyDto.getReplicateSampleDescription());
         study.setSumstatsFlag(studyDto.getSumstatsFlag());
         study.setPooledFlag(studyDto.getPooledFlag());
         study.setGxeFlag(studyDto.getGxeFlag());
