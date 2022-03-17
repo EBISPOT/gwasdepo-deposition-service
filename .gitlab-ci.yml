@@ -96,7 +96,7 @@ deploy-backend-sandbox-migration:
   environment:
     name: sandbox-migration
   only:
-    - develop
+    - gwasdepo-149-SampleDescription
 
 deploy-fallback:
   image: ${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/dtzar/helm-kubectl:2.13.1
