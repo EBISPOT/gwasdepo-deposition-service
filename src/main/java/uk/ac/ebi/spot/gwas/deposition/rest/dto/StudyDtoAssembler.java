@@ -45,10 +45,15 @@ public class StudyDtoAssembler implements ResourceAssembler<Study, Resource<Stud
                 null,
                 null,
                 null,
-                study.isAgreedToCc0(), null,
+                study.isAgreedToCc0(),
+                null,
                 null,
                 study.getInitialSampleDescription(),
-                study.getReplicateSampleDescription());
+                study.getReplicateSampleDescription(),
+                study.getSumstatsFlag(),
+                study.getPooledFlag(),
+                study.getGxeFlag());
+
 
         final ControllerLinkBuilder lb = ControllerLinkBuilder.linkTo(
                 ControllerLinkBuilder.methodOn(SubmissionsController.class).getSubmission(study.getSubmissionId(), null));
@@ -84,10 +89,15 @@ public class StudyDtoAssembler implements ResourceAssembler<Study, Resource<Stud
                 null,
                 null,
                 null,
-                study.isAgreedToCc0(), null,
+                study.isAgreedToCc0(),
+                null,
                 null,
                 study.getInitialSampleDescription(),
-                study.getReplicateSampleDescription());
+                study.getReplicateSampleDescription(),
+                study.getSumstatsFlag(),
+                study.getPooledFlag(),
+                study.getGxeFlag());
+
     }
 
     public static Study disassemble(StudyDto studyDto) {
@@ -115,7 +125,9 @@ public class StudyDtoAssembler implements ResourceAssembler<Study, Resource<Stud
         study.setCohortId(studyDto.getCohortId());
         study.setInitialSampleDescription(studyDto.getInitialSampleDescription());
         study.setReplicateSampleDescription(studyDto.getReplicateSampleDescription());
-
+        study.setSumstatsFlag(studyDto.getSumstatsFlag());
+        study.setPooledFlag(studyDto.getPooledFlag());
+        study.setGxeFlag(studyDto.getGxeFlag());
         return study;
     }
 }
