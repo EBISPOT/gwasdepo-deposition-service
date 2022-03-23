@@ -1,6 +1,6 @@
-image: ${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/docker:latest
+image: docker:latest
 services:
-  - ${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/docker:dind
+  - docker:dind
 
 stages:
   - build
@@ -21,7 +21,7 @@ variables:
   GIT_DEPTH: "0"  # Tells git to fetch all the branches of the project, required by the analysis task
 
 maven-build:
-  image: ${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/maven:3-jdk-8
+  image: maven:3-jdk-8
   stage: build
   script:
     - echo ${MAVEN_SETTINGS} | base64 -d > settings.xml
@@ -69,7 +69,7 @@ build-backend-release:
   - tags
 
 deploy-backend-sandbox:
-  image: ${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/dtzar/helm-kubectl:2.13.1
+  image: dtzar/helm-kubectl:2.13.1
   stage: deploy-sandbox
   script:
     - echo "Deploy to sandbox server"
@@ -84,7 +84,7 @@ deploy-backend-sandbox:
     - gwasdepo#477-sandbox-migration
 
 deploy-backend-sandbox-migration:
-  image: ${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/dtzar/helm-kubectl:2.13.1
+  image: dtzar/helm-kubectl:2.13.1
   stage: deploy-sandbox-migration
   script:
     - echo "Deploy to sandbox server"
@@ -99,7 +99,7 @@ deploy-backend-sandbox-migration:
     - develop
 
 deploy-fallback:
-  image: ${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/dtzar/helm-kubectl:2.13.1
+  image: dtzar/helm-kubectl:2.13.1
   stage: deploy-fallback
   script:
   - echo "Deploy to Production fallback server"
@@ -114,7 +114,7 @@ deploy-fallback:
   - tags
 
 deploy-live:
-  image: ${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/dtzar/helm-kubectl:2.13.1
+  image: dtzar/helm-kubectl:2.13.1
   stage: deploy-live
   script:
   - echo "Deploy to Production server"
