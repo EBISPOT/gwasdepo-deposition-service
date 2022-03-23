@@ -111,7 +111,20 @@ public class MongoConfig {
         @Override
         public MongoClient mongoClient() {
             String mongoUri = systemConfigProperties.getMongoUri();
-            return new MongoClient(new MongoClientURI("mongodb://" + mongoUri));
+            String dbUser = systemConfigProperties.getDbUser();
+            String dbPassword = systemConfigProperties.getDbPassword();
+            String credentials = "";
+            if (dbUser != null && dbPassword != null) {
+                dbUser = dbUser.trim();
+                dbPassword = dbPassword.trim();
+                if (!dbUser.equalsIgnoreCase("") &&
+                        !dbPassword.equalsIgnoreCase("")) {
+                    credentials = dbUser + ":" + dbPassword + "@";
+                }
+            }
+
+            return new MongoClient(new MongoClientURI("mongodb://" + credentials + mongoUri));
+           // return new MongoClient(new MongoClientURI("mongodb://" + mongoUri));
         }
 
         @Bean
