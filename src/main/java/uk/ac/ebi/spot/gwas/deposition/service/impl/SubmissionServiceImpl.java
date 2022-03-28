@@ -150,7 +150,7 @@ public class SubmissionServiceImpl implements SubmissionService {
         log.info("Updating status [{}] for submission : {}", status, submissionId);
         Submission submission = this.getSubmission(submissionId, user);
         submission.setOverallStatus(status);
-        if (status.equals(Status.SUBMITTED)) {
+        if (status.equals(Status.DEPOSITION_COMPLETE)) {
             submission.setDateSubmitted(LocalDate.now());
             if (submission.getProvenanceType().equalsIgnoreCase(SubmissionProvenanceType.BODY_OF_WORK.name())) {
                 bodyOfWorkListener.update(submission);

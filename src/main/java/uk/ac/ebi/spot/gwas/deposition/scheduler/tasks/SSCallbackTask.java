@@ -194,7 +194,7 @@ public class SSCallbackTask {
                 submissionService.saveSubmission(submission, userId);
 
                 User user = userService.getUser(submission.getCreated().getUserId());
-                submission = submissionService.updateSubmissionStatus(submission.getId(), Status.SUBMITTED.name(), user);
+                submission = submissionService.updateSubmissionStatus(submission.getId(), Status.DEPOSITION_COMPLETE.name(), user);
                 auditProxy.addAuditEntry(AuditHelper.submissionSubmit(user.getId(), submission));
                 log.info("Submission [{}] successfully submitted.", submission.getId());
                 summaryStatsProcessingService.callGlobusWrapUp(submission.getId());
@@ -229,7 +229,7 @@ public class SSCallbackTask {
                 submissionService.saveSubmission(submission, userId);
 
                 User user = userService.getUser(submission.getCreated().getUserId());
-                submission = submissionService.updateSubmissionStatus(submission.getId(), Status.SUBMITTED.name(), user);
+                submission = submissionService.updateSubmissionStatus(submission.getId(), Status.DEPOSITION_COMPLETE.name(), user);
                 auditProxy.addAuditEntry(AuditHelper.submissionSubmit(user.getId(), submission));
                 log.info("Submission [{}] successfully submitted.", submission.getId());
             }

@@ -216,7 +216,7 @@ public class SubmissionsController {
         User user = userService.findUser(jwtService.extractUser(HeadersUtil.extractJWT(request)), false);
         log.info("[{}] Request to delete submission: {}", user.getName(), submissionId);
         Submission submission = submissionService.getSubmission(submissionId, user);
-        if (submission.getOverallStatus().equalsIgnoreCase(Status.SUBMITTED.name())) {
+        if (submission.getOverallStatus().equalsIgnoreCase(Status.DEPOSITION_COMPLETE.name())) {
             auditProxy.addAuditEntry(AuditHelper.submissionDelete(user.getId(), submission, false));
             log.error("Unable to DELETE submission [{}]. Submission has already been SUBMITTED.", submissionId);
             throw new DeleteOnSubmittedSubmissionNotAllowedException("Unable to DELETE submission [" + submissionId + "]. Submission has already been SUBMITTED.");
