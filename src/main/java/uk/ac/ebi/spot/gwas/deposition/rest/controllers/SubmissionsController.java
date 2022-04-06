@@ -216,7 +216,7 @@ public class SubmissionsController {
         User user = userService.findUser(jwtService.extractUser(HeadersUtil.extractJWT(request)), false);
         log.info("[{}] Request to delete submission: {}", user.getName(), submissionId);
         Submission submission = submissionService.getSubmission(submissionId, user);
-        if (submission.getOverallStatus().equalsIgnoreCase(Status.SUBMITTED.name())) {
+        if (submission.getOverallStatus().equalsIgnoreCase(Status.DEPOSITION_COMPLETE.name())) {
             auditProxy.addAuditEntry(AuditHelper.submissionDelete(user.getId(), submission, false));
             log.error("Unable to DELETE submission [{}]. Submission has already been SUBMITTED.", submissionId);
             throw new DeleteOnSubmittedSubmissionNotAllowedException("Unable to DELETE submission [" + submissionId + "]. Submission has already been SUBMITTED.");
@@ -253,7 +253,7 @@ public class SubmissionsController {
     public Resource<SubmissionDto> updateSubmission(@PathVariable String submissionId, HttpServletRequest request) {
         User user = userService.findUser(jwtService.extractUser(HeadersUtil.extractJWT(request)), false);
         log.info("[{}] Request to submit submission: {}", user.getName(), submissionId);
-        Submission submission = submissionService.updateSubmissionStatus(submissionId, Status.SUBMITTED.name(), user);
+        Submission submission = submissionService.updateSubmissionStatus(submissionId, Status.DEPOSITION_COMPLETE.name(), user);
         auditProxy.addAuditEntry(AuditHelper.submissionSubmit(user.getId(), submission));
         log.info("Submissions successfully updated.");
         summaryStatsProcessingService.callGlobusWrapUp(submissionId);
