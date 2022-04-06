@@ -253,7 +253,7 @@ public class SubmissionsController {
     public Resource<SubmissionDto> updateSubmission(@PathVariable String submissionId, HttpServletRequest request) {
         User user = userService.findUser(jwtService.extractUser(HeadersUtil.extractJWT(request)), false);
         log.info("[{}] Request to submit submission: {}", user.getName(), submissionId);
-        Submission submission = submissionService.updateSubmissionStatus(submissionId, Status.SUBMITTED.name(), user);
+        Submission submission = submissionService.updateSubmissionStatus(submissionId, Status.DEPOSITION_COMPLETE.name(), user);
         auditProxy.addAuditEntry(AuditHelper.submissionSubmit(user.getId(), submission));
         log.info("Submissions successfully updated.");
         summaryStatsProcessingService.callGlobusWrapUp(submissionId);
