@@ -8,6 +8,8 @@ public class MailConstants {
 
     public static final String SUBMISSION_STUDIES = "SUBMISSION_STUDIES";
 
+    public static final String SUBMISSION_DOCS_URL = "SUBMISSION_DOCS_URL";
+
     public static final String PMID = "PMID";
 
     public static final String FIRST_AUTHOR = "FIRST_AUTHOR";

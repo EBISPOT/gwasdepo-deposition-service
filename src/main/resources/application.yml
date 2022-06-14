@@ -52,12 +52,13 @@ gwas-deposition:
   email-config:
     subject: GWAS Catalog submission for %PMID%
     base-url: https://www.ebi.ac.uk/gwas/deposition/submission/
+    docs-url: https://www.ebi.ac.uk/gwas/docs/submission#link-15
     emails:
       success: emails/success.email
       fail: emails/fail.email
     errors:
       active: false
-      receiver: gwas-dev-logs@ebi.ac.uk, tudor.groza@gmail.com
+      receiver: gwas-dev-logs@ebi.ac.uk
       subject: GWAS Deposition App - Error encountered
       email: emails/errors.email
 
