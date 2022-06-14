@@ -355,6 +355,8 @@
 
                         <p>Following submission the accession ID(s) for your submission will be available to download by pressing on the 'Download Study Accessions' button on the <a th:href="${SUBMISSION_STUDIES}">studies</a> page.</p>
 
+                        <p>For more information about how and when your data will become publicly accessible, please see our documentation pages <a th:href="${SUBMISSION_DOCS_URL}">${SUBMISSION_DOCS_URL}</a></p>
+
                         <p>Thanks for sharing your data with us.</p>
 
                         <p>Best wishes,<br/>
