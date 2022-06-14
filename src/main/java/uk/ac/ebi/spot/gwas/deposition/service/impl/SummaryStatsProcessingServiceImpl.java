@@ -110,6 +110,7 @@ public class SummaryStatsProcessingServiceImpl implements SummaryStatsProcessing
 
             metadata.put(MailConstants.SUBMISSION_ID, backendMailConfig.getSubmissionsBaseURL() + submission.getId());
             metadata.put(MailConstants.SUBMISSION_STUDIES, backendMailConfig.getSubmissionsBaseURL() + submission.getId());
+            metadata.put(MailConstants.SUBMISSION_DOCS_URL, backendMailConfig.getSubmissionsDocsURL());
 
             if (workId != null && !(appType != null && appType.equals("depo-curation"))) {
                 backendEmailService.sendSuccessEmail(submission.getCreated().getUserId(), workId, metadata);
