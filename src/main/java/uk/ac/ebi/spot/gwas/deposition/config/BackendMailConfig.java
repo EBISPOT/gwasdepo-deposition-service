@@ -21,6 +21,10 @@ public class BackendMailConfig {
     @Value("${gwas-deposition.email-config.base-url}")
     private String submissionsBaseURL;
 
+
+    @Value("${gwas-deposition.email-config.docs-url}")
+    private String submissionsDocsURL;
+
     @Value("${gwas-deposition.email-config.errors.subject}")
     private String errorsSubject;
 
@@ -59,6 +63,10 @@ public class BackendMailConfig {
 
     public String getErrorsSubject() {
         return errorsSubject;
+    }
+
+    public String getSubmissionsDocsURL() {
+        return submissionsDocsURL;
     }
 
     public List<String> getErrorsReceiver() {
