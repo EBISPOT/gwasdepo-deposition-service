@@ -14,8 +14,8 @@ spring:
     solr:
       host: http://solr-svc.gwas-dev.svc.cluster.local:8983/solr/
   mail:
-    host: outgoing.ebi.ac.uk
-    port: 587
+    host: hh-smtp.ebi.ac.uk
+    port: 25
     properties:
       mail:
         smtp:
