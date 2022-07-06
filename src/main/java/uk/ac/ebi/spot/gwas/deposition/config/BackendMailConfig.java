@@ -66,13 +66,12 @@ public class BackendMailConfig {
         return errorsSubject;
     }
 
-<<<<<<< HEAD
+
     public String getSubmissionsDocsURL() {
         return submissionsDocsURL;
     }
-=======
-    public String getSubmissionsDocsURL() { return submissionsDocsURL; }
->>>>>>> c0c4a1a385ab86da09cb77ed27e7dd694e8b522d
+
+ 
 
     public List<String> getErrorsReceiver() {
         List<String> result = new ArrayList<>();
