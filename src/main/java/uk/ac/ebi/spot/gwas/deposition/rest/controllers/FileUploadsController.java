@@ -224,7 +224,7 @@ public class FileUploadsController {
     }
 
     /**
-     * DELETE /v1/submissions/{submissionId}/uploads/{fileUploadId}
+         * DELETE /v1/submissions/{submissionId}/uploads/{fileUploadId}
      */
     @DeleteMapping(value = "/{submissionId}" + GWASDepositionBackendConstants.API_UPLOADS + "/{fileUploadId}")
     @ResponseStatus(HttpStatus.OK)
