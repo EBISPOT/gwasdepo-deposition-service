@@ -35,10 +35,10 @@ public class SampleDescriptionServiceImpl implements SampleDescriptionService {
 
                         if (sampleDto.getStage().equalsIgnoreCase(AncestryConstants.DISCOVERY)) {
                             sbInitialSampleDesc.append(buildDescription(sampleDto));
-                            sbInitialSampleDesc.append(",");
+                            sbInitialSampleDesc.append(", ");
                         } else if (sampleDto.getStage().equalsIgnoreCase(AncestryConstants.REPLICATION)) {
                             sbReplicateSampleDesc.append(buildDescription(sampleDto));
-                            sbReplicateSampleDesc.append(",");
+                            sbReplicateSampleDesc.append(", ");
                         }
                     });
         }
