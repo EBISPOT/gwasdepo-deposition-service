@@ -10,26 +10,27 @@ import uk.ac.ebi.spot.gwas.deposition.audit.AuditProxy;
 import uk.ac.ebi.spot.gwas.deposition.constants.FileUploadStatus;
 import uk.ac.ebi.spot.gwas.deposition.constants.Status;
 import uk.ac.ebi.spot.gwas.deposition.constants.SubmissionType;
-import uk.ac.ebi.spot.gwas.deposition.domain.FileUpload;
-import uk.ac.ebi.spot.gwas.deposition.domain.Study;
-import uk.ac.ebi.spot.gwas.deposition.domain.Submission;
-import uk.ac.ebi.spot.gwas.deposition.domain.User;
+import uk.ac.ebi.spot.gwas.deposition.domain.*;
 import uk.ac.ebi.spot.gwas.deposition.domain.ensembl.Variation;
 import uk.ac.ebi.spot.gwas.deposition.domain.ensembl.VariationSynonym;
+import uk.ac.ebi.spot.gwas.deposition.dto.AssociationDto;
+import uk.ac.ebi.spot.gwas.deposition.dto.SubmissionDataDto;
 import uk.ac.ebi.spot.gwas.deposition.dto.templateschema.TemplateSchemaDto;
 import uk.ac.ebi.spot.gwas.deposition.dto.templateschema.TemplateSchemaResponseDto;
+import uk.ac.ebi.spot.gwas.deposition.repository.AssociationRepository;
 import uk.ac.ebi.spot.gwas.deposition.repository.ensembl.VariationRepository;
 import uk.ac.ebi.spot.gwas.deposition.repository.ensembl.VariationSynonymRepository;
+import uk.ac.ebi.spot.gwas.deposition.rest.dto.AssociationDtoAssembler;
 import uk.ac.ebi.spot.gwas.deposition.service.*;
 import uk.ac.ebi.spot.gwas.deposition.util.ErrorUtil;
 import uk.ac.ebi.spot.gwas.template.validator.config.ErrorType;
-import uk.ac.ebi.spot.gwas.template.validator.domain.Association;
 import uk.ac.ebi.spot.gwas.template.validator.domain.SubmissionDocument;
 import uk.ac.ebi.spot.gwas.template.validator.domain.ValidationOutcome;
 import uk.ac.ebi.spot.gwas.template.validator.service.TemplateConverterService;
 import uk.ac.ebi.spot.gwas.template.validator.service.TemplateValidatorService;
 import uk.ac.ebi.spot.gwas.template.validator.util.ErrorMessageTemplateProcessor;
 import uk.ac.ebi.spot.gwas.template.validator.util.StreamSubmissionTemplateReader;
+import uk.ac.ebi.spot.gwas.template.validator.util.SubmissionConverter;
 
 import java.util.List;
 import java.util.Map;
@@ -51,12 +52,6 @@ public class MetadataValidationServiceImpl implements MetadataValidationService 
 
     @Autowired
     private TemplateConverterService templateConverterService;
-
-    @Autowired
-    private VariationRepository variationRepository;
-
-    @Autowired
-    private VariationSynonymRepository variationSynonymRepository;
 
     @Autowired
     private ErrorMessageTemplateProcessor errorMessageTemplateProcessor;
@@ -120,7 +115,6 @@ public class MetadataValidationServiceImpl implements MetadataValidationService 
 
             log.info("Validating metadata ...");
             ValidationOutcome validationOutcome = templateValidatorService.validate(streamSubmissionTemplateReader, schema, true);
-            validateSnps(templateConverterService.convert(streamSubmissionTemplateReader, schema));
             if (validationOutcome == null) {
                 this.materializeError(submission, fileUpload, ErrorType.INVALID_TEMPLATE_DATA, null, streamSubmissionTemplateReader, user);
             } else {
@@ -163,18 +157,5 @@ public class MetadataValidationServiceImpl implements MetadataValidationService 
         streamSubmissionTemplateReader.close();
         auditProxy.addAuditEntry(AuditHelper.submissionValidate(submission.getCreated().getUserId(), submission, false, errors));
         auditProxy.addAuditEntry(AuditHelper.fileValidate(submission.getCreated().getUserId(), fileUpload, submission, false, false, errors));
-    }
-
-    private void validateSnps(SubmissionDocument submissionDocument) {
-        Map<String, String> snpNames = submissionDocument.getAssociationEntries().stream().collect(Collectors.toMap(Association::getVariant_id, Association::getVariant_id));
-        List<Variation> foundVariations = variationRepository.findByNameIn(snpNames.values());
-        List<VariationSynonym> foundVariationSynonyms = variationSynonymRepository.findByNameIn(snpNames.values());
-        for (Variation variation: foundVariations) {
-            snpNames.remove(variation.getName());
-        }
-        for (VariationSynonym variation: foundVariationSynonyms) {
-            snpNames.remove(variation.getName());
-        }
-        System.out.println(snpNames.values());
     }
 }
