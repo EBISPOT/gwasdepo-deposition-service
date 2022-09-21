@@ -38,4 +38,6 @@ public interface SubmissionService {
     Submission createGlobusFolderForReopenedSubmission(String submissionId, User apiCaller, String globusEmail);
 
     public List<Study> getStudies(String submissionId);
+
+    void validateSnps(String submissionId);
 }

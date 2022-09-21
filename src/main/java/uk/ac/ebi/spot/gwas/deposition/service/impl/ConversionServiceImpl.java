@@ -4,7 +4,6 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import uk.ac.ebi.spot.gwas.deposition.audit.AuditProxy;
@@ -22,15 +21,16 @@ import uk.ac.ebi.spot.gwas.deposition.rest.dto.StudyDtoAssembler;
 import uk.ac.ebi.spot.gwas.deposition.service.*;
 import uk.ac.ebi.spot.gwas.deposition.util.BackendUtil;
 import uk.ac.ebi.spot.gwas.deposition.util.GCSTCounter;
-import uk.ac.ebi.spot.gwas.template.validator.domain.SubmissionDocument;
 import uk.ac.ebi.spot.gwas.template.validator.service.TemplateConverterService;
 import uk.ac.ebi.spot.gwas.template.validator.util.StreamSubmissionTemplateReader;
 import uk.ac.ebi.spot.gwas.template.validator.util.SubmissionConverter;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 public class ConversionServiceImpl implements ConversionService {
@@ -75,6 +75,7 @@ public class ConversionServiceImpl implements ConversionService {
 
     @Autowired
     private AuditProxy auditProxy;
+
 
     @Async
     @Override
@@ -149,9 +150,12 @@ public class ConversionServiceImpl implements ConversionService {
         for (AssociationDto associationDto : submissionDataDto.getAssociations()) {
             Association association = AssociationDtoAssembler.disassemble(associationDto);
             association.setSubmissionId(submission.getId());
+            association.setValid(false);
             association = associationRepository.insert(association);
             submission.addAssociation(association.getId());
         }
+
+        submissionService.validateSnps(submission.getId());
 
         log.info("Found {} samples.", submissionDataDto.getSamples().size());
         for (SampleDto sampleDto : submissionDataDto.getSamples()) {

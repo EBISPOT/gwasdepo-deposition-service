@@ -10,21 +10,31 @@ import uk.ac.ebi.spot.gwas.deposition.audit.AuditProxy;
 import uk.ac.ebi.spot.gwas.deposition.constants.FileUploadStatus;
 import uk.ac.ebi.spot.gwas.deposition.constants.Status;
 import uk.ac.ebi.spot.gwas.deposition.constants.SubmissionType;
-import uk.ac.ebi.spot.gwas.deposition.domain.FileUpload;
-import uk.ac.ebi.spot.gwas.deposition.domain.Study;
-import uk.ac.ebi.spot.gwas.deposition.domain.Submission;
-import uk.ac.ebi.spot.gwas.deposition.domain.User;
+import uk.ac.ebi.spot.gwas.deposition.domain.*;
+import uk.ac.ebi.spot.gwas.deposition.domain.ensembl.Variation;
+import uk.ac.ebi.spot.gwas.deposition.domain.ensembl.VariationSynonym;
+import uk.ac.ebi.spot.gwas.deposition.dto.AssociationDto;
+import uk.ac.ebi.spot.gwas.deposition.dto.SubmissionDataDto;
 import uk.ac.ebi.spot.gwas.deposition.dto.templateschema.TemplateSchemaDto;
 import uk.ac.ebi.spot.gwas.deposition.dto.templateschema.TemplateSchemaResponseDto;
+import uk.ac.ebi.spot.gwas.deposition.repository.AssociationRepository;
+import uk.ac.ebi.spot.gwas.deposition.repository.ensembl.VariationRepository;
+import uk.ac.ebi.spot.gwas.deposition.repository.ensembl.VariationSynonymRepository;
+import uk.ac.ebi.spot.gwas.deposition.rest.dto.AssociationDtoAssembler;
 import uk.ac.ebi.spot.gwas.deposition.service.*;
 import uk.ac.ebi.spot.gwas.deposition.util.ErrorUtil;
 import uk.ac.ebi.spot.gwas.template.validator.config.ErrorType;
+import uk.ac.ebi.spot.gwas.template.validator.domain.SubmissionDocument;
 import uk.ac.ebi.spot.gwas.template.validator.domain.ValidationOutcome;
+import uk.ac.ebi.spot.gwas.template.validator.service.TemplateConverterService;
 import uk.ac.ebi.spot.gwas.template.validator.service.TemplateValidatorService;
 import uk.ac.ebi.spot.gwas.template.validator.util.ErrorMessageTemplateProcessor;
 import uk.ac.ebi.spot.gwas.template.validator.util.StreamSubmissionTemplateReader;
+import uk.ac.ebi.spot.gwas.template.validator.util.SubmissionConverter;
 
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class MetadataValidationServiceImpl implements MetadataValidationService {
@@ -39,6 +49,9 @@ public class MetadataValidationServiceImpl implements MetadataValidationService 
 
     @Autowired
     private TemplateValidatorService templateValidatorService;
+
+    @Autowired
+    private TemplateConverterService templateConverterService;
 
     @Autowired
     private ErrorMessageTemplateProcessor errorMessageTemplateProcessor;
