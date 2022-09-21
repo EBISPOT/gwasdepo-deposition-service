@@ -110,13 +110,14 @@ public class SummaryStatsProcessingServiceImpl implements SummaryStatsProcessing
 
             metadata.put(MailConstants.SUBMISSION_ID, backendMailConfig.getSubmissionsBaseURL() + submission.getId());
             metadata.put(MailConstants.SUBMISSION_STUDIES, backendMailConfig.getSubmissionsBaseURL() + submission.getId());
+            metadata.put(MailConstants.SUBMISSION_DOCS_URL, backendMailConfig.getSubmissionsDocsURL());
 
-            if (workId != null) {
+            if (workId != null && !(appType != null && appType.equals("depo-curation"))) {
                 backendEmailService.sendSuccessEmail(submission.getCreated().getUserId(), workId, metadata);
             }
             auditProxy.addAuditEntry(AuditHelper.submissionValidate(submission.getCreated().getUserId(), submission, true, null));
             User user = userService.getUser(submission.getCreated().getUserId());
-            submission = submissionService.updateSubmissionStatus(submission.getId(), Status.SUBMITTED.name(), user);
+            submission = submissionService.updateSubmissionStatus(submission.getId(), Status.DEPOSITION_COMPLETE.name(), user);
             auditProxy.addAuditEntry(AuditHelper.submissionSubmit(user.getId(), submission));
             log.info("Submission [{}] successfully submitted.", submission.getId());
             return;

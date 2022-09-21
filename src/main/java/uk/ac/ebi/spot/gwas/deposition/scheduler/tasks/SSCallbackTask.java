@@ -109,6 +109,7 @@ public class SSCallbackTask {
 
             metadata.put(MailConstants.SUBMISSION_ID, backendMailConfig.getSubmissionsBaseURL() + submission.getId());
             metadata.put(MailConstants.SUBMISSION_STUDIES, backendMailConfig.getSubmissionsBaseURL() + submission.getId());
+            metadata.put(MailConstants.SUBMISSION_DOCS_URL, backendMailConfig.getSubmissionsDocsURL());
 
             String userId = submission.getCreated().getUserId();
             log.info("Callback ID completed: {}", callbackId.getCallbackId());
@@ -194,7 +195,7 @@ public class SSCallbackTask {
                 submissionService.saveSubmission(submission, userId);
 
                 User user = userService.getUser(submission.getCreated().getUserId());
-                submission = submissionService.updateSubmissionStatus(submission.getId(), Status.SUBMITTED.name(), user);
+                submission = submissionService.updateSubmissionStatus(submission.getId(), Status.DEPOSITION_COMPLETE.name(), user);
                 auditProxy.addAuditEntry(AuditHelper.submissionSubmit(user.getId(), submission));
                 log.info("Submission [{}] successfully submitted.", submission.getId());
                 summaryStatsProcessingService.callGlobusWrapUp(submission.getId());
@@ -229,7 +230,7 @@ public class SSCallbackTask {
                 submissionService.saveSubmission(submission, userId);
 
                 User user = userService.getUser(submission.getCreated().getUserId());
-                submission = submissionService.updateSubmissionStatus(submission.getId(), Status.SUBMITTED.name(), user);
+                submission = submissionService.updateSubmissionStatus(submission.getId(), Status.DEPOSITION_COMPLETE.name(), user);
                 auditProxy.addAuditEntry(AuditHelper.submissionSubmit(user.getId(), submission));
                 log.info("Submission [{}] successfully submitted.", submission.getId());
             }
