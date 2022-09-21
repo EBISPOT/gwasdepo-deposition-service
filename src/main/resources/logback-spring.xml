@@ -206,6 +206,7 @@
         -->
 
         <root level="DEBUG">
+            <appender-ref ref="ROLLING"/>
         </root>
     </springProfile>
 
