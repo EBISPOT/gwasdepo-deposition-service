@@ -4,7 +4,6 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import uk.ac.ebi.spot.gwas.deposition.audit.AuditProxy;
@@ -12,13 +11,9 @@ import uk.ac.ebi.spot.gwas.deposition.constants.FileUploadStatus;
 import uk.ac.ebi.spot.gwas.deposition.constants.Status;
 import uk.ac.ebi.spot.gwas.deposition.constants.SubmissionProvenanceType;
 import uk.ac.ebi.spot.gwas.deposition.domain.*;
-import uk.ac.ebi.spot.gwas.deposition.domain.ensembl.Variation;
-import uk.ac.ebi.spot.gwas.deposition.domain.ensembl.VariationSynonym;
 import uk.ac.ebi.spot.gwas.deposition.dto.*;
 import uk.ac.ebi.spot.gwas.deposition.dto.templateschema.TemplateSchemaDto;
 import uk.ac.ebi.spot.gwas.deposition.repository.*;
-import uk.ac.ebi.spot.gwas.deposition.repository.ensembl.VariationRepository;
-import uk.ac.ebi.spot.gwas.deposition.repository.ensembl.VariationSynonymRepository;
 import uk.ac.ebi.spot.gwas.deposition.rest.dto.AssociationDtoAssembler;
 import uk.ac.ebi.spot.gwas.deposition.rest.dto.NoteDtoAssembler;
 import uk.ac.ebi.spot.gwas.deposition.rest.dto.SampleDtoAssembler;
@@ -26,7 +21,6 @@ import uk.ac.ebi.spot.gwas.deposition.rest.dto.StudyDtoAssembler;
 import uk.ac.ebi.spot.gwas.deposition.service.*;
 import uk.ac.ebi.spot.gwas.deposition.util.BackendUtil;
 import uk.ac.ebi.spot.gwas.deposition.util.GCSTCounter;
-import uk.ac.ebi.spot.gwas.template.validator.domain.SubmissionDocument;
 import uk.ac.ebi.spot.gwas.template.validator.service.TemplateConverterService;
 import uk.ac.ebi.spot.gwas.template.validator.util.StreamSubmissionTemplateReader;
 import uk.ac.ebi.spot.gwas.template.validator.util.SubmissionConverter;
@@ -82,11 +76,6 @@ public class ConversionServiceImpl implements ConversionService {
     @Autowired
     private AuditProxy auditProxy;
 
-    @Autowired
-    private VariationRepository variationRepository;
-
-    @Autowired
-    private VariationSynonymRepository variationSynonymRepository;
 
     @Async
     @Override
@@ -166,7 +155,7 @@ public class ConversionServiceImpl implements ConversionService {
             submission.addAssociation(association.getId());
         }
 
-        validateSnps(submission.getId());
+        submissionService.validateSnps(submission.getId());
 
         log.info("Found {} samples.", submissionDataDto.getSamples().size());
         for (SampleDto sampleDto : submissionDataDto.getSamples()) {
@@ -211,23 +200,6 @@ public class ConversionServiceImpl implements ConversionService {
             }
         }
         summaryStatsProcessingService.processSummaryStats(submission, fileUpload.getId(), summaryStatsEntries, publication, bodyOfWork, userId, appType);
-    }
-
-    private void validateSnps(String submissionId) {
-        Map<String, Association> snps = associationRepository.readBySubmissionId(submissionId).collect(Collectors.toMap(Association::getVariantId, association -> association));
-        Map<String, String> snpNames = snps.values().stream().collect(Collectors.toMap(Association::getVariantId, Association::getVariantId));
-        List<Variation> foundVariations = variationRepository.findByNameIn(snpNames.values());
-        List<VariationSynonym> foundVariationSynonyms = variationSynonymRepository.findByNameIn(snpNames.values());
-        for (Variation variation: foundVariations) {
-            snpNames.remove(variation.getName());
-            snps.get(variation.getName()).setValid(true);
-            associationRepository.save(snps.get(variation.getName()));
-        }
-        for (VariationSynonym variation: foundVariationSynonyms) {
-            snpNames.remove(variation.getName());
-            snps.get(variation.getName()).setValid(true);
-            associationRepository.save(snps.get(variation.getName()));
-        }
     }
 
 }
