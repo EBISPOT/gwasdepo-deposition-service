@@ -102,7 +102,7 @@ gwas-catalog-service:
 
 spring:
   profiles:
-    active: dev
+    active: local
 
 validator:
   error-messages: error_messages.txt

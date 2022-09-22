@@ -1,0 +1,42 @@
+#===============COMPULSORY PROGRAM ARGUMENTS=====#
+mongo-server:
+auth-enable:
+solr-server:
+#===============COMPULSORY PROGRAM ARGUMENTS=====#
+
+server:
+  port: 8082
+
+spring:
+  data:
+    mongodb:
+      uri: ${mongo-server}
+    solr:
+      host: ${solr-server}
+    rabbitmq:
+      host: localhost
+      port: 5672
+
+gwas-deposition:
+  #db: gwas-deposition-dev
+  db: gwasdepo
+  solr:
+    enabled: true
+  auth:
+    curators:
+      auth-mechanism: EMAIL_WHITELISTING
+
+gwas-sumstats-service:
+  url: http://localhost:8000
+  callback-schedule:
+    enabled: true
+
+
+gwas-template-service:
+  enabled: true
+  url: http://localhost:8083
+
+quartz:
+  scheduler:
+    active: false
+    dbName: gwasdepo

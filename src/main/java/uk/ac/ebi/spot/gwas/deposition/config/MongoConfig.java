@@ -32,20 +32,26 @@ public class MongoConfig {
     @Configuration
     @EnableMongoRepositories(basePackages = {"uk.ac.ebi.spot.gwas.deposition.repository"})
     @EnableTransactionManagement
-    @Profile({"dev", "test"})
+    @Profile({"dev", "test", "local"})
     public static class MongoConfigDev extends AbstractMongoConfiguration {
 
         private static final Logger log = LoggerFactory.getLogger(MongoConfigDev.class);
         @Autowired
         private SystemConfigProperties systemConfigProperties;
 
+        @Autowired
+        private GWASDepositionBackendConfig gwasDepositionBackendConfig;
+
         @Override
         protected String getDatabaseName() {
+            return gwasDepositionBackendConfig.getDbName();
+        }
+        /*protected String getDatabaseName() {
             String serviceName = systemConfigProperties.getServerName();
             String environmentName = systemConfigProperties.getActiveSpringProfile();
 
             return serviceName + "-" + environmentName;
-        }
+        }*/
 
         @Bean
         public GridFsTemplate gridFsTemplate() throws Exception {
@@ -55,6 +61,26 @@ public class MongoConfig {
         @Override
         public MongoClient mongoClient() {
             String mongoUri = systemConfigProperties.getMongoUri();
+            String dbUser = systemConfigProperties.getDbUser();
+            String dbPassword = systemConfigProperties.getDbPassword();
+            String credentials = "";
+            if (dbUser != null && dbPassword != null) {
+                dbUser = dbUser.trim();
+                dbPassword = dbPassword.trim();
+                if (!dbUser.equalsIgnoreCase("") &&
+                        !dbPassword.equalsIgnoreCase("")) {
+                    credentials = dbUser + ":" + dbPassword + "@";
+                }
+            }
+
+            //return new MongoClient(new MongoClientURI("mongodb://" + mongoUri));
+            return new MongoClient(new MongoClientURI("mongodb://" + credentials + mongoUri));
+            //String mongoUri = systemConfigProperties.getMongoUri();
+            //return new MongoClient(new MongoClientURI("mongodb://" + mongoUri));
+        }
+
+        /*public MongoClient mongoClient() {
+            String mongoUri = systemConfigProperties.getMongoUri();
 
             String[] addresses = mongoUri.split(",");
             List<ServerAddress> servers = new ArrayList<>();
@@ -63,7 +89,7 @@ public class MongoConfig {
                 servers.add(new ServerAddress(split[0].trim(), Integer.parseInt(split[1].trim())));
             }
             return new MongoClient(servers);
-        }
+        }*/
 
         @Bean
         public Javers javers() {

@@ -1,6 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
     <property scope="context" name="serviceName" value="deposition-service"/>
+    <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+
+    <springProfile name="local">
+        <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+            <encoder>
+                <pattern>${CONSOLE_LOG_PATTERN}</pattern>
+                <charset>utf8</charset>
+            </encoder>
+        </appender>
+
+        <logger name="uk.ac.ebi.spot.gwas" level="INFO">
+            <appender-ref ref="CONSOLE"/>
+        </logger>
+
+        <logger name="org.springframework" level="DEBUG">
+            <appender-ref ref="CONSOLE"/>
+        </logger>
+    </springProfile>
 
     <springProfile name="dev">
         <property resource="logging-dev.properties"/>

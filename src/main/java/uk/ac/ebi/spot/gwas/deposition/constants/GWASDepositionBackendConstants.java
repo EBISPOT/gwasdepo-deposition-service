@@ -75,4 +75,8 @@ public class GWASDepositionBackendConstants {
     public static final String PROFILE_SANDBOX = "sandbox";
 
     public static final String VALUE_NR = "NR";
+
+    public static final String QUEUE_NAME = "study_change";
+    public static final String EXCHANGE_NAME = "study_change_exchange";
+    public static final String ROUTING_KEY = "study-ingest";
 }
