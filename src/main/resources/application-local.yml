@@ -7,11 +7,6 @@ spring:
       uri: mongodb-hhvm-062.ebi.ac.uk:27017,mongodb-hxvm-063.ebi.ac.uk:27017/admin?replicaSet=gwasdepodevrs039
     solr:
       host: http://localhost:8983/solr
-  datasource:
-    url: jdbc:mysql://ensembldb.ensembl.org:3306/homo_sapiens_variation_107_38
-    username: anonymous
-    password:
-    driver-class-name: com.mysql.cj.jdbc.Driver
 
 gwas-deposition:
   db: gwasdepo
