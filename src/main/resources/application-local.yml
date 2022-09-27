@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 #===============COMPULSORY PROGRAM ARGUMENTS=====#
 mongo-server:
 auth-enable:
@@ -6,6 +7,8 @@ solr-server:
 
 server:
   port: 8082
+
+
 
 spring:
   data:
@@ -16,9 +19,13 @@ spring:
     rabbitmq:
       host: localhost
       port: 5672
+    datasource:
+      url: jdbc:mysql://ensembldb.ensembl.org:3306/homo_sapiens_variation_107_38
+      username: anonymous
+      password:
+      driver-class-name: com.mysql.cj.jdbc.Driver
 
 gwas-deposition:
-  #db: gwas-deposition-dev
   db: gwasdepo
   solr:
     enabled: true

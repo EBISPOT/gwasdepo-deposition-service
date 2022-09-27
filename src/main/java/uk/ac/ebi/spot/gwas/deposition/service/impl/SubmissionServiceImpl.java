@@ -14,20 +14,21 @@ import uk.ac.ebi.spot.gwas.deposition.constants.PublicationStatus;
 import uk.ac.ebi.spot.gwas.deposition.constants.Status;
 import uk.ac.ebi.spot.gwas.deposition.constants.SubmissionProvenanceType;
 import uk.ac.ebi.spot.gwas.deposition.domain.*;
+import uk.ac.ebi.spot.gwas.deposition.domain.ensembl.Variation;
+import uk.ac.ebi.spot.gwas.deposition.domain.ensembl.VariationSynonym;
 import uk.ac.ebi.spot.gwas.deposition.dto.summarystats.SSGlobusFolderDto;
 import uk.ac.ebi.spot.gwas.deposition.exception.AuthorizationException;
 import uk.ac.ebi.spot.gwas.deposition.exception.EmailAccountNotLinkedToGlobusException;
 import uk.ac.ebi.spot.gwas.deposition.exception.EntityNotFoundException;
 import uk.ac.ebi.spot.gwas.deposition.exception.SSGlobusFolderCreatioException;
 import uk.ac.ebi.spot.gwas.deposition.repository.*;
+import uk.ac.ebi.spot.gwas.deposition.repository.ensembl.VariationRepository;
+import uk.ac.ebi.spot.gwas.deposition.repository.ensembl.VariationSynonymRepository;
 import uk.ac.ebi.spot.gwas.deposition.service.*;
 
 import javax.swing.text.html.Option;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
-import java.util.UUID;
 
 @Service
 public class SubmissionServiceImpl implements SubmissionService {
@@ -78,6 +79,12 @@ public class SubmissionServiceImpl implements SubmissionService {
 
     @Autowired
     SumStatsService sumStatsService;
+
+    @Autowired
+    private VariationRepository variationRepository;
+
+    @Autowired
+    private VariationSynonymRepository variationSynonymRepository;
 
     @Override
     public Submission createSubmission(Submission submission) {
@@ -395,5 +402,23 @@ public class SubmissionServiceImpl implements SubmissionService {
             }
         }
     return studies;
+    }
+
+    @Override
+    public void validateSnps(String submissionId) {
+        Map<String, Association> snps = associationRepository.readBySubmissionId(submissionId).collect(Collectors.toMap(Association::getVariantId, association -> association));
+        Map<String, String> snpNames = snps.values().stream().collect(Collectors.toMap(Association::getVariantId, Association::getVariantId));
+        List<Variation> foundVariations = variationRepository.findByNameIn(snpNames.values());
+        List<VariationSynonym> foundVariationSynonyms = variationSynonymRepository.findByNameIn(snpNames.values());
+        for (Variation variation: foundVariations) {
+            snpNames.remove(variation.getName());
+            snps.get(variation.getName()).setValid(true);
+            associationRepository.save(snps.get(variation.getName()));
+        }
+        for (VariationSynonym variation: foundVariationSynonyms) {
+            snpNames.remove(variation.getName());
+            snps.get(variation.getName()).setValid(true);
+            associationRepository.save(snps.get(variation.getName()));
+        }
     }
 }
