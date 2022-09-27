@@ -3,6 +3,10 @@ environments:
   config: application-local.yml
   dev: false
   gcp: false
+- name: local
+  config: application-local.yml
+  dev: true
+  gcp: false
 - name: test
   config: application-test.yml
   dev: true

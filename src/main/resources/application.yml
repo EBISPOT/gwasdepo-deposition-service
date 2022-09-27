@@ -103,6 +103,16 @@ gwas-catalog-service:
 spring:
   profiles:
     active: local
+  datasource:
+    url: jdbc:mysql://ensembldb.ensembl.org:3306/homo_sapiens_variation_107_38
+    username: anonymous
+    password:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    continue-on-error: true
+
+ensembl-snp-validation:
+  enabled: true
+
 
 validator:
   error-messages: error_messages.txt

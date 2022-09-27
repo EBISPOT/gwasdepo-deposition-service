@@ -25,6 +25,7 @@ spring:
       password:
       driver-class-name: com.mysql.cj.jdbc.Driver
 
+
 gwas-deposition:
   db: gwasdepo
   solr:

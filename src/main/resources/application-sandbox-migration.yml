@@ -13,11 +13,6 @@ spring:
       #uri: mongodb-hx-gwasdepopro-001:27017,mongodb-hl-gwasdepopro-002:27017/admin?replicaSet=gwasdepoprors080
     solr:
       host: http://solr-svc.gwas-dev.svc.cluster.local:8983/solr/
-  datasource:
-    url: jdbc:mysql://ensembldb.ensembl.org:3306/homo_sapiens_variation_107_38
-    username: anonymous
-    password:
-    driver-class-name: com.mysql.cj.jdbc.Driver
   mail:
     host: hh-smtp.ebi.ac.uk
     port: 25

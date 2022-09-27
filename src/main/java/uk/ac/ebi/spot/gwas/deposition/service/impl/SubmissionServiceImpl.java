@@ -406,7 +406,7 @@ public class SubmissionServiceImpl implements SubmissionService {
 
     @Override
     public void validateSnps(String submissionId) {
-        Map<String, Association> snps = associationRepository.readBySubmissionId(submissionId).collect(Collectors.toMap(Association::getVariantId, association -> association));
+        Map<String, Association> snps = associationRepository.readBySubmissionId(submissionId).collect(Collectors.toMap(Association::getVariantId, association -> association, (a1, a2) -> a1));
         Map<String, String> snpNames = snps.values().stream().collect(Collectors.toMap(Association::getVariantId, Association::getVariantId));
         List<Variation> foundVariations = variationRepository.findByNameIn(snpNames.values());
         List<VariationSynonym> foundVariationSynonyms = variationSynonymRepository.findByNameIn(snpNames.values());
