@@ -1,7 +1,7 @@
 environments:
-- name: dev
-  config: application-dev.yml
-  dev: true
+- name: local
+  config: application-local.yml
+  dev: false
   gcp: false
 - name: local
   config: application-local.yml

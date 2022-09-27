@@ -63,6 +63,9 @@ public class SSCallbackTask {
     @Autowired
     private SummaryStatsProcessingService summaryStatsProcessingService;
 
+    @Autowired
+    private StudyQueueSenderService studyQueueSenderService;
+
     public void checkCallbackIds() {
         log.info("Running callback ID checks.");
         if (sumStatsService == null) {
@@ -196,6 +199,7 @@ public class SSCallbackTask {
 
                 User user = userService.getUser(submission.getCreated().getUserId());
                 submission = submissionService.updateSubmissionStatus(submission.getId(), Status.DEPOSITION_COMPLETE.name(), user);
+                studyQueueSenderService.sendStudiesToQueue(submission.getId());
                 auditProxy.addAuditEntry(AuditHelper.submissionSubmit(user.getId(), submission));
                 log.info("Submission [{}] successfully submitted.", submission.getId());
                 summaryStatsProcessingService.callGlobusWrapUp(submission.getId());
@@ -231,6 +235,7 @@ public class SSCallbackTask {
 
                 User user = userService.getUser(submission.getCreated().getUserId());
                 submission = submissionService.updateSubmissionStatus(submission.getId(), Status.DEPOSITION_COMPLETE.name(), user);
+                studyQueueSenderService.sendStudiesToQueue(submission.getId());
                 auditProxy.addAuditEntry(AuditHelper.submissionSubmit(user.getId(), submission));
                 log.info("Submission [{}] successfully submitted.", submission.getId());
             }

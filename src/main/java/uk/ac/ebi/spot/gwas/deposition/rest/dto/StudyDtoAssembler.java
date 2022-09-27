@@ -53,7 +53,8 @@ public class StudyDtoAssembler implements ResourceAssembler<Study, Resource<Stud
                 study.getReplicateSampleDescription(),
                 study.getSumstatsFlag(),
                 study.getPooledFlag(),
-                study.getGxeFlag());
+                study.getGxeFlag(),
+                study.getSubmissionId());
 
 
         final ControllerLinkBuilder lb = ControllerLinkBuilder.linkTo(
@@ -98,7 +99,8 @@ public class StudyDtoAssembler implements ResourceAssembler<Study, Resource<Stud
                 study.getReplicateSampleDescription(),
                 study.getSumstatsFlag(),
                 study.getPooledFlag(),
-                study.getGxeFlag());
+                study.getGxeFlag(),
+                study.getSubmissionId());
 
     }
 

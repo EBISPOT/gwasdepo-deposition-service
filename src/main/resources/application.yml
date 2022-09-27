@@ -113,6 +113,7 @@ spring:
 ensembl-snp-validation:
   enabled: true
 
+
 validator:
   error-messages: error_messages.txt
   ss-content-validation:
