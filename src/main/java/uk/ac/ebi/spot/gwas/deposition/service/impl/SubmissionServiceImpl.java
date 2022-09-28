@@ -5,12 +5,11 @@ import org.joda.time.LocalDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import uk.ac.ebi.spot.gwas.deposition.components.BodyOfWorkListener;
-import uk.ac.ebi.spot.gwas.deposition.constants.BodyOfWorkStatus;
-import uk.ac.ebi.spot.gwas.deposition.constants.PublicationStatus;
 import uk.ac.ebi.spot.gwas.deposition.constants.Status;
 import uk.ac.ebi.spot.gwas.deposition.constants.SubmissionProvenanceType;
 import uk.ac.ebi.spot.gwas.deposition.domain.*;
@@ -26,7 +25,6 @@ import uk.ac.ebi.spot.gwas.deposition.repository.ensembl.VariationRepository;
 import uk.ac.ebi.spot.gwas.deposition.repository.ensembl.VariationSynonymRepository;
 import uk.ac.ebi.spot.gwas.deposition.service.*;
 
-import javax.swing.text.html.Option;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -85,6 +83,9 @@ public class SubmissionServiceImpl implements SubmissionService {
 
     @Autowired
     private VariationSynonymRepository variationSynonymRepository;
+
+    @Value("${ensembl-snp-validation.enabled}")
+    private boolean ensemblSnpValidationEnabled;
 
     @Override
     public Submission createSubmission(Submission submission) {
@@ -405,11 +406,21 @@ public class SubmissionServiceImpl implements SubmissionService {
     }
 
     @Override
-    public void validateSnps(String submissionId) {
+    public boolean validateSnps(String submissionId) {
+        if (!ensemblSnpValidationEnabled) {
+            return false;
+        }
         Map<String, Association> snps = associationRepository.readBySubmissionId(submissionId).collect(Collectors.toMap(Association::getVariantId, association -> association, (a1, a2) -> a1));
         Map<String, String> snpNames = snps.values().stream().collect(Collectors.toMap(Association::getVariantId, Association::getVariantId));
-        List<Variation> foundVariations = variationRepository.findByNameIn(snpNames.values());
-        List<VariationSynonym> foundVariationSynonyms = variationSynonymRepository.findByNameIn(snpNames.values());
+        List<Variation> foundVariations;
+        List<VariationSynonym> foundVariationSynonyms;
+        try {
+            foundVariations = variationRepository.findByNameIn(snpNames.values());
+            foundVariationSynonyms = variationSynonymRepository.findByNameIn(snpNames.values());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
         for (Variation variation: foundVariations) {
             snpNames.remove(variation.getName());
             snps.get(variation.getName()).setValid(true);
@@ -420,5 +431,6 @@ public class SubmissionServiceImpl implements SubmissionService {
             snps.get(variation.getName()).setValid(true);
             associationRepository.save(snps.get(variation.getName()));
         }
+        return true;
     }
 }
