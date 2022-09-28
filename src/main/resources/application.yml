@@ -109,6 +109,8 @@ spring:
     password:
     driver-class-name: com.mysql.cj.jdbc.Driver
     continue-on-error: true
+  jpa:
+    database-platform: org.hibernate.dialect.MySQL5Dialect
 
 ensembl-snp-validation:
   enabled: true

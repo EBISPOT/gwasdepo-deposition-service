@@ -325,10 +325,10 @@ public class SubmissionsController {
     }
 
     @GetMapping(value = "/{submissionId}/validate-snps")
-    public void validateSnps(@PathVariable  String submissionId, HttpServletRequest request) {
+    public boolean validateSnps(@PathVariable  String submissionId, HttpServletRequest request) {
 
         userService.findUser(jwtService.extractUser(HeadersUtil.extractJWT(request)), false);
-        submissionService.validateSnps(submissionId);
+        return submissionService.validateSnps(submissionId);
     }
 
 }
