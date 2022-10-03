@@ -14,7 +14,7 @@ spring:
     solr:
       host: http://solr-svc.gwas-dev.svc.cluster.local:8983/solr/
     rabbitmq:
-      host: rabbitmq-dev
+      host: rabbitmq-dev.gwas-dev.svc.cluster.local
       port: 5672
   mail:
     host: hh-smtp.ebi.ac.uk
