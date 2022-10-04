@@ -239,4 +239,17 @@ public class FileUploadsController {
         submissionDataCleaningService.cleanSubmission(submission);
         log.info("File [{}] successfully removed from submission: {}", fileUploadId, submission.getId());
     }
+
+    @ResponseStatus(HttpStatus.OK)
+    @GetMapping(value = GWASDepositionBackendConstants.API_UPLOADS)
+    public HttpEntity<byte[]> getTemplateForSubmissionByCallbackId(@RequestParam String callbackId) {
+        FileUpload fileUpload = fileUploadsService.getFileUploadByCallbackId(callbackId);
+        byte[] payload = fileUploadsService.retrieveFileContent(fileUpload.getId());
+        log.info("Returning content for file [{}] for callbackId: {}", fileUpload.getFileName(), callbackId);
+        HttpHeaders responseHeaders = new HttpHeaders();
+        responseHeaders.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileUpload.getFileName());
+        responseHeaders.add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_OCTET_STREAM_VALUE);
+        responseHeaders.add(HttpHeaders.CONTENT_LENGTH, Integer.toString(payload.length));
+        return new HttpEntity<>(payload, responseHeaders);
+    }
 }
