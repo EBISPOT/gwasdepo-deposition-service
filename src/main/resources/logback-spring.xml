@@ -223,8 +223,8 @@
                 </logger>
         -->
 
-        <root level="DEBUG">
-            <appender-ref ref="ROLLING"/>
+        <root level="OFF">
+            
         </root>
     </springProfile>
 
