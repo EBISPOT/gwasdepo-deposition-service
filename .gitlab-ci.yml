@@ -92,7 +92,7 @@ deploy-backend-sandbox-migration:
     - echo ${PLIVE_KUBECONFIG} | base64 -d > /root/.kube/config
     - helm init --stable-repo-url https://charts.helm.sh/stable
     - helm delete --purge gwas-deposition-backend-dev || true
-    - helm install --name gwas-deposition-backend-dev --set k8Namespace=gwas-dev,service.name=gwas-deposition-backend-dev,ingress.name=backend-ingress-dev,image.env.envName=sandbox-migration,image.volume.claimName=gwas-dev-depo-logs,image.repository=$BACKEND_REGISTRY_IMAGE,image.tag=$CI_COMMIT_SHA,image.env.dbUser=gwasdepo,image.env.secretsName=sandbox-secrets,image.env.secretsKey=db-backend ./k8chart/ --wait
+    - helm install --name gwas-deposition-backend-dev --set k8Namespace=gwas-dev,service.name=gwas-deposition-backend-dev,ingress.name=backend-ingress-dev,image.env.envName=sandbox-migration,image.volume.claimName=gwas-dev-depo-logs,image.repository=$BACKEND_REGISTRY_IMAGE,image.tag=$CI_COMMIT_SHA,image.env.dbUser=gwasdepo,image.env.secretsName=sandbox-secrets,image.env.secretsKey=db-backend,image.env.rabbitSecretsName=rabbitmq-dev,image.env.rabbitSecretsKey=Password ./k8chart/ --wait
   environment:
     name: sandbox-migration
   only:

@@ -11,4 +11,4 @@ ADD target/gwasdepo-deposition-service-*.jar /home/gwas-deposition-backend/
 USER gwas-deposition-backend
 
 # Launch application server
-ENTRYPOINT exec $JAVA_HOME/bin/java $XMX $XMS -jar -Dspring.profiles.active=$ENVIRONMENT /home/gwas-deposition-backend/gwasdepo-deposition-service-*.jar
+ENTRYPOINT exec $JAVA_HOME/bin/java $XMX $XMS -jar -Dspring.profiles.active=$ENVIRONMENT -Dspring.rabbitmq.password=$RABBIT_PWD /home/gwas-deposition-backend/gwasdepo-deposition-service-*.jar

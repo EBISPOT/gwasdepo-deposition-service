@@ -6,6 +6,10 @@ server:
 spring:
   main:
     allow-bean-definition-overriding: true
+  rabbitmq:
+    host: rabbitmq-dev
+    port: 5672
+    username: user
   data:
     mongodb:
       #uri: mongo-0.mongo.gwas-dev.svc.cluster.local,mongo-1.mongo.gwas-dev.svc.cluster.local,mongo-2.mongo.gwas-dev.svc.cluster.local:27017
@@ -13,9 +17,6 @@ spring:
       #uri: mongodb-hx-gwasdepopro-001:27017,mongodb-hl-gwasdepopro-002:27017/admin?replicaSet=gwasdepoprors080
     solr:
       host: http://solr-svc.gwas-dev.svc.cluster.local:8983/solr/
-    rabbitmq:
-      host: rabbitmq-dev.gwas-dev.svc.cluster.local
-      port: 5672
   mail:
     host: hh-smtp.ebi.ac.uk
     port: 25
