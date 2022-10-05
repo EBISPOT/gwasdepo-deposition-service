@@ -244,6 +244,9 @@ public class FileUploadsController {
     @GetMapping(value = GWASDepositionBackendConstants.API_UPLOADS)
     public HttpEntity<byte[]> getTemplateForSubmissionByCallbackId(@RequestParam String callbackId) {
         FileUpload fileUpload = fileUploadsService.getFileUploadByCallbackId(callbackId);
+        if (fileUpload == null) {
+            throw new EntityNotFoundException("Fileupload not found for callbackId " + callbackId);
+        }
         byte[] payload = fileUploadsService.retrieveFileContent(fileUpload.getId());
         log.info("Returning content for file [{}] for callbackId: {}", fileUpload.getFileName(), callbackId);
         HttpHeaders responseHeaders = new HttpHeaders();
