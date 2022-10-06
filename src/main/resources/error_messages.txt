@@ -1,5 +1,7 @@
 ORPHAN_STUDY=The study tag referenced in row(s) [(${row})] is not defined in the study tab. Please check.
 NON_UNIQUE_STUDY_TAG=Study tags should be unique. Found duplicated study tags: '[(${value})]'
+NON_UNIQUE_CHECKSUM=Checksums should be unique. Found duplicated checksums: '[(${value})]'
+NON_UNIQUE_SUMMARY_STATISTICS_FILE=Summary statistics file should be unique. found duplicated Summary statistics files: '[(${value})]'
 MISSING_VALUE=Column '[(${column})]' in row(s) [(${row})] lacks mandatory value
 INCORRECT_VALUE_RANGE-ACCEPTED_VALUES=Column '[(${column})]' in row(s) [(${row})] contains incorrect value. Accepted values are: '[(${value})]'
 INCORRECT_VALUE_RANGE-PATTERN=Column '[(${column})]' in row(s) [(${row})] contains incorrect value. Accepted values should follow the pattern: '[(${value})]'

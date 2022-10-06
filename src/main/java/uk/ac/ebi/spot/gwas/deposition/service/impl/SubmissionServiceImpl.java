@@ -1,16 +1,21 @@
 package uk.ac.ebi.spot.gwas.deposition.service.impl;
 
+import com.mongodb.bulk.BulkWriteResult;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.mongodb.core.BulkOperations;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
 import uk.ac.ebi.spot.gwas.deposition.components.BodyOfWorkListener;
-import uk.ac.ebi.spot.gwas.deposition.constants.BodyOfWorkStatus;
-import uk.ac.ebi.spot.gwas.deposition.constants.PublicationStatus;
 import uk.ac.ebi.spot.gwas.deposition.constants.Status;
 import uk.ac.ebi.spot.gwas.deposition.constants.SubmissionProvenanceType;
 import uk.ac.ebi.spot.gwas.deposition.domain.*;
@@ -26,7 +31,6 @@ import uk.ac.ebi.spot.gwas.deposition.repository.ensembl.VariationRepository;
 import uk.ac.ebi.spot.gwas.deposition.repository.ensembl.VariationSynonymRepository;
 import uk.ac.ebi.spot.gwas.deposition.service.*;
 
-import javax.swing.text.html.Option;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -85,6 +89,12 @@ public class SubmissionServiceImpl implements SubmissionService {
 
     @Autowired
     private VariationSynonymRepository variationSynonymRepository;
+
+    @Value("${ensembl-snp-validation.enabled}")
+    private boolean ensemblSnpValidationEnabled;
+
+    @Autowired
+    private MongoTemplate mongoTemplate;
 
     @Override
     public Submission createSubmission(Submission submission) {
@@ -405,20 +415,45 @@ public class SubmissionServiceImpl implements SubmissionService {
     }
 
     @Override
-    public void validateSnps(String submissionId) {
+    public boolean validateSnps(String submissionId) {
+        if (!ensemblSnpValidationEnabled) {
+            return false;
+        }
+        log.info("Started validating SNPs for submission: {}", submissionId);
+        BulkOperations bulkOps = mongoTemplate.bulkOps(BulkOperations.BulkMode.UNORDERED, Association.class);
         Map<String, Association> snps = associationRepository.readBySubmissionId(submissionId).collect(Collectors.toMap(Association::getVariantId, association -> association, (a1, a2) -> a1));
         Map<String, String> snpNames = snps.values().stream().collect(Collectors.toMap(Association::getVariantId, Association::getVariantId));
-        List<Variation> foundVariations = variationRepository.findByNameIn(snpNames.values());
-        List<VariationSynonym> foundVariationSynonyms = variationSynonymRepository.findByNameIn(snpNames.values());
+        List<Variation> foundVariations;
+        List<VariationSynonym> foundVariationSynonyms;
+        try {
+            foundVariations = variationRepository.findByNameIn(snpNames.values());
+            foundVariationSynonyms = variationSynonymRepository.findByNameIn(snpNames.values());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+        log.info("Found {} valid SNPs", foundVariations.size() + foundVariationSynonyms.size());
+        log.info("Marking SNPs as valid in bulk");
         for (Variation variation: foundVariations) {
-            snpNames.remove(variation.getName());
-            snps.get(variation.getName()).setValid(true);
-            associationRepository.save(snps.get(variation.getName()));
+            Query query = new Query().addCriteria(new Criteria("id").is(snps.get(variation.getName()).getId()));
+            Update update = new Update().set("isValid", true);
+            bulkOps.updateOne(query, update);
         }
         for (VariationSynonym variation: foundVariationSynonyms) {
-            snpNames.remove(variation.getName());
-            snps.get(variation.getName()).setValid(true);
-            associationRepository.save(snps.get(variation.getName()));
+            Query query = new Query().addCriteria(new Criteria("id").is(snps.get(variation.getName()).getId()));
+            Update update = new Update().set("isValid", true);
+            bulkOps.updateOne(query, update);
         }
+        BulkWriteResult bulkWriteResult = null;
+        if (!foundVariations.isEmpty() || !foundVariationSynonyms.isEmpty()) {
+            bulkWriteResult = bulkOps.execute();
+        }
+        if (bulkWriteResult != null && bulkWriteResult.wasAcknowledged()) {
+            log.info("Finished validating SNPs for submission: {}", submissionId);
+        }
+        else {
+            return false;
+        }
+        return true;
     }
 }
