@@ -222,9 +222,9 @@
                     <appender-ref ref="ROLLING"/>
                 </logger>
         -->
-
-        <root level="OFF">
-            
+        
+        <root level="WARN">
+            <appender-ref ref="ROLLING"/>
         </root>
     </springProfile>
 
