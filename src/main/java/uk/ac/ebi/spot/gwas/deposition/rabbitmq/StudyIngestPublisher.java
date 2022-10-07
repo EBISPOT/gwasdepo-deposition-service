@@ -26,7 +26,9 @@ public class StudyIngestPublisher {
     public void send(StudyDto studyDto) {
         log.info("Sending Message for"+studyDto.getSubmissionId()+":"+studyDto.getAccession());
         //rabbitTemplate.convertAndSend(DepositionCurationConstants.ROUTING_KEY, studyDto);
-
+        log.info("Queue In Publisher "+rabbitMQConfigProperties.getQueueName());
+        log.info("Exchange In Publisher "+rabbitMQConfigProperties.getExchangeName());
+        log.info("Routing key In Publisher "+rabbitMQConfigProperties.getRoutingKey());
         rabbitTemplate.convertAndSend(rabbitMQConfigProperties.getExchangeName(),rabbitMQConfigProperties.getRoutingKey()
         , studyDto);
     }
