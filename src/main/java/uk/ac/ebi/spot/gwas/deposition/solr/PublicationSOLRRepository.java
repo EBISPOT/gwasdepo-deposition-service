@@ -4,7 +4,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.solr.repository.Query;
 import org.springframework.data.solr.repository.SolrCrudRepository;
-import uk.ac.ebi.spot.gwas.deposition.domain.SOLRPublication;
 
 import java.util.Optional;
 

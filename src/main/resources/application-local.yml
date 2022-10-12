@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+
 #===============COMPULSORY PROGRAM ARGUMENTS=====#
 mongo-server:
 auth-enable:
@@ -11,6 +11,8 @@ server:
 
 
 spring:
+  main:
+    allow-bean-definition-overriding: true
   data:
     mongodb:
       uri: ${mongo-server}

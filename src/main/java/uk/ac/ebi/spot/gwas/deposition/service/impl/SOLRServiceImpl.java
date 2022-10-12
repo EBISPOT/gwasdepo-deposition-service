@@ -10,10 +10,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import uk.ac.ebi.spot.gwas.deposition.domain.Publication;
-import uk.ac.ebi.spot.gwas.deposition.domain.SOLRPublication;
 import uk.ac.ebi.spot.gwas.deposition.repository.PublicationRepository;
 import uk.ac.ebi.spot.gwas.deposition.service.SOLRService;
 import uk.ac.ebi.spot.gwas.deposition.solr.PublicationSOLRRepository;
+import uk.ac.ebi.spot.gwas.deposition.solr.SOLRPublication;
 import uk.ac.ebi.spot.gwas.deposition.util.SOLRPublicationAssembler;
 
 import java.util.ArrayList;
@@ -35,6 +35,9 @@ public class SOLRServiceImpl implements SOLRService {
 
     @Autowired(required = false)
     private SOLRIndexService solrIndexService;
+
+    @Autowired
+    private SOLRPublicationAssembler solrPublicationAssembler;
 
     @Async
     public void reindexPublications() {
@@ -77,7 +80,7 @@ public class SOLRServiceImpl implements SOLRService {
     @Override
     public void addPublication(Publication publication) {
         log.info("Adding publication: {}", publication.getPmid());
-        SOLRPublication solrPublication = SOLRPublicationAssembler.assemble(publication);
+        SOLRPublication solrPublication = solrPublicationAssembler.assemble(publication);
         if (solrPublication != null) {
             publicationSOLRRepository.save(solrPublication);
         }
@@ -98,7 +101,7 @@ public class SOLRServiceImpl implements SOLRService {
         log.info("SOLR returned {} results.", solrPublications.size());
         List<Publication> list = new ArrayList<>();
         for (SOLRPublication solrPublication : solrPublications) {
-            Publication publication = SOLRPublicationAssembler.disassemble(solrPublication);
+            Publication publication = solrPublicationAssembler.disassemble(solrPublication);
             if (publication != null) {
                 list.add(publication);
             }

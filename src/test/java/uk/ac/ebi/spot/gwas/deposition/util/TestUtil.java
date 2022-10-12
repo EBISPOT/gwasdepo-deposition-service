@@ -62,7 +62,9 @@ public class TestUtil {
                 LocalDate.now(),
                 new CorrespondingAuthor(RandomStringUtils.randomAlphanumeric(10),
                         RandomStringUtils.randomAlphanumeric(10)),
-                status);
+                status, null,
+                null,
+                null);
     }
 
     public static TemplateSchemaDto templateSchemaDto() {
