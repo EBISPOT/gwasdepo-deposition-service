@@ -18,6 +18,9 @@ image:
     dbUser: ""
     secretsName: ""
     secretsKey: ""
+    rabbitSecretsName: ""
+    rabbitSecretsKey: ""
+
   volume:
     claimName: gwas-depo-logs
 

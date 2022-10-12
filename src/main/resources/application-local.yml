@@ -13,14 +13,14 @@ server:
 spring:
   main:
     allow-bean-definition-overriding: true
+  rabbitmq:
+    host: localhost
+    port: 5672
   data:
     mongodb:
       uri: ${mongo-server}
     solr:
       host: ${solr-server}
-    rabbitmq:
-      host: localhost
-      port: 5672
     datasource:
       url: jdbc:mysql://ensembldb.ensembl.org:3306/homo_sapiens_variation_107_38
       username: anonymous
