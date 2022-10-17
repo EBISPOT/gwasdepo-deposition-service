@@ -87,7 +87,10 @@ public class SSCallbackTaskTest extends IntegrationTest {
                 LocalDate.now(),
                 new CorrespondingAuthor(RandomStringUtils.randomAlphanumeric(10),
                         RandomStringUtils.randomAlphanumeric(10)),
-                RandomStringUtils.randomAlphanumeric(10));
+                RandomStringUtils.randomAlphanumeric(10),
+                null,
+                null,
+                null);
         publication = publicationRepository.insert(publication);
 
         Submission submission = new Submission();
