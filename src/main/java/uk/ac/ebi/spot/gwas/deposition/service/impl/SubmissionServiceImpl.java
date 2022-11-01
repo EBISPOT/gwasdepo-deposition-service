@@ -421,8 +421,8 @@ public class SubmissionServiceImpl implements SubmissionService {
         }
         log.info("Started validating SNPs for submission: {}", submissionId);
         BulkOperations bulkOps = mongoTemplate.bulkOps(BulkOperations.BulkMode.UNORDERED, Association.class);
-        Map<String, Association> snps = associationRepository.readBySubmissionId(submissionId).collect(Collectors.toMap(Association::getVariantId, association -> association, (a1, a2) -> a1));
-        Map<String, String> snpNames = snps.values().stream().collect(Collectors.toMap(Association::getVariantId, Association::getVariantId));
+        Map<String, Association> snps = associationRepository.readBySubmissionId(submissionId).collect(Collectors.toMap(Association::getVariantId, association -> association, (a1, a2) -> null));
+        Map<String, String> snpNames = snps.values().stream().filter(Objects::nonNull).collect(Collectors.toMap(Association::getVariantId, Association::getVariantId));
         List<Variation> foundVariations;
         List<VariationSynonym> foundVariationSynonyms;
         try {
