@@ -50,3 +50,9 @@ quartz:
   scheduler:
     active: false
     dbName: gwasdepo
+
+
+rabbitmq:
+  queue-name: study_change_sandbox
+  exchange-name: study_change_exchange_sandbox
+  routing-key: study-ingest_sandbox
