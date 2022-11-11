@@ -5,7 +5,7 @@ server:
 logging:
   level:
     org:
-      springframework: DEBUG
+      springframework: ERROR
 
 quartz:
   scheduler:
@@ -102,7 +102,19 @@ gwas-catalog-service:
 
 spring:
   profiles:
-    active: dev
+    active: local
+  datasource:
+    url: jdbc:mysql://mysql-hhvm7-025.ebi.ac.uk:5306/homo_sapiens_variation_107_38
+    username: anonymous
+    password:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    continue-on-error: true
+  jpa:
+    database-platform: org.hibernate.dialect.MySQL5Dialect
+
+ensembl-snp-validation:
+  enabled: true
+
 
 validator:
   error-messages: error_messages.txt

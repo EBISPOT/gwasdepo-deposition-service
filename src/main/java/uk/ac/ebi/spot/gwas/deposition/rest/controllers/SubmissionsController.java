@@ -324,4 +324,11 @@ public class SubmissionsController {
         return submissionAssemblyService.toResource(submission);
     }
 
+    @GetMapping(value = "/{submissionId}/validate-snps")
+    public boolean validateSnps(@PathVariable  String submissionId, HttpServletRequest request) {
+
+        userService.findUser(jwtService.extractUser(HeadersUtil.extractJWT(request)), false);
+        return submissionService.validateSnps(submissionId);
+    }
+
 }

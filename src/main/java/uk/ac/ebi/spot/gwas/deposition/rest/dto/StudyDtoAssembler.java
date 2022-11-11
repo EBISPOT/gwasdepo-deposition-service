@@ -48,11 +48,13 @@ public class StudyDtoAssembler implements ResourceAssembler<Study, Resource<Stud
                 study.isAgreedToCc0(),
                 null,
                 null,
+                null,
                 study.getInitialSampleDescription(),
                 study.getReplicateSampleDescription(),
                 study.getSumstatsFlag(),
                 study.getPooledFlag(),
-                study.getGxeFlag());
+                study.getGxeFlag(),
+                study.getSubmissionId());
 
 
         final ControllerLinkBuilder lb = ControllerLinkBuilder.linkTo(
@@ -92,11 +94,13 @@ public class StudyDtoAssembler implements ResourceAssembler<Study, Resource<Stud
                 study.isAgreedToCc0(),
                 null,
                 null,
+                null,
                 study.getInitialSampleDescription(),
                 study.getReplicateSampleDescription(),
                 study.getSumstatsFlag(),
                 study.getPooledFlag(),
-                study.getGxeFlag());
+                study.getGxeFlag(),
+                study.getSubmissionId());
 
     }
 
