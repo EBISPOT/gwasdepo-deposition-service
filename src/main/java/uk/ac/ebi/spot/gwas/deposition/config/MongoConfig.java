@@ -174,7 +174,7 @@ public class MongoConfig {
     @Configuration
     @EnableMongoRepositories(basePackages = {"uk.ac.ebi.spot.gwas.deposition.repository"})
     @EnableTransactionManagement
-    @Profile({"prod", "prod-fallback", "local"})
+    @Profile({"prod", "prod-fallback"})
     public static class MongoConfigProd extends AbstractMongoConfiguration {
 
         @Autowired
