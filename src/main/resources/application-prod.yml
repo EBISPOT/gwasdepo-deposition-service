@@ -6,6 +6,10 @@ server:
 spring:
   main:
     allow-bean-definition-overriding: true
+  rabbitmq:
+    host: rabbitmq.rabbitmq.svc.cluster.local
+    port: 5672
+    username: ebigwasuser
   data:
     mongodb:
       #uri: mongodb-hhvm-062.ebi.ac.uk:27017,mongodb-hxvm-063.ebi.ac.uk:27017/admin?replicaSet=gwasdepodevrs039
@@ -56,3 +60,8 @@ gwas-catalog-service:
 solr:
   enable:
     alias: true
+
+rabbitmq:
+  queue-name: study_change
+  exchange-name: study_change_exchange
+  routing-key: study-ingest
