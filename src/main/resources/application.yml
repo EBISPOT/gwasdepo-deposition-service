@@ -5,7 +5,7 @@ server:
 logging:
   level:
     org:
-      springframework: ERROR
+      springframework: DEBUG
 
 quartz:
   scheduler:
