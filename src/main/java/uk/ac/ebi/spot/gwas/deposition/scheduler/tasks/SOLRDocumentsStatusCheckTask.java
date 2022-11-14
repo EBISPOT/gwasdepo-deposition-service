@@ -3,6 +3,7 @@ package uk.ac.ebi.spot.gwas.deposition.scheduler.tasks;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import uk.ac.ebi.spot.gwas.deposition.config.SystemConfigProperties;
 import uk.ac.ebi.spot.gwas.deposition.constants.PublicationIngestStatus;
@@ -20,6 +21,7 @@ public class SOLRDocumentsStatusCheckTask {
 
     private static final Logger log = LoggerFactory.getLogger(SOLRDocumentsStatusCheckTask.class);
 
+    @Lazy
     @Autowired
     private SOLRService solrService;
 
