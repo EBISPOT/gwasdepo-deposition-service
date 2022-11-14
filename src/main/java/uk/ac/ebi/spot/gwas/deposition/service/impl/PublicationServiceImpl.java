@@ -31,7 +31,8 @@ public class PublicationServiceImpl implements PublicationService {
     @Autowired
     private SSTemplateEntryPlaceholderRepository ssTemplateEntryPlaceholderRepository;
 
-    @Autowired(required = false)
+    //@Autowired(required = false)
+    @Autowired
     private SOLRService solrService;
 
     @Override

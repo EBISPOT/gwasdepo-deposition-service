@@ -29,7 +29,8 @@ public class SOLRDocumentsStatusCheckTask {
     @Autowired
     private PublicationIngestEntryRepository publicationIngestEntryRepository;
 
-    @Autowired(required = false)
+    //@Autowired(required = false)
+    @Autowired
     private SOLRService solrService;
 
     public void checkSOLRDocuments() {
