@@ -17,7 +17,8 @@ public class ServiceManagementController {
 
     private static final Logger log = LoggerFactory.getLogger(ServiceManagementController.class);
 
-    @Autowired(required = false)
+    //@Autowired(required = false)
+    @Autowired
     private SOLRService solrService;
 
     @Autowired

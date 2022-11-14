@@ -25,7 +25,7 @@ maven-build:
   stage: build
   script:
     - echo ${MAVEN_SETTINGS} | base64 -d > settings.xml
-    - mvn -s settings.xml clean install -B -Dspring.profiles.active=test -Dmaven.test.error.ignore=true -Dmaven.test.failure.ignore=true
+    - mvn -s settings.xml clean install -B -Dspring.profiles.active=test -DskipTests=true -Dmaven.test.error.ignore=true -Dmaven.test.failure.ignore=true
   artifacts:
     paths:
       - target/*.jar
