@@ -21,6 +21,10 @@ public class SOLRDocumentsStatusCheckTask {
     private static final Logger log = LoggerFactory.getLogger(SOLRDocumentsStatusCheckTask.class);
 
     @Autowired
+    private SOLRService solrService;
+
+
+    @Autowired
     private PublicationService publicationService;
 
     @Autowired
@@ -30,8 +34,7 @@ public class SOLRDocumentsStatusCheckTask {
     private PublicationIngestEntryRepository publicationIngestEntryRepository;
 
     //@Autowired(required = false)
-    @Autowired
-    private SOLRService solrService;
+
 
     public void checkSOLRDocuments() {
         if (solrService == null) {
