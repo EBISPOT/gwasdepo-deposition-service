@@ -103,7 +103,8 @@
         <logger name="uk.ac.ebi.spot.gwas" level="INFO">
             <appender-ref ref="ROLLING"/>
         </logger>
-        <root level="OFF">
+        <root level="DEBUG">
+            <appender-ref ref="ROLLING"/>
         </root>
     </springProfile>
 
@@ -133,7 +134,8 @@
             <appender-ref ref="ROLLING"/>
         </logger>
 -->
-        <root level="OFF">
+        <root level="DEBUG">
+            <appender-ref ref="ROLLING"/>
         </root>
     </springProfile>
 
