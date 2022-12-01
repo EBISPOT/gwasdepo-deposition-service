@@ -12,7 +12,7 @@ import uk.ac.ebi.spot.gwas.deposition.scheduler.jobs.SOLRDocumentsStatusCheckJob
 import java.util.Date;
 
 @Configuration
-@ConditionalOnProperty(name = "comms.messaging.enabled", havingValue = "true")
+//@ConditionalOnProperty(name = "comms.messaging.enabled", havingValue = "true")
 @Profile(GWASDepositionBackendConstants.PROFILE_SANDBOX_MIGRATION)
 public class SOLRDocumentStatusCheckConfigSandbox extends AbstractQuartzConfig {
 
