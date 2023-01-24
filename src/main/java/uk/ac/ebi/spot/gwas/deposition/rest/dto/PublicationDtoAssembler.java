@@ -28,7 +28,10 @@ public class PublicationDtoAssembler implements ResourceAssembler<Publication, R
                 publication.getCorrespondingAuthor() != null ?
                         new CorrespondingAuthorDto(publication.getCorrespondingAuthor().getAuthorName(),
                                 publication.getCorrespondingAuthor().getEmail()) : null,
-                publication.getStatus());
+                publication.getStatus(),
+                null,
+                null,
+                null);
     }
 
     public Resource<PublicationDto> toResource(Publication publication) {
@@ -42,7 +45,10 @@ public class PublicationDtoAssembler implements ResourceAssembler<Publication, R
                 publication.getCorrespondingAuthor() != null ?
                         new CorrespondingAuthorDto(publication.getCorrespondingAuthor().getAuthorName(),
                                 publication.getCorrespondingAuthor().getEmail()) : null,
-                publication.getStatus());
+                publication.getStatus(),
+                null,
+                null,
+                null);
 
 
         final ControllerLinkBuilder lb = ControllerLinkBuilder.linkTo(

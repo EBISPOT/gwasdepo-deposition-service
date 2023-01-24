@@ -54,7 +54,12 @@ public class StudyDtoAssembler implements ResourceAssembler<Study, Resource<Stud
                 study.getSumstatsFlag(),
                 study.getPooledFlag(),
                 study.getGxeFlag(),
-                study.getSubmissionId());
+                study.getSubmissionId(),
+                study.getImputationPanel(),
+                study.getImputationSoftware(),
+                study.getAdjustedCovariates(),
+                study.getNeg_log_p_value(),
+                study.getEffect_allele_frequency_lower_limit());
 
 
         final ControllerLinkBuilder lb = ControllerLinkBuilder.linkTo(
@@ -100,7 +105,12 @@ public class StudyDtoAssembler implements ResourceAssembler<Study, Resource<Stud
                 study.getSumstatsFlag(),
                 study.getPooledFlag(),
                 study.getGxeFlag(),
-                study.getSubmissionId());
+                study.getSubmissionId(),
+                study.getImputationPanel(),
+                study.getImputationSoftware(),
+                study.getAdjustedCovariates(),
+                study.getNeg_log_p_value(),
+                study.getEffect_allele_frequency_lower_limit());
 
     }
 
@@ -132,6 +142,11 @@ public class StudyDtoAssembler implements ResourceAssembler<Study, Resource<Stud
         study.setSumstatsFlag(studyDto.getSumstatsFlag());
         study.setPooledFlag(studyDto.getPooledFlag());
         study.setGxeFlag(studyDto.getGxeFlag());
+        study.setImputationPanel(studyDto.getImputationPanel());
+        study.setImputationSoftware(studyDto.getImputationSoftware());
+        study.setAdjustedCovariates(studyDto.getAdjustedCovariates());
+        study.setNeg_log_p_value(studyDto.getNeg_log_p_value());
+        study.setEffect_allele_frequency_lower_limit(studyDto.getEffect_allele_frequency_lower_limit());
         return study;
     }
 }
