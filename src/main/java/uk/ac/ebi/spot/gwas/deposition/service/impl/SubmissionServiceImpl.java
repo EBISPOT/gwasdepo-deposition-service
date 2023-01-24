@@ -237,19 +237,19 @@ public class SubmissionServiceImpl implements SubmissionService {
                     Optional.ofNullable(fileUpload.getCallbackId()).ifPresent((callbackId) ->
                             deleteCallbackId(callbackId));
                     Optional.ofNullable(summaryStatsEntryRepository.findByFileUploadId(fileUploadId)).ifPresent((sumstats) ->
-                           sumstats.forEach((sumstat) -> summaryStatsEntryRepository.delete(sumstat)));
+                            sumstats.forEach((sumstat) -> summaryStatsEntryRepository.delete(sumstat)));
 
                 });
             });
         });
-            submission.setAssociations(new ArrayList<>());
-            submission.setSamples(new ArrayList<>());
-            submission.setNotes(new ArrayList<>());
-            submission.setStudies(new ArrayList<>());
-            submission.setFileUploads(new ArrayList<>());
-            submission.setLastUpdated(new Provenance(DateTime.now(), user.getId()));
-            submission.setEditTemplate(new Provenance(DateTime.now(), user.getId()));
-            return saveSubmission(submission, user.getId());
+        submission.setAssociations(new ArrayList<>());
+        submission.setSamples(new ArrayList<>());
+        submission.setNotes(new ArrayList<>());
+        submission.setStudies(new ArrayList<>());
+        submission.setFileUploads(new ArrayList<>());
+        submission.setLastUpdated(new Provenance(DateTime.now(), user.getId()));
+        submission.setEditTemplate(new Provenance(DateTime.now(), user.getId()));
+        return saveSubmission(submission, user.getId());
 
     }
 
@@ -386,15 +386,15 @@ public class SubmissionServiceImpl implements SubmissionService {
      * @return
      */
     public List<Study> getStudies(String submissionId) {
-       List<Study> studies = studyRepository.readBySubmissionId(submissionId)
-        .collect(Collectors.toList());
-       List<String> studyTags = studies.stream().map(study -> study.getStudyTag())
-               .collect(Collectors.toList());
+        List<Study> studies = studyRepository.readBySubmissionId(submissionId)
+                .collect(Collectors.toList());
+        List<String> studyTags = studies.stream().map(study -> study.getStudyTag())
+                .collect(Collectors.toList());
         Submission submission = submissionRepository.findById(submissionId).get();
         if(submission.getPublicationId() != null && !submission.getPublicationId().isEmpty()) {
             Publication publication = publicationRepository.findById(submission.getPublicationId()).get();
             List<Study> pmIdStudies = studyRepository.findByPmidsContains(publication.getPmid());
-          List<Study> uniqueStudies = pmIdStudies.stream().filter(study -> !studyTags.contains(study.getStudyTag()))
+            List<Study> uniqueStudies = pmIdStudies.stream().filter(study -> !studyTags.contains(study.getStudyTag()))
                     .collect(Collectors.groupingBy(Study::getStudyTag))
                     .values().stream()
                     .map((studyArr) -> studyArr.stream().findFirst().get())
@@ -411,7 +411,7 @@ public class SubmissionServiceImpl implements SubmissionService {
                 studies.addAll(uniqueStudies);
             }
         }
-    return studies;
+        return studies;
     }
 
     @Override
@@ -421,8 +421,17 @@ public class SubmissionServiceImpl implements SubmissionService {
         }
         log.info("Started validating SNPs for submission: {}", submissionId);
         BulkOperations bulkOps = mongoTemplate.bulkOps(BulkOperations.BulkMode.UNORDERED, Association.class);
-        Map<String, Association> snps = associationRepository.readBySubmissionId(submissionId).collect(Collectors.toMap(Association::getVariantId, association -> association, (a1, a2) -> a1));
-        Map<String, String> snpNames = snps.values().stream().collect(Collectors.toMap(Association::getVariantId, Association::getVariantId));
+        // removes any duplicated rsid in a study
+        Map<String, Association> snps = associationRepository.readBySubmissionId(submissionId).collect(Collectors.toMap(a -> a.getStudyTag() + "-" + a.getVariantId(), association -> association, (a1, a2) -> null));
+        // removes any duplicated rsid in the map for SQL query
+        Map<String, String> snpNames = snps.values().stream().filter(Objects::nonNull).collect(Collectors.toMap(Association::getVariantId, Association::getVariantId));
+        Map<String, List<Association>> submissionSnpsByRsid = new HashMap<>();
+        snps.forEach((s, association) -> {
+            if (!submissionSnpsByRsid.containsKey(association.getVariantId())) {
+                submissionSnpsByRsid.put(association.getVariantId(), new ArrayList<>());
+            }
+            submissionSnpsByRsid.get(association.getVariantId()).add(association);
+        });
         List<Variation> foundVariations;
         List<VariationSynonym> foundVariationSynonyms;
         try {
@@ -435,14 +444,18 @@ public class SubmissionServiceImpl implements SubmissionService {
         log.info("Found {} valid SNPs", foundVariations.size() + foundVariationSynonyms.size());
         log.info("Marking SNPs as valid in bulk");
         for (Variation variation: foundVariations) {
-            Query query = new Query().addCriteria(new Criteria("id").is(snps.get(variation.getName()).getId()));
-            Update update = new Update().set("isValid", true);
-            bulkOps.updateOne(query, update);
+            for (Association a: submissionSnpsByRsid.get(variation.getName())) {
+                Query query = new Query().addCriteria(new Criteria("id").is(a.getId()));
+                Update update = new Update().set("isValid", true);
+                bulkOps.updateOne(query, update);
+            }
         }
         for (VariationSynonym variation: foundVariationSynonyms) {
-            Query query = new Query().addCriteria(new Criteria("id").is(snps.get(variation.getName()).getId()));
-            Update update = new Update().set("isValid", true);
-            bulkOps.updateOne(query, update);
+            for (Association a: submissionSnpsByRsid.get(variation.getName())) {
+                Query query = new Query().addCriteria(new Criteria("id").is(a.getId()));
+                Update update = new Update().set("isValid", true);
+                bulkOps.updateOne(query, update);
+            }
         }
         BulkWriteResult bulkWriteResult = null;
         if (!foundVariations.isEmpty() || !foundVariationSynonyms.isEmpty()) {
