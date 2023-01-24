@@ -68,6 +68,9 @@ public class SummaryStatsProcessingServiceImpl implements SummaryStatsProcessing
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private StudyQueueSenderService studyQueueSenderService;
+
     @Override
     @Async
     public void processSummaryStats(Submission submission, String fileUploadId, List<SummaryStatsEntry> summaryStatsEntries,
@@ -118,6 +121,7 @@ public class SummaryStatsProcessingServiceImpl implements SummaryStatsProcessing
             auditProxy.addAuditEntry(AuditHelper.submissionValidate(submission.getCreated().getUserId(), submission, true, null));
             User user = userService.getUser(submission.getCreated().getUserId());
             submission = submissionService.updateSubmissionStatus(submission.getId(), Status.DEPOSITION_COMPLETE.name(), user);
+            studyQueueSenderService.sendStudiesToQueue(submission.getId());
             auditProxy.addAuditEntry(AuditHelper.submissionSubmit(user.getId(), submission));
             log.info("Submission [{}] successfully submitted.", submission.getId());
             return;

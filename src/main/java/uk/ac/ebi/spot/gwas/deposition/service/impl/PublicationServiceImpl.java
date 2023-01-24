@@ -3,6 +3,7 @@ package uk.ac.ebi.spot.gwas.deposition.service.impl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.core.query.TextCriteria;
@@ -31,7 +32,9 @@ public class PublicationServiceImpl implements PublicationService {
     @Autowired
     private SSTemplateEntryPlaceholderRepository ssTemplateEntryPlaceholderRepository;
 
-    @Autowired(required = false)
+    //@Autowired(required = false)
+    @Lazy
+    @Autowired
     private SOLRService solrService;
 
     @Override

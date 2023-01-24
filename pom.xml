@@ -104,12 +104,12 @@
         <dependency>
             <groupId>uk.ac.ebi.spot.gwasdepo</groupId>
             <artifactId>gwasdepo-commons</artifactId>
-            <version>1.0.26-SNAPSHOT</version>
+            <version>1.0.28-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>uk.ac.ebi.spot.gwasdepo</groupId>
             <artifactId>gwasdepo-template-validator</artifactId>
-            <version>1.0.19-SNAPSHOT</version>
+            <version>1.0.20-SNAPSHOT</version>
         </dependency>
 
         <dependency>
@@ -158,10 +158,10 @@
             <groupId>org.springframework.data</groupId>
             <artifactId>spring-data-rest-hal-browser</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-solr</artifactId>
-        </dependency>
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter-data-solr</artifactId>
+            </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-mail</artifactId>
@@ -230,6 +230,11 @@
             <groupId>org.javers</groupId>
             <artifactId>javers-spring-mongo</artifactId>
             <version>5.0.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-amqp</artifactId>
         </dependency>
         <!--<dependency>
             <groupId>org.javers</groupId>

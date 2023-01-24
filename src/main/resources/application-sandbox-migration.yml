@@ -6,6 +6,10 @@ server:
 spring:
   main:
     allow-bean-definition-overriding: true
+  rabbitmq:
+    host: rabbitmq.rabbitmq.svc.cluster.local
+    port: 5672
+    username: ebigwasuser
   data:
     mongodb:
       #uri: mongo-0.mongo.gwas-dev.svc.cluster.local,mongo-1.mongo.gwas-dev.svc.cluster.local,mongo-2.mongo.gwas-dev.svc.cluster.local:27017
@@ -67,3 +71,9 @@ gwas-catalog-service:
 solr:
   enable:
     alias: true
+
+
+rabbitmq:
+  queue-name: study_change_sandbox
+  exchange-name: study_change_exchange_sandbox
+  routing-key: study-ingest_sandbox

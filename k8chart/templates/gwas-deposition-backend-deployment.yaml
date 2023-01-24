@@ -50,6 +50,11 @@ spec:
             secretKeyRef:
               name: {{.Values.image.env.secretsName}}
               key: {{.Values.image.env.secretsKey}}
+        - name: RABBIT_PWD
+          valueFrom:
+            secretKeyRef:
+              name: {{.Values.image.env.rabbitSecretsName}}
+              key: {{.Values.image.env.rabbitSecretsKey}}
       volumes:
       - name: log
         persistentVolumeClaim:

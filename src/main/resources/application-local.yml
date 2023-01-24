@@ -1,25 +1,58 @@
+
+#===============COMPULSORY PROGRAM ARGUMENTS=====#
+mongo-server:
+auth-enable:
+solr-server:
+#===============COMPULSORY PROGRAM ARGUMENTS=====#
+
 server:
-  port: 8080
+  port: 8082
+
+
 
 spring:
+  main:
+    allow-bean-definition-overriding: true
+  rabbitmq:
+    host: localhost
+    port: 5672
   data:
     mongodb:
-      uri: mongodb-hhvm-062.ebi.ac.uk:27017,mongodb-hxvm-063.ebi.ac.uk:27017/admin?replicaSet=gwasdepodevrs039
+      uri: ${mongo-server}
     solr:
-      host: http://localhost:8983/solr
+      host: ${solr-server}
+    datasource:
+      url: jdbc:mysql://ensembldb.ensembl.org:3306/homo_sapiens_variation_107_38
+      username: anonymous
+      password:
+      driver-class-name: com.mysql.cj.jdbc.Driver
+
 
 gwas-deposition:
   db: gwasdepo
   solr:
-    enabled: false
+    enabled: true
   auth:
     curators:
       auth-mechanism: EMAIL_WHITELISTING
 
 gwas-sumstats-service:
+  url: http://localhost:8000
   callback-schedule:
-    enabled: false
+    enabled: true
+
+
+gwas-template-service:
+  enabled: true
+  url: http://localhost:8083
 
 quartz:
   scheduler:
+    active: false
     dbName: gwasdepo
+
+
+rabbitmq:
+  queue-name: study_change_sandbox
+  exchange-name: study_change_exchange_sandbox
+  routing-key: study-ingest_sandbox

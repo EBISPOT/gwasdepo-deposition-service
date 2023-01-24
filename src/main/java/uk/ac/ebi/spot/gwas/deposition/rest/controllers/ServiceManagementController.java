@@ -3,6 +3,7 @@ package uk.ac.ebi.spot.gwas.deposition.rest.controllers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import uk.ac.ebi.spot.gwas.deposition.constants.GWASDepositionBackendConstants;
@@ -17,7 +18,9 @@ public class ServiceManagementController {
 
     private static final Logger log = LoggerFactory.getLogger(ServiceManagementController.class);
 
-    @Autowired(required = false)
+    //@Autowired(required = false)
+    @Lazy
+    @Autowired
     private SOLRService solrService;
 
     @Autowired
