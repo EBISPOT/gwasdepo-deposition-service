@@ -119,7 +119,10 @@ public class SOLRPublicationAssembler {
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .map(User::getId)
-                .orElse(null)
+                .orElse(null),
+                null,
+                null,
+                null
         );
 
         publication.setId(solrPublication.getPublicationid());
