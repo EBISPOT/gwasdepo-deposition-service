@@ -386,10 +386,10 @@ public class SubmissionServiceImpl implements SubmissionService {
      * @return
      */
     public List<Study> getStudies(String submissionId) {
-        List<Study> studies = studyRepository.readBySubmissionId(submissionId)
-                .collect(Collectors.toList());
-        List<String> studyTags = studies.stream().map(study -> study.getStudyTag())
-                .collect(Collectors.toList());
+       List<Study> studies = studyRepository.readBySubmissionId(submissionId)
+        .collect(Collectors.toList());
+       List<String> studyTags = studies.stream().map(study -> study.getStudyTag())
+               .collect(Collectors.toList());
         Submission submission = submissionRepository.findById(submissionId).get();
         if(submission.getPublicationId() != null && !submission.getPublicationId().isEmpty()) {
             Publication publication = publicationRepository.findById(submission.getPublicationId()).get();
@@ -421,10 +421,11 @@ public class SubmissionServiceImpl implements SubmissionService {
         }
         log.info("Started validating SNPs for submission: {}", submissionId);
         BulkOperations bulkOps = mongoTemplate.bulkOps(BulkOperations.BulkMode.UNORDERED, Association.class);
-        // removes any duplicated rsid in a study
+        // removes any duplicated rsid in a study map(tag - rsid, association)
         Map<String, Association> snps = associationRepository.readBySubmissionId(submissionId).collect(Collectors.toMap(a -> a.getStudyTag() + "-" + a.getVariantId(), association -> association, (a1, a2) -> null));
         // removes any duplicated rsid in the map for SQL query
-        Map<String, String> snpNames = snps.values().stream().filter(Objects::nonNull).collect(Collectors.toMap(Association::getVariantId, Association::getVariantId));
+        Set<String> snpNames = snps.values().stream().filter(Objects::nonNull).map(Association::getVariantId).collect(Collectors.toSet());
+        // map(rsid, association[])
         Map<String, List<Association>> submissionSnpsByRsid = new HashMap<>();
         snps.forEach((s, association) -> {
             if (!submissionSnpsByRsid.containsKey(association.getVariantId())) {
@@ -435,8 +436,8 @@ public class SubmissionServiceImpl implements SubmissionService {
         List<Variation> foundVariations;
         List<VariationSynonym> foundVariationSynonyms;
         try {
-            foundVariations = variationRepository.findByNameIn(snpNames.values());
-            foundVariationSynonyms = variationSynonymRepository.findByNameIn(snpNames.values());
+            foundVariations = variationRepository.findByNameIn(snpNames);
+            foundVariationSynonyms = variationSynonymRepository.findByNameIn(snpNames);
         } catch (Exception e) {
             e.printStackTrace();
             return false;
