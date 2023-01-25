@@ -222,10 +222,8 @@ public class SubmissionServiceImpl implements SubmissionService {
     }
 
     /**
-     *
      * @param submissionId
-     * @param user
-     * Reset the Submission related Child objects for Uploading new template
+     * @param user         Reset the Submission related Child objects for Uploading new template
      */
     public Submission editFileUploadSubmissionDetails(String submissionId, User user) {
         log.info("Updating submission with new File Content: {}", submissionId);
@@ -254,9 +252,7 @@ public class SubmissionServiceImpl implements SubmissionService {
     }
 
     /**
-     *
-     * @param submissionId
-     * Delete Old submission related child objects
+     * @param submissionId Delete Old submission related child objects
      */
     @Override
     public void deleteSubmissionChildren(String submissionId) {
@@ -264,7 +260,7 @@ public class SubmissionServiceImpl implements SubmissionService {
 
         log.info("Reached Deleting Study Stage");
         Optional.ofNullable(studyRepository.findBySubmissionId(submissionId, Pageable.unpaged())).
-                ifPresent((studies) ->  studies.forEach((study) ->  {
+                ifPresent((studies) -> studies.forEach((study) -> {
                     study.setSubmissionId("");
                     studyRepository.save(study);
 
@@ -280,7 +276,7 @@ public class SubmissionServiceImpl implements SubmissionService {
 
         log.info("Reached Deleting Sample Stage");
         Optional.ofNullable(sampleRepository.findBySubmissionId(submissionId, Pageable.unpaged())).
-                ifPresent((samples) ->  samples.forEach((sample) -> {
+                ifPresent((samples) -> samples.forEach((sample) -> {
                             sample.setSubmissionId("");
                             sampleRepository.save(sample);
                         }
@@ -288,15 +284,13 @@ public class SubmissionServiceImpl implements SubmissionService {
 
         log.info("Reached Deleting Note Stage");
         Optional.ofNullable(noteRepository.findBySubmissionId(submissionId, Pageable.unpaged())).
-                ifPresent((notes) ->  notes.forEach((note) -> {
+                ifPresent((notes) -> notes.forEach((note) -> {
                             note.setSubmissionId("");
                             noteRepository.save(note);
                         }
                 ));
 
     }
-
-
 
 
     @Override
@@ -344,7 +338,7 @@ public class SubmissionServiceImpl implements SubmissionService {
         }
     }
 
-    public Submission lockSubmission(Submission submission,User user, String status){
+    public Submission lockSubmission(Submission submission, User user, String status) {
         Optional.ofNullable(status).ifPresent((lockstatus) -> {
             if (lockstatus.equals("lock"))
                 submission.setLockDetails(new LockDetails(new Provenance(DateTime.now(),
@@ -382,16 +376,17 @@ public class SubmissionServiceImpl implements SubmissionService {
 
     /**
      * Get List of Studies for previous submission & Publication
+     *
      * @param submissionId
      * @return
      */
     public List<Study> getStudies(String submissionId) {
-       List<Study> studies = studyRepository.readBySubmissionId(submissionId)
-        .collect(Collectors.toList());
-       List<String> studyTags = studies.stream().map(study -> study.getStudyTag())
-               .collect(Collectors.toList());
+        List<Study> studies = studyRepository.readBySubmissionId(submissionId)
+                .collect(Collectors.toList());
+        List<String> studyTags = studies.stream().map(study -> study.getStudyTag())
+                .collect(Collectors.toList());
         Submission submission = submissionRepository.findById(submissionId).get();
-        if(submission.getPublicationId() != null && !submission.getPublicationId().isEmpty()) {
+        if (submission.getPublicationId() != null && !submission.getPublicationId().isEmpty()) {
             Publication publication = publicationRepository.findById(submission.getPublicationId()).get();
             List<Study> pmIdStudies = studyRepository.findByPmidsContains(publication.getPmid());
             List<Study> uniqueStudies = pmIdStudies.stream().filter(study -> !studyTags.contains(study.getStudyTag()))
@@ -401,7 +396,7 @@ public class SubmissionServiceImpl implements SubmissionService {
                     .collect(Collectors.toList());
             studies.addAll(uniqueStudies);
         } else {
-            if(submission.getBodyOfWorks() != null && !submission.getBodyOfWorks().isEmpty()) {
+            if (submission.getBodyOfWorks() != null && !submission.getBodyOfWorks().isEmpty()) {
                 List<Study> bowStudies = studyRepository.findByBodyOfWorkListContains(submission.getBodyOfWorks().get(0));
                 List<Study> uniqueStudies = bowStudies.stream().filter(study -> !studyTags.contains(study.getStudyTag()))
                         .collect(Collectors.groupingBy(Study::getStudyTag))
@@ -444,15 +439,15 @@ public class SubmissionServiceImpl implements SubmissionService {
         }
         log.info("Found {} valid SNPs", foundVariations.size() + foundVariationSynonyms.size());
         log.info("Marking SNPs as valid in bulk");
-        for (Variation variation: foundVariations) {
-            for (Association a: submissionSnpsByRsid.get(variation.getName())) {
+        for (Variation variation : foundVariations) {
+            for (Association a : submissionSnpsByRsid.get(variation.getName())) {
                 Query query = new Query().addCriteria(new Criteria("id").is(a.getId()));
                 Update update = new Update().set("isValid", true);
                 bulkOps.updateOne(query, update);
             }
         }
-        for (VariationSynonym variation: foundVariationSynonyms) {
-            for (Association a: submissionSnpsByRsid.get(variation.getName())) {
+        for (VariationSynonym variation : foundVariationSynonyms) {
+            for (Association a : submissionSnpsByRsid.get(variation.getName())) {
                 Query query = new Query().addCriteria(new Criteria("id").is(a.getId()));
                 Update update = new Update().set("isValid", true);
                 bulkOps.updateOne(query, update);
@@ -464,8 +459,7 @@ public class SubmissionServiceImpl implements SubmissionService {
         }
         if (bulkWriteResult != null && bulkWriteResult.wasAcknowledged()) {
             log.info("Finished validating SNPs for submission: {}", submissionId);
-        }
-        else {
+        } else {
             return false;
         }
         return true;
