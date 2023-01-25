@@ -411,57 +411,58 @@ public class SubmissionServiceImpl implements SubmissionService {
 
     @Override
     public boolean validateSnps(String submissionId) {
-        if (!ensemblSnpValidationEnabled) {
-            return false;
-        }
-        log.info("Started validating SNPs for submission: {}", submissionId);
-        BulkOperations bulkOps = mongoTemplate.bulkOps(BulkOperations.BulkMode.UNORDERED, Association.class);
-        // removes any duplicated rsid in a study map(tag - rsid, association)
-        Map<String, Association> snps = associationRepository.readBySubmissionId(submissionId).collect(Collectors.toMap(a -> a.getStudyTag() + "-" + a.getVariantId(), association -> association, (a1, a2) -> null));
-        // removes any duplicated rsid in the map for SQL query
-        Set<String> snpNames = snps.values().stream().filter(Objects::nonNull).map(Association::getVariantId).collect(Collectors.toSet());
-        // map(rsid, association[])
-        Map<String, List<Association>> submissionSnpsByRsid = new HashMap<>();
-        snps.forEach((s, association) -> {
-            if (!submissionSnpsByRsid.containsKey(association.getVariantId())) {
-                submissionSnpsByRsid.put(association.getVariantId(), new ArrayList<>());
-            }
-            submissionSnpsByRsid.get(association.getVariantId()).add(association);
-        });
-        List<Variation> foundVariations;
-        List<VariationSynonym> foundVariationSynonyms;
         try {
+            if (!ensemblSnpValidationEnabled) {
+                return false;
+            }
+            log.info("Started validating SNPs for submission: {}", submissionId);
+            BulkOperations bulkOps = mongoTemplate.bulkOps(BulkOperations.BulkMode.UNORDERED, Association.class);
+            // removes any duplicated rsid in a study map(tag - rsid, association)
+            Map<String, Association> snps = associationRepository.readBySubmissionId(submissionId).collect(Collectors.toMap(a -> a.getStudyTag() + "-" + a.getVariantId(), association -> association, (a1, a2) -> null));
+            // removes any duplicated rsid in the map for SQL query
+            Set<String> snpNames = snps.values().stream().filter(Objects::nonNull).map(Association::getVariantId).collect(Collectors.toSet());
+            // map(rsid, association[])
+            Map<String, List<Association>> submissionSnpsByRsid = new HashMap<>();
+            snps.forEach((s, association) -> {
+                if (!submissionSnpsByRsid.containsKey(association.getVariantId())) {
+                    submissionSnpsByRsid.put(association.getVariantId(), new ArrayList<>());
+                }
+                submissionSnpsByRsid.get(association.getVariantId()).add(association);
+            });
+            List<Variation> foundVariations;
+            List<VariationSynonym> foundVariationSynonyms;
             foundVariations = variationRepository.findByNameIn(snpNames);
             foundVariationSynonyms = variationSynonymRepository.findByNameIn(snpNames);
-        } catch (Exception e) {
-            e.printStackTrace();
+            log.info("Found {} valid SNPs", foundVariations.size() + foundVariationSynonyms.size());
+            log.info("Marking SNPs as valid in bulk");
+            for (Variation variation : foundVariations) {
+                for (Association a : submissionSnpsByRsid.get(variation.getName())) {
+                    Query query = new Query().addCriteria(new Criteria("id").is(a.getId()));
+                    Update update = new Update().set("isValid", true);
+                    bulkOps.updateOne(query, update);
+                }
+            }
+            for (VariationSynonym variation : foundVariationSynonyms) {
+                for (Association a : submissionSnpsByRsid.get(variation.getName())) {
+                    Query query = new Query().addCriteria(new Criteria("id").is(a.getId()));
+                    Update update = new Update().set("isValid", true);
+                    bulkOps.updateOne(query, update);
+                }
+            }
+            BulkWriteResult bulkWriteResult = null;
+            if (!foundVariations.isEmpty() || !foundVariationSynonyms.isEmpty()) {
+                bulkWriteResult = bulkOps.execute();
+            }
+            if (bulkWriteResult != null && bulkWriteResult.wasAcknowledged()) {
+                log.info("Finished validating SNPs for submission: {}", submissionId);
+            } else {
+                return false;
+            }
+            return true;
+        }
+        catch (Exception e) {
+            log.error("SNP Validation Error: {}", e.getMessage(), e);
             return false;
         }
-        log.info("Found {} valid SNPs", foundVariations.size() + foundVariationSynonyms.size());
-        log.info("Marking SNPs as valid in bulk");
-        for (Variation variation : foundVariations) {
-            for (Association a : submissionSnpsByRsid.get(variation.getName())) {
-                Query query = new Query().addCriteria(new Criteria("id").is(a.getId()));
-                Update update = new Update().set("isValid", true);
-                bulkOps.updateOne(query, update);
-            }
-        }
-        for (VariationSynonym variation : foundVariationSynonyms) {
-            for (Association a : submissionSnpsByRsid.get(variation.getName())) {
-                Query query = new Query().addCriteria(new Criteria("id").is(a.getId()));
-                Update update = new Update().set("isValid", true);
-                bulkOps.updateOne(query, update);
-            }
-        }
-        BulkWriteResult bulkWriteResult = null;
-        if (!foundVariations.isEmpty() || !foundVariationSynonyms.isEmpty()) {
-            bulkWriteResult = bulkOps.execute();
-        }
-        if (bulkWriteResult != null && bulkWriteResult.wasAcknowledged()) {
-            log.info("Finished validating SNPs for submission: {}", submissionId);
-        } else {
-            return false;
-        }
-        return true;
     }
 }
