@@ -90,6 +90,8 @@ public class SSCallbackTaskTest extends IntegrationTest {
                 RandomStringUtils.randomAlphanumeric(10),
                 null,
                 null,
+                null, null,
+                null,
                 null);
         publication = publicationRepository.insert(publication);
 

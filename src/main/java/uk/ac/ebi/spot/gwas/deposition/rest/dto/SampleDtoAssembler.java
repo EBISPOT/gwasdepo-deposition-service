@@ -28,7 +28,9 @@ public class SampleDtoAssembler implements ResourceAssembler<Sample, Resource<Sa
                 sample.getAncestryCategory(),
                 sample.getAncestry(),
                 sample.getAncestryDescription(),
-                sample.getCountryRecruitement());
+                sample.getCountryRecruitement(),
+                sample.getCaseControlStudy(),
+                sample.getAncestryMethod());
 
         final ControllerLinkBuilder lb = ControllerLinkBuilder.linkTo(
                 ControllerLinkBuilder.methodOn(SubmissionsController.class).getSubmission(sample.getSubmissionId(), null));
@@ -48,7 +50,9 @@ public class SampleDtoAssembler implements ResourceAssembler<Sample, Resource<Sa
                 sample.getAncestryCategory(),
                 sample.getAncestry(),
                 sample.getAncestryDescription(),
-                sample.getCountryRecruitement());
+                sample.getCountryRecruitement(),
+                sample.getCaseControlStudy(),
+                sample.getAncestryMethod());
     }
 
     public static Sample disassemble(SampleDto sampleDto) {
@@ -63,6 +67,8 @@ public class SampleDtoAssembler implements ResourceAssembler<Sample, Resource<Sa
         sample.setAncestry(sampleDto.getAncestry());
         sample.setAncestryDescription(sampleDto.getAncestryDescription());
         sample.setCountryRecruitement(sampleDto.getCountryRecruitement());
+        sample.setCaseControlStudy(sampleDto.getCaseControlStudy());
+        sample.setAncestryMethod(sampleDto.getAncestryMethod());
         return sample;
     }
 }
