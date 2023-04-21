@@ -12,4 +12,6 @@ public interface BackendEmailService {
     void sendErrorsEmail(String location, String error);
 
     void sendReminderEmail(String userId, Map<String, Object> metadata, String emailFile);
+
+    void sendGlobusFolderEmail(String userId, Map<String, Object> metadata, String emailFile, String globusId, String globusIdentity);
 }
