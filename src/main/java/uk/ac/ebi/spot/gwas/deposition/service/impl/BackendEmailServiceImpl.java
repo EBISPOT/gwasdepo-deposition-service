@@ -75,7 +75,6 @@ public class BackendEmailServiceImpl implements BackendEmailService {
     public void sendGlobusFolderEmail(String userId, Map<String, Object> metadata, String emailFile, String globusId, String globusIdentity) {
         User user = userService.getUser(userId);
         metadata.put(MailConstants.USER_NAME, user.getName());
-        metadata.put(MailConstants.SUBMISSION_ID, backendMailConfig.getSubmissionsBaseURL() + metadata.get(MailConstants.SUBMISSION_ID));
         metadata.put(MailConstants.GLOBUS_ID, globusId);
         metadata.put(MailConstants.GLOBUS_IDENTITY, globusIdentity);
         if (emailService != null) {

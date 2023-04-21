@@ -149,6 +149,8 @@ public class SubmissionsController {
             bodyOfWork.setStatus(BodyOfWorkStatus.UNDER_SUBMISSION.name());
             bodyOfWorkService.save(bodyOfWork);
             auditProxy.addAuditEntry(AuditHelper.submissionCreateBOW(user.getId(), submission, bodyOfWork, false, true));
+            metadata.put(MailConstants.SUBMISSION_ID, backendMailConfig.getSubmissionsBaseURL() + submission.getId());
+            backendEmailService.sendGlobusFolderEmail(user.getId(), metadata, backendMailConfig.getGlobusEmail(), globusFolder, submissionCreationDto.getGlobusIdentity());
             return submissionAssemblyService.toResource(submission);
         }
 
@@ -183,6 +185,7 @@ public class SubmissionsController {
                 publicationService.savePublication(publication);
                 fileHandlerService.handleSummaryStatsTemplate(submission, publication, user);
             }
+            metadata.put(MailConstants.SUBMISSION_ID, backendMailConfig.getSubmissionsBaseURL() + submission.getId());
             backendEmailService.sendGlobusFolderEmail(user.getId(), metadata, backendMailConfig.getGlobusEmail(), globusFolder, submissionCreationDto.getGlobusIdentity());
             log.info("Returning new submission: {}", submission.getId());
             return submissionAssemblyService.toResource(submission);

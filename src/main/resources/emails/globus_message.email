@@ -351,8 +351,8 @@
 
                         <p>Thanks for choosing the GWAS Catalog as the repository for your Summary Statistics.</p>
 
-                        <p>This is to inform you regarding submission (<a th:href="${SUBMISSION_ID}"><span th:text="${PUBLICATION_TITLE}"></span></a>) and
-                        because of globus issue, curators will need to manually create Globus folder using your identity. Once the globus folder
+                        <p>This is to inform you regarding submission (<a th:href="${SUBMISSION_ID}"><span th:text="${SUBMISSION_ID}"></span></a>),
+                        because of globus issue curators will need to manually create Globus folder using your identity. Once the globus folder
                         is created Dev team will update the globus details for your submission from backend. After this curators will email
                         you to inform regarding upload of sumstats files. This is a temporary workaround till we fix the Globus issues. </p>
 
