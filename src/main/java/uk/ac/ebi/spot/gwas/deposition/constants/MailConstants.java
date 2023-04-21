@@ -21,4 +21,8 @@ public class MailConstants {
     public static final String ERROR_LOCATION = "ERROR_LOCATION";
 
     public static final String ERROR_CONTENT = "ERROR_CONTENT";
+
+    public static final String GLOBUS_IDENTITY = "GLOBUS_IDENTITY";
+
+    public static final String GLOBUS_ID = "GLOBUS_ID";
 }
