@@ -72,6 +72,17 @@ public class BackendEmailServiceImpl implements BackendEmailService {
         }
     }
 
+    public void sendGlobusFolderEmail(String userId, Map<String, Object> metadata, String emailFile, String globusId, String globusIdentity) {
+        User user = userService.getUser(userId);
+        metadata.put(MailConstants.USER_NAME, user.getName());
+        metadata.put(MailConstants.GLOBUS_ID, globusId);
+        metadata.put(MailConstants.GLOBUS_IDENTITY, globusIdentity);
+        if (emailService != null) {
+            EmailBuilder successBuilder = new SuccessEmailBuilder(emailFile);
+            emailService.sendMessage("gwas-subs@ebi.ac.uk", "GWAS Catalog submission (" + metadata.get(MailConstants.SUBMISSION_ID) + ") needs Globus folder creation", successBuilder.getEmailContent(metadata), false);
+        }
+    }
+
     private String getSubject(String pubmedId) {
         String subject = backendMailConfig.getSubject();
         if (subject.contains("%PMID%")) {
