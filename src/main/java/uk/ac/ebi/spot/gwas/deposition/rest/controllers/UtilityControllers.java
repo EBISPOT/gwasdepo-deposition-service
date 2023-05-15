@@ -11,6 +11,7 @@ import uk.ac.ebi.spot.gwas.deposition.constants.GeneralCommon;
 import uk.ac.ebi.spot.gwas.deposition.domain.User;
 import uk.ac.ebi.spot.gwas.deposition.service.BodyOfWorkService;
 import uk.ac.ebi.spot.gwas.deposition.service.JWTService;
+import uk.ac.ebi.spot.gwas.deposition.service.SummaryStatsProcessingService;
 import uk.ac.ebi.spot.gwas.deposition.service.UserService;
 import uk.ac.ebi.spot.gwas.deposition.util.HeadersUtil;
 
@@ -30,6 +31,9 @@ public class UtilityControllers {
 
     @Autowired
     private BodyOfWorkService bodyOfWorkService;
+
+    @Autowired
+    private SummaryStatsProcessingService  summaryStatsProcessingService;
 
     /**
      * POST /v1/remove-embargo
@@ -55,5 +59,18 @@ public class UtilityControllers {
         User user = userService.findUser(jwtService.extractUser(HeadersUtil.extractJWT(request)), false);
         log.info("[{}] Request to remove embargo on body of work: {}", user.getId(), bowId);
         bodyOfWorkService.addEmbargo(bowId, user);
+    }
+
+    /**
+     * POST /v1/bypass-ss-validation
+     */
+    @PostMapping(value = GWASDepositionBackendConstants.API_BYPASS_SS_VALIDATION,
+            consumes = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public void bypassSSValidation(@RequestBody String submissionId, HttpServletRequest request) {
+        User user = userService.findUser(jwtService.extractUser(HeadersUtil.extractJWT(request)), false);
+        summaryStatsProcessingService.bypassSSValidation(submissionId, user);
+
     }
 }

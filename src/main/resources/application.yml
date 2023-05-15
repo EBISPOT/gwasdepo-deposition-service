@@ -87,6 +87,7 @@ gwas-sumstats-service:
     sum-stats: /v1/sum-stats
     globus-mkdir: /v1/sum-stats/globus/mkdir
     globus: /v1/sum-stats/globus
+    ss-skip-validation: /v1/sum-stats/validate
   callback-schedule:
     enabled: true
 
