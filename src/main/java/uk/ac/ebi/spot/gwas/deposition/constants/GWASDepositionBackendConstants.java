@@ -12,6 +12,8 @@ public class GWASDepositionBackendConstants {
 
     public static final String API_ADD_EMBARGO = "/add-embargo";
 
+    public static final String API_BYPASS_SS_VALIDATION= "/bypass-ss-validation";
+
     public static final String API_SUBMISSIONS = "/submissions";
 
     public static final String API_STUDIES = "/studies";

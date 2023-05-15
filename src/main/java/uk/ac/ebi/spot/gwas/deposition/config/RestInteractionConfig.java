@@ -30,6 +30,9 @@ public class RestInteractionConfig {
     @Value("${gwas-catalog-service.endpoint}")
     private String gwasCatalogServiceEndpoint;
 
+    @Value("${gwas-sumstats-service.endpoints.ss-skip-validation}")
+    private String ssSkipValidationEndpoint;
+
     public String getSumStatsEndpoint() {
         return sumStatsServiceUrl + sumStatsEndpoint;
     }
@@ -52,5 +55,9 @@ public class RestInteractionConfig {
 
     public String getGwasCatalogServiceEndpoint() {
         return gwasCatalogServiceEndpoint;
+    }
+
+    public String getSsSkipValidationEndpoint() {
+        return sumStatsServiceUrl + ssSkipValidationEndpoint;
     }
 }
