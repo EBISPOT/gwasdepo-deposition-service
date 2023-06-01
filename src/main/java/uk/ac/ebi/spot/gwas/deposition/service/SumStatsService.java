@@ -3,6 +3,7 @@ package uk.ac.ebi.spot.gwas.deposition.service;
 
 import uk.ac.ebi.spot.gwas.deposition.domain.SSGlobusResponse;
 import uk.ac.ebi.spot.gwas.deposition.domain.Submission;
+import uk.ac.ebi.spot.gwas.deposition.dto.curation.SSBypassValidationDto;
 import uk.ac.ebi.spot.gwas.deposition.dto.summarystats.SSGlobusFolderDto;
 import uk.ac.ebi.spot.gwas.deposition.dto.summarystats.SSWrapUpRequestDto;
 import uk.ac.ebi.spot.gwas.deposition.dto.summarystats.SummaryStatsRequestDto;
@@ -21,4 +22,6 @@ public interface SumStatsService {
     void deleteGlobusFolder(Submission submission);
 
     SSGlobusResponse createGlobusFolder(SSGlobusFolderDto ssGlobusFolderDto);
+
+    void callSSBypassValidation(String callbackId, SSBypassValidationDto ssBypassValidationDto);
 }

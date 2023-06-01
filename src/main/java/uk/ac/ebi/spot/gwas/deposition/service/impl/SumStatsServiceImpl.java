@@ -14,6 +14,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import uk.ac.ebi.spot.gwas.deposition.domain.SSGlobusResponse;
 import uk.ac.ebi.spot.gwas.deposition.domain.Submission;
+import uk.ac.ebi.spot.gwas.deposition.dto.curation.SSBypassValidationDto;
 import uk.ac.ebi.spot.gwas.deposition.dto.summarystats.*;
 import uk.ac.ebi.spot.gwas.deposition.service.BackendEmailService;
 import uk.ac.ebi.spot.gwas.deposition.service.SumStatsService;
@@ -174,5 +175,23 @@ public class SumStatsServiceImpl extends GatewayService implements SumStatsServi
             log.error("Unable to call gwas-sumstats-service: {}", e.getMessage(), e);
             return null;
         }
+    }
+
+    public void callSSBypassValidation(String callbackId, SSBypassValidationDto ssBypassValidationDto) {
+
+        String endpoint = restInteractionConfig.getSsSkipValidationEndpoint() + "/" + callbackId;
+        try{
+            log.info("Calling SS Validate Endpoint: {}",endpoint);
+            HttpEntity httpEntity = restRequestUtil.httpEntity()
+                    .withJsonBody(ssBypassValidationDto)
+                    .build();
+            restTemplate.exchange(endpoint,
+                    HttpMethod.POST, httpEntity,
+                    new ParameterizedTypeReference<Void>() {
+                    });
+        } catch (Exception e) {
+            log.error("Unable to call gwas-sumstats-service Validation Endpoint: {}", e.getMessage(), e);
+        }
+
     }
 }

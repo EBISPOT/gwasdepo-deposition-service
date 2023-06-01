@@ -11,11 +11,9 @@ import uk.ac.ebi.spot.gwas.deposition.audit.AuditHelper;
 import uk.ac.ebi.spot.gwas.deposition.audit.AuditProxy;
 import uk.ac.ebi.spot.gwas.deposition.config.BackendMailConfig;
 import uk.ac.ebi.spot.gwas.deposition.config.GWASDepositionBackendConfig;
-import uk.ac.ebi.spot.gwas.deposition.constants.FileUploadStatus;
-import uk.ac.ebi.spot.gwas.deposition.constants.MailConstants;
-import uk.ac.ebi.spot.gwas.deposition.constants.Status;
-import uk.ac.ebi.spot.gwas.deposition.constants.SubmissionProvenanceType;
+import uk.ac.ebi.spot.gwas.deposition.constants.*;
 import uk.ac.ebi.spot.gwas.deposition.domain.*;
+import uk.ac.ebi.spot.gwas.deposition.dto.curation.SSBypassValidationDto;
 import uk.ac.ebi.spot.gwas.deposition.dto.summarystats.SSWrapUpRequestDto;
 import uk.ac.ebi.spot.gwas.deposition.dto.summarystats.SSWrapUpRequestEntryDto;
 import uk.ac.ebi.spot.gwas.deposition.dto.summarystats.SummaryStatsRequestDto;
@@ -29,6 +27,7 @@ import uk.ac.ebi.spot.gwas.deposition.util.AccessionMapUtil;
 import uk.ac.ebi.spot.gwas.deposition.util.BackendUtil;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class SummaryStatsProcessingServiceImpl implements SummaryStatsProcessingService {
@@ -70,6 +69,7 @@ public class SummaryStatsProcessingServiceImpl implements SummaryStatsProcessing
 
     @Autowired
     private StudyQueueSenderService studyQueueSenderService;
+
 
     @Override
     @Async
@@ -230,4 +230,31 @@ public class SummaryStatsProcessingServiceImpl implements SummaryStatsProcessing
         SSWrapUpRequestDto ssWrapUpRequestDto = new SSWrapUpRequestDto(ssWrapUpRequestEntryDtos);
         sumStatsService.wrapUpGlobusSubmission(callbackIdOptional.get().getCallbackId(), ssWrapUpRequestDto);
     }
+
+
+    @Override
+    public void bypassSSValidation(String submissionId, User user) {
+        Submission submission = submissionService.getSubmission(submissionId, user);
+        List<FileUpload> fileUploads = submission.getFileUploads().stream()
+                .map(fileUploadsService::getFileUpload)
+                .filter(fileUpload -> ( fileUpload.getType().equalsIgnoreCase(FileUploadType.METADATA.name()) || fileUpload.getType().equalsIgnoreCase(FileUploadType.SUMMARY_STATS.name())))
+                .collect(Collectors.toList());
+        FileUpload fileUpload = fileUploads.get(0);
+        SSBypassValidationDto ssBypassValidationDto = new SSBypassValidationDto(true);
+        String callbackId = fileUpload.getCallbackId();
+        sumStatsService.callSSBypassValidation(callbackId, ssBypassValidationDto);
+        submission.setOverallStatus("VALIDATING");
+        submission.setSummaryStatsStatus("VALIDATING");
+        submissionService.saveSubmission(submission, user.getId());
+        fileUpload.setErrors(new ArrayList<>());
+        fileUpload.setStatus("VALIDATING");
+        fileUploadsService.save(fileUpload);
+        CallbackId callback =callbackIdRepository.findByCallbackId(callbackId).get();
+        callback.setValid(true);
+        callback.setCompleted(false);
+        callbackIdRepository.save(callback);
+
+
+    }
+
 }
