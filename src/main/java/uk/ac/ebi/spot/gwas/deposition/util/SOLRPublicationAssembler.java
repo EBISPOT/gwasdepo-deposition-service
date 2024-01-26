@@ -48,13 +48,13 @@ public class SOLRPublicationAssembler {
                     publication.getJournal(),
                     publication.getPublicationDate(),
                     correspondingAuthor,
-                    Optional.ofNullable(publication.getCurator())
+                    Optional.ofNullable(publication.getCuratorId())
                     .map(curatorId -> curatorRepository.findById(curatorId))
                     .filter(Optional::isPresent)
                     .map(Optional::get)
                     .map(curator -> curator.getFirstName() +" " + curator.getLastName())
                     .orElse(null),
-                    Optional.ofNullable(publication.getCurationStatus())
+                    Optional.ofNullable(publication.getCurationStatusId())
                             .map(statusId -> curationStatusRepository.findById(statusId))
                             .filter(Optional::isPresent)
                             .map(Optional::get)
