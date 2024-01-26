@@ -56,6 +56,7 @@ gwas-deposition:
     emails:
       success: emails/success.email
       fail: emails/fail.email
+      globus: emails/globus_message.email
     errors:
       active: false
       receiver: gwas-dev-logs@ebi.ac.uk
@@ -86,6 +87,7 @@ gwas-sumstats-service:
     sum-stats: /v1/sum-stats
     globus-mkdir: /v1/sum-stats/globus/mkdir
     globus: /v1/sum-stats/globus
+    ss-skip-validation: /v1/sum-stats/validate
   callback-schedule:
     enabled: true
 

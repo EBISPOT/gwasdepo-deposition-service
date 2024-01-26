@@ -18,6 +18,7 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import uk.ac.ebi.spot.gwas.deposition.audit.AuditHelper;
 import uk.ac.ebi.spot.gwas.deposition.audit.AuditProxy;
+import uk.ac.ebi.spot.gwas.deposition.config.BackendMailConfig;
 import uk.ac.ebi.spot.gwas.deposition.config.GWASDepositionBackendConfig;
 import uk.ac.ebi.spot.gwas.deposition.constants.*;
 import uk.ac.ebi.spot.gwas.deposition.domain.*;
@@ -34,6 +35,8 @@ import uk.ac.ebi.spot.gwas.deposition.util.HeadersUtil;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 @RestController
@@ -78,6 +81,12 @@ public class SubmissionsController {
     @Autowired
     private CuratorAuthService curatorAuthService;
 
+    @Autowired
+    private BackendEmailService backendEmailService;
+
+    @Autowired
+    private BackendMailConfig backendMailConfig;
+
 
     /**
      * POST /v1/submissions
@@ -96,6 +105,10 @@ public class SubmissionsController {
         }
 
         String globusFolder = UUID.randomUUID().toString();
+        /* Globus Workaround changes */
+        //Map<String, Object> metadata = new HashMap<>();
+
+        // Commenting for Globus Issue
         SSGlobusResponse outcome = sumStatsService.createGlobusFolder(new SSGlobusFolderDto(globusFolder,
                 submissionCreationDto.getGlobusIdentity() != null ?
                         submissionCreationDto.getGlobusIdentity() :
@@ -137,6 +150,9 @@ public class SubmissionsController {
             bodyOfWork.setStatus(BodyOfWorkStatus.UNDER_SUBMISSION.name());
             bodyOfWorkService.save(bodyOfWork);
             auditProxy.addAuditEntry(AuditHelper.submissionCreateBOW(user.getId(), submission, bodyOfWork, false, true));
+            /* Globus Workaround changes */
+            //metadata.put(MailConstants.SUBMISSION_ID, backendMailConfig.getSubmissionsBaseURL() + submission.getId());
+            //backendEmailService.sendGlobusFolderEmail(user.getId(), metadata, backendMailConfig.getGlobusEmail(), globusFolder, submissionCreationDto.getGlobusIdentity());
             return submissionAssemblyService.toResource(submission);
         }
 
@@ -172,6 +188,9 @@ public class SubmissionsController {
                 publicationService.savePublication(publication);
                 fileHandlerService.handleSummaryStatsTemplate(submission, publication, user);
             }
+            /* Globus Workaround changes */
+            //metadata.put(MailConstants.SUBMISSION_ID, backendMailConfig.getSubmissionsBaseURL() + submission.getId());
+            //backendEmailService.sendGlobusFolderEmail(user.getId(), metadata, backendMailConfig.getGlobusEmail(), globusFolder, submissionCreationDto.getGlobusIdentity());
             log.info("Returning new submission: {}", submission.getId());
             return submissionAssemblyService.toResource(submission);
         }

@@ -18,6 +18,9 @@ public class BackendMailConfig {
     @Value("${gwas-deposition.email-config.emails.fail}")
     private String failEmail;
 
+    @Value("${gwas-deposition.email-config.emails.globus}")
+    private String globusEmail;
+
     @Value("${gwas-deposition.email-config.base-url}")
     private String submissionsBaseURL;
 
@@ -71,7 +74,10 @@ public class BackendMailConfig {
         return submissionsDocsURL;
     }
 
- 
+
+    public String getGlobusEmail() {
+        return globusEmail;
+    }
 
     public List<String> getErrorsReceiver() {
         List<String> result = new ArrayList<>();

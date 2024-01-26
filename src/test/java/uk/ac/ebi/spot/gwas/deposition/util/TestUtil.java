@@ -64,6 +64,9 @@ public class TestUtil {
                         RandomStringUtils.randomAlphanumeric(10)),
                 status, null,
                 null,
+                null,
+                null,
+                null,
                 null);
     }
 

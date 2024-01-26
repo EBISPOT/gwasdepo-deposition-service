@@ -54,7 +54,13 @@ public class StudyDtoAssembler implements ResourceAssembler<Study, Resource<Stud
                 study.getSumstatsFlag(),
                 study.getPooledFlag(),
                 study.getGxeFlag(),
-                study.getSubmissionId());
+                study.getSubmissionId(),
+                study.getImputationPanel(),
+                study.getImputationSoftware(),
+                study.getAdjustedCovariates(),
+                study.getEffect_allele_frequency_lower_limit(),
+                study.getSex(),
+                study.getCoordinateSystem());
 
 
         final ControllerLinkBuilder lb = ControllerLinkBuilder.linkTo(
@@ -100,7 +106,13 @@ public class StudyDtoAssembler implements ResourceAssembler<Study, Resource<Stud
                 study.getSumstatsFlag(),
                 study.getPooledFlag(),
                 study.getGxeFlag(),
-                study.getSubmissionId());
+                study.getSubmissionId(),
+                study.getImputationPanel(),
+                study.getImputationSoftware(),
+                study.getAdjustedCovariates(),
+                study.getEffect_allele_frequency_lower_limit(),
+                study.getSex(),
+                study.getCoordinateSystem());
 
     }
 
@@ -132,6 +144,12 @@ public class StudyDtoAssembler implements ResourceAssembler<Study, Resource<Stud
         study.setSumstatsFlag(studyDto.getSumstatsFlag());
         study.setPooledFlag(studyDto.getPooledFlag());
         study.setGxeFlag(studyDto.getGxeFlag());
+        study.setImputationPanel(studyDto.getImputationPanel());
+        study.setImputationSoftware(studyDto.getImputationSoftware());
+        study.setAdjustedCovariates(studyDto.getAdjustedCovariates());
+        study.setEffect_allele_frequency_lower_limit(studyDto.getMinor_allele_frequency_lower_limit());
+        study.setSex(studyDto.getSex());
+        study.setCoordinateSystem(studyDto.getCoordinateSystem());
         return study;
     }
 }
