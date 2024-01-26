@@ -31,7 +31,11 @@ public class PublicationDtoAssembler implements ResourceAssembler<Publication, R
                 publication.getStatus(),
                 null,
                 null,
-                null);
+                null,
+                null,
+                null,
+                null
+                );
     }
 
     public Resource<PublicationDto> toResource(Publication publication) {
@@ -46,6 +50,9 @@ public class PublicationDtoAssembler implements ResourceAssembler<Publication, R
                         new CorrespondingAuthorDto(publication.getCorrespondingAuthor().getAuthorName(),
                                 publication.getCorrespondingAuthor().getEmail()) : null,
                 publication.getStatus(),
+                null,
+                null,
+                null,
                 null,
                 null,
                 null);
