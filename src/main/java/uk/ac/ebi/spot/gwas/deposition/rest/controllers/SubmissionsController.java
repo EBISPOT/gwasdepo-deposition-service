@@ -157,6 +157,7 @@ public class SubmissionsController {
         }
 
         Publication publication = publicationService.retrievePublication(submissionCreationDto.getPublication().getPmid(), false);
+        publication.setSubmitter(user.getName());
         if (publication.getStatus().equals(PublicationStatus.ELIGIBLE.name()) ||
                 publication.getStatus().equals(PublicationStatus.PUBLISHED.name())) {
 
