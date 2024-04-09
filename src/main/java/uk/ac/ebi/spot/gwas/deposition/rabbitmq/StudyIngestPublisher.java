@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 import uk.ac.ebi.spot.gwas.deposition.config.RabbitMQConfigProperties;
 import uk.ac.ebi.spot.gwas.deposition.constants.GWASDepositionBackendConstants;
 import uk.ac.ebi.spot.gwas.deposition.dto.StudyDto;
+import uk.ac.ebi.spot.gwas.deposition.dto.curation.StudyRabbitMessage;
 
 @Component
 public class StudyIngestPublisher {
@@ -23,13 +24,13 @@ public class StudyIngestPublisher {
         this.rabbitTemplate = rabbitTemplate;
     }
 
-    public void send(StudyDto studyDto) {
-        log.info("Sending Message for"+studyDto.getSubmissionId()+":"+studyDto.getAccession());
+    public void send(StudyRabbitMessage studyRabbitMessage) {
+        log.info("Sending Message for {} : {}",studyRabbitMessage.getSubmissionId(),studyRabbitMessage.getAccession());
         //rabbitTemplate.convertAndSend(DepositionCurationConstants.ROUTING_KEY, studyDto);
         log.info("Queue In Publisher "+rabbitMQConfigProperties.getQueueName());
         log.info("Exchange In Publisher "+rabbitMQConfigProperties.getExchangeName());
         log.info("Routing key In Publisher "+rabbitMQConfigProperties.getRoutingKey());
         rabbitTemplate.convertAndSend(rabbitMQConfigProperties.getExchangeName(),rabbitMQConfigProperties.getRoutingKey()
-        , studyDto);
+        , studyRabbitMessage);
     }
 }

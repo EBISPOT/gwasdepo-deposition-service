@@ -236,6 +236,7 @@ public class SSCallbackTask {
                 User user = userService.getUser(submission.getCreated().getUserId());
                 submission = submissionService.updateSubmissionStatus(submission.getId(), Status.DEPOSITION_COMPLETE.name(), user);
                 studyQueueSenderService.sendStudiesToQueue(submission.getId());
+                studyQueueSenderService.sendMetaDataMessageToQueue(submission.getId());
                 auditProxy.addAuditEntry(AuditHelper.submissionSubmit(user.getId(), submission));
                 log.info("Submission [{}] successfully submitted.", submission.getId());
             }
