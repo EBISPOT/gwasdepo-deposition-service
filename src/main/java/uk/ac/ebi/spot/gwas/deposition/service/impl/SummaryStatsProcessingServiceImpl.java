@@ -122,6 +122,10 @@ public class SummaryStatsProcessingServiceImpl implements SummaryStatsProcessing
             User user = userService.getUser(submission.getCreated().getUserId());
             submission = submissionService.updateSubmissionStatus(submission.getId(), Status.DEPOSITION_COMPLETE.name(), user);
             studyQueueSenderService.sendStudiesToQueue(submission.getId());
+
+            if(appType != null && appType.equals("depo-curation")) {
+                studyQueueSenderService.sendMetaDataMessageToQueue(submission.getId());
+            }
             auditProxy.addAuditEntry(AuditHelper.submissionSubmit(user.getId(), submission));
             log.info("Submission [{}] successfully submitted.", submission.getId());
             return;

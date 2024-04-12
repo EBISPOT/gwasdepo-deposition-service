@@ -65,3 +65,7 @@ rabbitmq:
   queue-name: study_change
   exchange-name: study_change_exchange
   routing-key: study-ingest
+  sumstats:
+    queue-name: metadata-yml-update
+    exchange-name: metadata-yml-update-exchange
+    routing-key: metadata-yml-update-route

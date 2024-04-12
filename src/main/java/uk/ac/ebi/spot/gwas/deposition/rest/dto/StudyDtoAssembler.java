@@ -60,7 +60,8 @@ public class StudyDtoAssembler implements ResourceAssembler<Study, Resource<Stud
                 study.getAdjustedCovariates(),
                 study.getEffect_allele_frequency_lower_limit(),
                 study.getSex(),
-                study.getCoordinateSystem());
+                study.getCoordinateSystem(),
+                study.getAnalysisSoftware());
 
 
         final ControllerLinkBuilder lb = ControllerLinkBuilder.linkTo(
@@ -112,7 +113,8 @@ public class StudyDtoAssembler implements ResourceAssembler<Study, Resource<Stud
                 study.getAdjustedCovariates(),
                 study.getEffect_allele_frequency_lower_limit(),
                 study.getSex(),
-                study.getCoordinateSystem());
+                study.getCoordinateSystem(),
+                study.getAnalysisSoftware());
 
     }
 
@@ -150,6 +152,7 @@ public class StudyDtoAssembler implements ResourceAssembler<Study, Resource<Stud
         study.setEffect_allele_frequency_lower_limit(studyDto.getMinor_allele_frequency_lower_limit());
         study.setSex(studyDto.getSex());
         study.setCoordinateSystem(studyDto.getCoordinateSystem());
+        study.setAnalysisSoftware(studyDto.getAnalysisSoftware());
         return study;
     }
 }
