@@ -92,6 +92,8 @@ public class SSCallbackTaskTest extends IntegrationTest {
                 null,
                 null, null,
                 null,
+                null,
+                null,
                 null);
         publication = publicationRepository.insert(publication);
 
