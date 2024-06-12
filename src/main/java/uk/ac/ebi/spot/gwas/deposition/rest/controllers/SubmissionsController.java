@@ -18,6 +18,7 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import uk.ac.ebi.spot.gwas.deposition.audit.AuditHelper;
 import uk.ac.ebi.spot.gwas.deposition.audit.AuditProxy;
+import uk.ac.ebi.spot.gwas.deposition.audit.constants.PublicationEventType;
 import uk.ac.ebi.spot.gwas.deposition.config.BackendMailConfig;
 import uk.ac.ebi.spot.gwas.deposition.config.GWASDepositionBackendConfig;
 import uk.ac.ebi.spot.gwas.deposition.constants.*;
@@ -86,6 +87,8 @@ public class SubmissionsController {
 
     @Autowired
     private BackendMailConfig backendMailConfig;
+    @Autowired
+    PublicationAuditService publicationAuditService;
 
 
     /**
@@ -150,9 +153,13 @@ public class SubmissionsController {
             bodyOfWork.setStatus(BodyOfWorkStatus.UNDER_SUBMISSION.name());
             bodyOfWorkService.save(bodyOfWork);
             auditProxy.addAuditEntry(AuditHelper.submissionCreateBOW(user.getId(), submission, bodyOfWork, false, true));
+            String submissionEvent = String.format("SubmissionId-%s Body of Work", submission.getId());
+            publicationAuditService.createAuditEvent(PublicationEventType.SUBMISSION_CREATED.name(), submission.getId(),
+                    submissionEvent, false, user); // Added to handle event tracking
             /* Globus Workaround changes */
             //metadata.put(MailConstants.SUBMISSION_ID, backendMailConfig.getSubmissionsBaseURL() + submission.getId());
             //backendEmailService.sendGlobusFolderEmail(user.getId(), metadata, backendMailConfig.getGlobusEmail(), globusFolder, submissionCreationDto.getGlobusIdentity());
+
             return submissionAssemblyService.toResource(submission);
         }
 
@@ -178,6 +185,9 @@ public class SubmissionsController {
                 auditProxy.addAuditEntry(AuditHelper.submissionCreatePub(user.getId(),
                         submission, publication, false, true, null));
                 publicationService.savePublication(publication);
+                String submissionEvent = String.format("SubmissionId-%s Pmid Sumstats and Metadata", submission.getId());
+                publicationAuditService.createAuditEvent(PublicationEventType.SUBMISSION_CREATED.name(), submission.getId(),
+                        submissionEvent, false, user);
             }
             if (publication.getStatus().equals(PublicationStatus.PUBLISHED.name())) {
                 publication.setStatus(PublicationStatus.UNDER_SUMMARY_STATS_SUBMISSION.name());
@@ -187,6 +197,9 @@ public class SubmissionsController {
                         submission, publication, false, true, null));
                 publicationService.savePublication(publication);
                 fileHandlerService.handleSummaryStatsTemplate(submission, publication, user);
+                String submissionEvent = String.format("SubmissionId-%s Pmid Sumstats Only", submission.getId());
+                publicationAuditService.createAuditEvent(PublicationEventType.SUBMISSION_CREATED.name(), submission.getId(),
+                        submissionEvent, false, user);
             }
             /* Globus Workaround changes */
             //metadata.put(MailConstants.SUBMISSION_ID, backendMailConfig.getSubmissionsBaseURL() + submission.getId());
