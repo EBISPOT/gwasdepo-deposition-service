@@ -137,7 +137,8 @@ public class ConversionServiceImpl implements ConversionService {
                 summaryStatsEntries.add(new SummaryStatsEntry(fileUpload.getId(),
                         study.getStudyTag(), study.getSummaryStatisticsFile(),
                         study.getRawFilePath(), study.getChecksum(), study.getSummaryStatisticsAssembly(),
-                        study.getReadmeFile(), submission.getGlobusFolderId()));
+                        study.getReadmeFile(), submission.getGlobusFolderId(),
+                        study.getAnalysisSoftware()));
             }
         }
         //Moving code block to avoid repeated changing of Submission Object to capture Javers correctly

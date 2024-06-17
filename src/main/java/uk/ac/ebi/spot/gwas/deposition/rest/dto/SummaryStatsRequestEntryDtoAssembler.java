@@ -12,6 +12,7 @@ public class SummaryStatsRequestEntryDtoAssembler {
                 summaryStatsEntry.getMd5(),
                 summaryStatsEntry.getAssembly(),
                 summaryStatsEntry.getReadme(),
-                summaryStatsEntry.getGlobusFolder());
+                summaryStatsEntry.getGlobusFolder(),
+                summaryStatsEntry.getAnalysisSoftware());
     }
 }
