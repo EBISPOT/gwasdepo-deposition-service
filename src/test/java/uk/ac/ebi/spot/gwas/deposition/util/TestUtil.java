@@ -67,6 +67,8 @@ public class TestUtil {
                 null,
                 null,
                 null,
+                null,
+                null,
                 null);
     }
 
@@ -121,8 +123,10 @@ public class TestUtil {
                         RandomStringUtils.randomAlphanumeric(10),
                         RandomStringUtils.randomAlphanumeric(10),
                         RandomStringUtils.randomAlphanumeric(10),
+                        RandomStringUtils.randomAlphanumeric(10),
                         RandomStringUtils.randomAlphanumeric(10)),
                 new SummaryStatsRequestEntryDto(RandomStringUtils.randomAlphanumeric(10),
+                        RandomStringUtils.randomAlphanumeric(10),
                         RandomStringUtils.randomAlphanumeric(10),
                         RandomStringUtils.randomAlphanumeric(10),
                         RandomStringUtils.randomAlphanumeric(10),

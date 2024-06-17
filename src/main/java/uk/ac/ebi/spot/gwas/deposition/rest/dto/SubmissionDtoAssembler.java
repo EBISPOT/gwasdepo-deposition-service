@@ -31,9 +31,7 @@ public class SubmissionDtoAssembler {
                 submission.getProvenanceType(),
                 created, lastUpdated,editTemplate,
                 lockDetailsDto,
-                submission.isAgreedToCc0(),
-                submission.getOpenTargetsFlag(),
-                submission.getUserRequestedFlag()
+                submission.isAgreedToCc0()
         );
     }
 }
