@@ -122,6 +122,8 @@ public class SOLRPublicationAssembler {
                 .orElse(null),
                 null,
                 null,
+                null,
+                null,
                 null
         );
 
