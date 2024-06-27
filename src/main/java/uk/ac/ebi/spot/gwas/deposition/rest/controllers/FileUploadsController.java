@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import uk.ac.ebi.spot.gwas.deposition.audit.AuditHelper;
 import uk.ac.ebi.spot.gwas.deposition.audit.AuditProxy;
+import uk.ac.ebi.spot.gwas.deposition.audit.constants.PublicationEventType;
 import uk.ac.ebi.spot.gwas.deposition.config.GWASDepositionBackendConfig;
 import uk.ac.ebi.spot.gwas.deposition.constants.GWASDepositionBackendConstants;
 import uk.ac.ebi.spot.gwas.deposition.constants.GeneralCommon;
@@ -69,6 +70,9 @@ public class FileUploadsController {
     @Autowired
     private SubmissionDataCleaningService submissionDataCleaningService;
 
+    @Autowired
+    PublicationAuditService publicationAuditService;
+
     /*
      * POST /v1/submissions/{submissionId}/uploads
      */
@@ -88,8 +92,14 @@ public class FileUploadsController {
         FileUpload fileUpload;
         if (submission.getType().equals(SubmissionType.SUMMARY_STATS.name())) {
             fileUpload = fileHandlerService.handleSummaryStatsFile(submission, file, user);
+            String submissionEvent = String.format("SubmissionId-%s prefilled",submissionId);
+            publicationAuditService.createAuditEvent(PublicationEventType.TEMPLATE_UPLOAD.name(),
+                    submissionId,  submissionEvent, false, user);
         } else {
             fileUpload = fileHandlerService.handleMetadataFile(submission, file, user, null,null);
+            String submissionEvent = String.format("SubmissionId-%s",submissionId);
+            publicationAuditService.createAuditEvent(PublicationEventType.TEMPLATE_UPLOAD.name(),
+                    submissionId,  submissionEvent, false, user);
         }
         auditProxy.addAuditEntry(AuditHelper.fileCreate(submission.getCreated().getUserId(), fileUpload, submission, true, null));
 

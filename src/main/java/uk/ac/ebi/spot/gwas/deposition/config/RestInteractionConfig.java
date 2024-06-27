@@ -33,6 +33,15 @@ public class RestInteractionConfig {
     @Value("${gwas-sumstats-service.endpoints.ss-skip-validation}")
     private String ssSkipValidationEndpoint;
 
+    @Value("${audit.url}")
+    private String auditServiceUrl;
+
+    @Value("${audit.endpoints.publication}")
+    private String auditServicePublicationEndpoint;
+
+    @Value("${audit.endpoints.pub-audit-entries}")
+    private String  auditServicePubAuditEntriesEndpoint;
+
     public String getSumStatsEndpoint() {
         return sumStatsServiceUrl + sumStatsEndpoint;
     }
@@ -59,5 +68,17 @@ public class RestInteractionConfig {
 
     public String getSsSkipValidationEndpoint() {
         return sumStatsServiceUrl + ssSkipValidationEndpoint;
+    }
+
+    public String getAuditServiceUrl() {
+        return auditServiceUrl;
+    }
+
+    public String getAuditServicePublicationEndpoint() {
+        return auditServicePublicationEndpoint;
+    }
+
+    public String getAuditServicePubAuditEntriesEndpoint() {
+        return auditServicePubAuditEntriesEndpoint;
     }
 }
