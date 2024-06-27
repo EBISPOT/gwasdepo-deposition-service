@@ -92,6 +92,8 @@ public class SSCallbackTaskTest extends IntegrationTest {
                 null,
                 null, null,
                 null,
+                null,
+                null,
                 null);
         publication = publicationRepository.insert(publication);
 
@@ -116,6 +118,7 @@ public class SSCallbackTaskTest extends IntegrationTest {
         fileUpload.setCallbackId(callbackId.getCallbackId());
         fileUpload = fileUploadRepository.insert(fileUpload);
         summaryStatsEntry = new SummaryStatsEntry(fileUpload.getId(),
+                RandomStringUtils.randomAlphanumeric(10),
                 RandomStringUtils.randomAlphanumeric(10),
                 RandomStringUtils.randomAlphanumeric(10),
                 RandomStringUtils.randomAlphanumeric(10),
