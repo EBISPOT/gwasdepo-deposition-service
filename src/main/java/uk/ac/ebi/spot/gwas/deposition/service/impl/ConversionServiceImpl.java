@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import uk.ac.ebi.spot.gwas.deposition.audit.AuditProxy;
+import uk.ac.ebi.spot.gwas.deposition.audit.constants.PublicationEventType;
 import uk.ac.ebi.spot.gwas.deposition.constants.FileUploadStatus;
 import uk.ac.ebi.spot.gwas.deposition.constants.Status;
 import uk.ac.ebi.spot.gwas.deposition.constants.SubmissionProvenanceType;
@@ -75,6 +76,11 @@ public class ConversionServiceImpl implements ConversionService {
 
     @Autowired
     private AuditProxy auditProxy;
+
+    @Autowired
+    PublicationAuditService publicationAuditService;
+    @Autowired
+    UserService userService;
 
 
     @Async
@@ -183,7 +189,9 @@ public class ConversionServiceImpl implements ConversionService {
         submission.setOverallStatus(Status.VALIDATING.name());
         submission.setMetadataStatus(Status.VALID.name());
         submissionService.saveSubmission(submission, userId);
-
+        String submissionEvent = String.format("SubmissionId-%s MetaData Validation", submission.getId());  // Adding for audit event tracking
+        publicationAuditService.createAuditEvent(PublicationEventType.METADATA_VALIDATION_SUCCESS.name(), submission.getId(),
+                submissionEvent, false, userService.getUser(userId));
         fileUpload.setStatus(FileUploadStatus.VALID.name());
         fileUploadsService.save(fileUpload);
 

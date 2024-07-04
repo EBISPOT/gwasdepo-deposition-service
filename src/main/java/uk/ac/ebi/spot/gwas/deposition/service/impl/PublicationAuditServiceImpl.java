@@ -39,7 +39,7 @@ public class PublicationAuditServiceImpl implements PublicationAuditService {
                           Boolean isPublication, User user) {
        PublicationAuditEntryDto publicationAuditEntryDto = PublicationAuditHelper.createAuditEvent(eventType,
                 subOrPubId, event,
-                false, new UserDto(user.getName(), user.getEmail(),
+               isPublication, new UserDto(user.getName(), user.getEmail(),
                         user.getNickname(), user.getUserReference(), user.getDomains()),
               DateTime.now());
        log.info("The date in publicationAuditEntryDto is {}",publicationAuditEntryDto.getProvenanceDto().getTimestamp());

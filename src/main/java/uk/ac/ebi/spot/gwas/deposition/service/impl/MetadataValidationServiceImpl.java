@@ -7,6 +7,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import uk.ac.ebi.spot.gwas.deposition.audit.AuditHelper;
 import uk.ac.ebi.spot.gwas.deposition.audit.AuditProxy;
+import uk.ac.ebi.spot.gwas.deposition.audit.constants.PublicationEventType;
 import uk.ac.ebi.spot.gwas.deposition.constants.FileUploadStatus;
 import uk.ac.ebi.spot.gwas.deposition.constants.Status;
 import uk.ac.ebi.spot.gwas.deposition.constants.SubmissionType;
@@ -64,6 +65,10 @@ public class MetadataValidationServiceImpl implements MetadataValidationService 
 
     @Autowired
     private AuditProxy auditProxy;
+
+
+    @Autowired
+    PublicationAuditService publicationAuditService;
 
     @Override
     @Async
@@ -127,7 +132,9 @@ public class MetadataValidationServiceImpl implements MetadataValidationService 
                     submission.setOverallStatus(Status.INVALID.name());
                     submission.setMetadataStatus(Status.INVALID.name());
                     submissionService.saveSubmission(submission, user.getId());
-
+                    String submissionEvent = String.format("SubmissionId-%s MetaData Validation", submission.getId());  // Adding for audit event tracking
+                    publicationAuditService.createAuditEvent(PublicationEventType.METADATA_VALIDATION_FAILED.name(), submission.getId(),
+                            submissionEvent, false, user);
                     List<String> errors = ErrorUtil.transform(validationOutcome.getErrorMessages(), errorMessageTemplateProcessor);
                     fileUpload.setErrors(errors);
                     fileUpload.setStatus(FileUploadStatus.INVALID.name());
@@ -149,7 +156,9 @@ public class MetadataValidationServiceImpl implements MetadataValidationService 
         submission.setOverallStatus(Status.INVALID.name());
         submission.setMetadataStatus(Status.INVALID.name());
         submissionService.saveSubmission(submission, user.getId());
-
+        String submissionEvent = String.format("SubmissionId-%s MetaData Validation", submission.getId());  // Adding for audit event tracking
+        publicationAuditService.createAuditEvent(PublicationEventType.METADATA_VALIDATION_FAILED.name(), submission.getId(),
+                submissionEvent, false, user);
         List<String> errors = errorMessageTemplateProcessor.processGenericError(errorType, context);
         fileUpload.setErrors(errors);
         fileUpload.setStatus(FileUploadStatus.INVALID.name());

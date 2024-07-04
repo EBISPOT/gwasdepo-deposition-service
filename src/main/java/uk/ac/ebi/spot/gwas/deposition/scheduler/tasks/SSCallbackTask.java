@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import uk.ac.ebi.spot.gwas.deposition.audit.AuditHelper;
 import uk.ac.ebi.spot.gwas.deposition.audit.AuditProxy;
+import uk.ac.ebi.spot.gwas.deposition.audit.constants.PublicationEventType;
 import uk.ac.ebi.spot.gwas.deposition.config.BackendMailConfig;
 import uk.ac.ebi.spot.gwas.deposition.config.GWASDepositionBackendConfig;
 import uk.ac.ebi.spot.gwas.deposition.constants.*;
@@ -65,6 +66,10 @@ public class SSCallbackTask {
 
     @Autowired
     private StudyQueueSenderService studyQueueSenderService;
+
+
+    @Autowired
+    PublicationAuditService publicationAuditService;
 
     public void checkCallbackIds() {
         log.info("Running callback ID checks.");
@@ -161,6 +166,9 @@ public class SSCallbackTask {
 
                 submission.setOverallStatus(Status.INVALID.name());
                 submission.setSummaryStatsStatus(Status.INVALID.name());
+                String submissionEvent = String.format("SubmissionId-%s SS Validation", submission.getId());  // Adding for audit event tracking
+                publicationAuditService.createAuditEvent(PublicationEventType.SS_VALIDATION_FAILED.name(), submission.getId(),
+                        submissionEvent, false, userService.getUser(submission.getCreated().getUserId()));
                 backendEmailService.sendFailEmail(userId, workId, metadata, allErrors);
                 auditProxy.addAuditEntry(AuditHelper.submissionValidate(submission.getCreated().getUserId(), submission, false, allErrors));
                 submissionService.saveSubmission(submission, userId);
@@ -185,6 +193,9 @@ public class SSCallbackTask {
 
                 submission.setOverallStatus(Status.VALID.name());
                 submission.setSummaryStatsStatus(Status.VALID.name());
+                String submissionEvent = String.format("SubmissionId-%s SS Validation", submission.getId());  // Adding for audit event tracking
+                publicationAuditService.createAuditEvent(PublicationEventType.SS_VALIDATION_SUCCESS.name(), submission.getId(),
+                        submissionEvent, false, userService.getUser(submission.getCreated().getUserId()));
 
                 FileUpload fileUpload = fileUploadsService.getFileUploadByCallbackId(callbackId.getCallbackId());
                 if (fileUpload != null) {
