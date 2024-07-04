@@ -191,6 +191,19 @@ public class SubmissionServiceImpl implements SubmissionService {
         return null;
     }
 
+    @Override
+    public Submission findByBodyOfWork(String bodyOfWorkId) {
+        log.info("Retrieving submission for: {}", bodyOfWorkId);
+        List<Submission> submissionPage = submissionRepository.findByBodyOfWorksContainsAndArchived(bodyOfWorkId, false);
+        if (submissionPage != null && !submissionPage.isEmpty()) {
+            log.info("Found submission {} for: {}", submissionPage.get(0).getId(), bodyOfWorkId);
+            return submissionPage.get(0);
+        }
+
+        log.info("No submission found for: {}", bodyOfWorkId);
+        return null;
+    }
+
 
     @Override
     public void deleteSubmission(String submissionId, User user) {

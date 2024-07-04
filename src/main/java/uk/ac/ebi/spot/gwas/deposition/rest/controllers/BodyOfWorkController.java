@@ -133,7 +133,7 @@ public class BodyOfWorkController {
         BodyOfWork bodyOfWork = BodyOfWorkDtoDisassembler.disassemble(bodyOfWorkDto, new Provenance(DateTime.now(), user.getId()));
         BodyOfWork updated = bodyOfWorkService.updateBodyOfWork(bodyofworkId, bodyOfWork, user);
         auditProxy.addAuditEntry(AuditHelper.bowUpdate(user.getId(), updated));
-        Submission submission = submissionService.findByBodyOfWork(bodyofworkId, user.getId());
+        Submission submission = submissionService.findByBodyOfWork(bodyofworkId);
         String pubAddedEvent = String.format("SubmissionId-%s %s", submission.getId(), bodyOfWorkDto.getPmids()
                 .stream().collect(Collectors.joining(",")));
 
