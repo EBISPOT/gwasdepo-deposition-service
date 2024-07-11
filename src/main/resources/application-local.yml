@@ -52,6 +52,13 @@ quartz:
     dbName: gwasdepo
 
 
+audit:
+  url: http://localhost:8085
+  endpoints:
+    audit-entries: /v1/audit-entries
+    pub-audit-entries: /publication-audit-entries
+    publication: /v1/publications
+
 rabbitmq:
   queue-name: study_change_sandbox
   exchange-name: study_change_exchange_sandbox

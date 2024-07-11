@@ -22,6 +22,8 @@ public interface SubmissionService {
 
     Submission findByBodyOfWork(String bodyOfWorkId, String userId);
 
+    Submission findByBodyOfWork(String bodyOfWorkId);
+
     void deleteSubmission(String submissionId, User user);
 
     void deleteSubmissionChildren(String submissionId);

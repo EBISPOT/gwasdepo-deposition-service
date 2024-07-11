@@ -34,6 +34,9 @@ spring:
 audit:
   enabled: true
   url: http://gwas-audit-service-dev:8080
+  endpoints:
+    pub-audit-entries: /publication-audit-entries
+    publication: /v1/publications
 
 quartz:
   scheduler:

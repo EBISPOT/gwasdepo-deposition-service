@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import uk.ac.ebi.spot.gwas.deposition.audit.AuditProxy;
+import uk.ac.ebi.spot.gwas.deposition.audit.constants.PublicationEventType;
 import uk.ac.ebi.spot.gwas.deposition.constants.FileUploadStatus;
 import uk.ac.ebi.spot.gwas.deposition.constants.Status;
 import uk.ac.ebi.spot.gwas.deposition.constants.SubmissionProvenanceType;
@@ -76,6 +77,11 @@ public class ConversionServiceImpl implements ConversionService {
     @Autowired
     private AuditProxy auditProxy;
 
+    @Autowired
+    PublicationAuditService publicationAuditService;
+    @Autowired
+    UserService userService;
+
 
     @Async
     @Override
@@ -137,7 +143,8 @@ public class ConversionServiceImpl implements ConversionService {
                 summaryStatsEntries.add(new SummaryStatsEntry(fileUpload.getId(),
                         study.getStudyTag(), study.getSummaryStatisticsFile(),
                         study.getRawFilePath(), study.getChecksum(), study.getSummaryStatisticsAssembly(),
-                        study.getReadmeFile(), submission.getGlobusFolderId()));
+                        study.getReadmeFile(), submission.getGlobusFolderId(),
+                        study.getAnalysisSoftware()));
             }
         }
         //Moving code block to avoid repeated changing of Submission Object to capture Javers correctly
@@ -182,7 +189,9 @@ public class ConversionServiceImpl implements ConversionService {
         submission.setOverallStatus(Status.VALIDATING.name());
         submission.setMetadataStatus(Status.VALID.name());
         submissionService.saveSubmission(submission, userId);
-
+        String submissionEvent = String.format("SubmissionId-%s MetaData Validation", submission.getId());  // Adding for audit event tracking
+        publicationAuditService.createAuditEvent(PublicationEventType.METADATA_VALIDATION_SUCCESS.name(), submission.getId(),
+                submissionEvent, false, userService.getUser(userId));
         fileUpload.setStatus(FileUploadStatus.VALID.name());
         fileUploadsService.save(fileUpload);
 

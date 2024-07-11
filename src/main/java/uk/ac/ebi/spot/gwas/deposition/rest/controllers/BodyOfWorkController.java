@@ -16,6 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import uk.ac.ebi.spot.gwas.deposition.audit.AuditHelper;
 import uk.ac.ebi.spot.gwas.deposition.audit.AuditProxy;
+import uk.ac.ebi.spot.gwas.deposition.audit.constants.PublicationEventType;
 import uk.ac.ebi.spot.gwas.deposition.config.GWASDepositionBackendConfig;
 import uk.ac.ebi.spot.gwas.deposition.constants.GWASDepositionBackendConstants;
 import uk.ac.ebi.spot.gwas.deposition.constants.GeneralCommon;
@@ -27,14 +28,12 @@ import uk.ac.ebi.spot.gwas.deposition.dto.BodyOfWorkDto;
 import uk.ac.ebi.spot.gwas.deposition.exception.CannotDeleteBodyOfWorkException;
 import uk.ac.ebi.spot.gwas.deposition.rest.dto.BodyOfWorkDtoAssembler;
 import uk.ac.ebi.spot.gwas.deposition.rest.dto.BodyOfWorkDtoDisassembler;
-import uk.ac.ebi.spot.gwas.deposition.service.BodyOfWorkService;
-import uk.ac.ebi.spot.gwas.deposition.service.JWTService;
-import uk.ac.ebi.spot.gwas.deposition.service.SubmissionService;
-import uk.ac.ebi.spot.gwas.deposition.service.UserService;
+import uk.ac.ebi.spot.gwas.deposition.service.*;
 import uk.ac.ebi.spot.gwas.deposition.util.BackendUtil;
 import uk.ac.ebi.spot.gwas.deposition.util.HeadersUtil;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping(value = GeneralCommon.API_V1 + GWASDepositionBackendConstants.API_BODY_OF_WORK)
@@ -62,6 +61,9 @@ public class BodyOfWorkController {
 
     @Autowired
     private SubmissionService submissionService;
+
+    @Autowired
+    PublicationAuditService publicationAuditService;
 
     /**
      * POST /v1/bodyofwork
@@ -131,6 +133,12 @@ public class BodyOfWorkController {
         BodyOfWork bodyOfWork = BodyOfWorkDtoDisassembler.disassemble(bodyOfWorkDto, new Provenance(DateTime.now(), user.getId()));
         BodyOfWork updated = bodyOfWorkService.updateBodyOfWork(bodyofworkId, bodyOfWork, user);
         auditProxy.addAuditEntry(AuditHelper.bowUpdate(user.getId(), updated));
+        Submission submission = submissionService.findByBodyOfWork(bodyofworkId);
+        String pubAddedEvent = String.format("SubmissionId-%s %s", submission.getId(), bodyOfWorkDto.getPmids()
+                .stream().collect(Collectors.joining(",")));
+
+        publicationAuditService.createAuditEvent(PublicationEventType.PMID_ADDED.name(),
+                submission.getId(),  pubAddedEvent, false, user);
         log.info("Returning body of work: {}", updated.getId());
         return bodyOfWorkDtoAssembler.toResource(updated);
     }

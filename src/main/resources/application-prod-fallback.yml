@@ -32,6 +32,9 @@ spring:
 
 audit:
   enabled: true
+  endpoints:
+    pub-audit-entries: /publication-audit-entries
+    publication: /v1/publications
 
 quartz:
   scheduler:
