@@ -30,7 +30,7 @@ quartz:
 gwas-deposition:
   auth:
     enabled: false
-    cert: aap.der
+    cert: keycloak-cert.der
     unauthenticated-endpoints: /v1/publications
     auto-curator-service-account: auto-curator-service@ebi.ac.uk
     curators:
