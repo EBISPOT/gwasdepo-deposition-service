@@ -73,9 +73,9 @@ public class PublicationServiceImpl implements PublicationService {
     public void savePublication(Publication publication) {
         log.info("Saving publication: {}", publication.getPmid());
         publicationRepository.save(publication);
-        if (solrService != null) {
-            solrService.updatePublication(publication);
-        }
+//        if (solrService != null) {
+//            solrService.updatePublication(publication);
+//        }
     }
 
     @Override
