@@ -28,6 +28,8 @@ public class BackendMailConfig {
     @Value("${gwas-deposition.email-config.docs-url}")
     private String submissionsDocsURL;
 
+    @Value("${gwas-deposition.email-config.association-pilot-url}")
+    private String associationPilotUrl;
 
     @Value("${gwas-deposition.email-config.errors.subject}")
     private String errorsSubject;
@@ -74,6 +76,9 @@ public class BackendMailConfig {
         return submissionsDocsURL;
     }
 
+    public String getAssociationPilotUrl() {
+        return associationPilotUrl;
+    }
 
     public String getGlobusEmail() {
         return globusEmail;
