@@ -53,6 +53,7 @@ gwas-deposition:
     subject: GWAS Catalog submission for %PMID%
     base-url: https://www.ebi.ac.uk/gwas/deposition/submission/
     docs-url: https://www.ebi.ac.uk/gwas/docs/submission#link-15
+    association-pilot-url: https://docs.google.com/forms/d/e/1FAIpQLSelVfHrb7wYJFSBDOr57TmBHF9_3OJU6wIvsJ19H1FU6B5VnA/viewform?usp=sharing
     emails:
       success: emails/success.email
       fail: emails/fail.email
