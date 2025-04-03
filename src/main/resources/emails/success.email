@@ -144,6 +144,10 @@
         text-decoration: underline;
       }
 
+      .news-red {
+        color: red
+      }
+
       /* -------------------------------------
           BUTTONS
       ------------------------------------- */
@@ -350,14 +354,18 @@
                       <td>
                         <p>Dear <span th:text="${USER_NAME}"></span>,</p>
 
+                        <p>Please read the following email carefully as it contains important information.</p>
+
                         <p>The summary statistics for <span th:text="${PMID}"></span> - <i><span th:text="${PUBLICATION_TITLE}"></span></i>
                         by <span th:text="${FIRST_AUTHOR}"></span> et al., were successfully validated and submitted to the GWAS Catalog.</p>
 
-                        <p>Following submission the accession ID(s) for your submission will be available to download by pressing on the 'Download Study Accessions' button on the <a th:href="${SUBMISSION_STUDIES}">studies</a> page.</p>
+                        <p>The accession ID(s) for your submission (beginning GCST-) are available to download by pressing on the 'Download Study Accessions' button on the <a th:href="${SUBMISSION_STUDIES}">submission page</a>. You should use these IDs if you are citing the submission in your journal publication.</p>
 
                         <p>For more information about how and when your data will become publicly accessible, please see our documentation pages <a th:href="${SUBMISSION_DOCS_URL}"><small th:text="${SUBMISSION_DOCS_URL}"></small></a></p>
 
-                        <p>Thanks for sharing your data with us.</p>
+                        <p> <span class="news-red">NEW!!!</span> Help us to curate your paper faster! You can now submit the top associations from your analysis, for inclusion in the GWAS Catalog website. <a th:href="${ASSOCIATION_PILOT_URL}">Click here</a> to find out more!</p>
+
+                        <p>Thanks for sharing your data with the community.</p>
 
                         <p>Best wishes,<br/>
                         GWAS Catalog team</p>
