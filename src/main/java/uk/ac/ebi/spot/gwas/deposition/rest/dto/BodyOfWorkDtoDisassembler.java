@@ -18,7 +18,9 @@ public class BodyOfWorkDtoDisassembler {
                     .map(AuthorDtoAssembler::disassemble).collect(Collectors.toList());
         }
 
-        BodyOfWork bodyOfWork = new BodyOfWork(bodyOfWorkDto.getTitle(),
+        BodyOfWork bodyOfWork = new BodyOfWork(
+                bodyOfWorkDto.getBodyOfWorkType(),
+                bodyOfWorkDto.getTitle(),
                 bodyOfWorkDto.getDescription(),
                 bodyOfWorkDto.getJournal(),
                 bodyOfWorkDto.getDoi(),
