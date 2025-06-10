@@ -3,6 +3,7 @@ package uk.ac.ebi.spot.gwas.deposition.util;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
+import uk.ac.ebi.spot.gwas.deposition.constants.BodyOfWorkType;
 import uk.ac.ebi.spot.gwas.deposition.constants.PublicationStatus;
 import uk.ac.ebi.spot.gwas.deposition.constants.SummaryStatsResponseConstants;
 import uk.ac.ebi.spot.gwas.deposition.domain.*;
@@ -30,7 +31,9 @@ public class TestUtil {
                 RandomStringUtils.randomAlphanumeric(10),
                 RandomStringUtils.randomAlphanumeric(10));
 
-        return new BodyOfWork(RandomStringUtils.randomAlphanumeric(10),
+        return new BodyOfWork(
+                BodyOfWorkType.GCP,
+                RandomStringUtils.randomAlphanumeric(10),
                 RandomStringUtils.randomAlphanumeric(10),
                 RandomStringUtils.randomAlphanumeric(10),
                 RandomStringUtils.randomAlphanumeric(10),
