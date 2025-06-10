@@ -7,7 +7,6 @@ import org.springframework.stereotype.Service;
 import uk.ac.ebi.spot.gwas.deposition.constants.GWASDepositionBackendConstants;
 import uk.ac.ebi.spot.gwas.deposition.domain.GCPCounterItem;
 import uk.ac.ebi.spot.gwas.deposition.repository.GCPCounterItemRepository;
-import uk.ac.ebi.spot.gwas.deposition.service.BodyOfWorkService;
 
 import java.util.List;
 

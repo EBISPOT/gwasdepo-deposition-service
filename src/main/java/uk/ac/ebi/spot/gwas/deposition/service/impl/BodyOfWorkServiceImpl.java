@@ -8,6 +8,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import uk.ac.ebi.spot.gwas.deposition.components.BodyOfWorkListener;
+import uk.ac.ebi.spot.gwas.deposition.constants.BodyOfWorkType;
 import uk.ac.ebi.spot.gwas.deposition.constants.PublicationStatus;
 import uk.ac.ebi.spot.gwas.deposition.domain.*;
 import uk.ac.ebi.spot.gwas.deposition.exception.AuthorizationException;
@@ -19,6 +20,7 @@ import uk.ac.ebi.spot.gwas.deposition.service.BodyOfWorkService;
 import uk.ac.ebi.spot.gwas.deposition.service.CuratorAuthService;
 import uk.ac.ebi.spot.gwas.deposition.service.UserService;
 import uk.ac.ebi.spot.gwas.deposition.util.GCPCounter;
+import uk.ac.ebi.spot.gwas.deposition.util.PCPCounter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -49,11 +51,22 @@ public class BodyOfWorkServiceImpl implements BodyOfWorkService {
 
     @Autowired
     private PublicationRepository publicationRepository;
+    @Autowired
+    private PCPCounter PCPCounter;
 
     @Override
     public BodyOfWork createBodyOfWork(BodyOfWork bodyOfWork) {
         log.info("Creating body of work: {}", bodyOfWork.getTitle());
-        bodyOfWork.setBowId(gcpCounter.getNext());
+        if (bodyOfWork.getBowType() == BodyOfWorkType.GCP) {
+            bodyOfWork.setBowId(gcpCounter.getNext());
+        }
+        else if (bodyOfWork.getBowType() == BodyOfWorkType.PCP) {
+            bodyOfWork.setBowId(PCPCounter.getNext());
+        }
+        else {
+            log.error("Invalid BoW type: {}", bodyOfWork.getBowType());
+            throw new IllegalArgumentException("BodyOfWork.bowType is required (PCP or GCP)");
+        }
         bodyOfWork = bodyOfWorkRepository.insert(bodyOfWork);
         log.info("Body of work created: {}", bodyOfWork.getId());
         return bodyOfWork;
