@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.Profiles;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import uk.ac.ebi.spot.gwas.deposition.constants.GWASDepositionBackendConstants;
 import uk.ac.ebi.spot.gwas.deposition.domain.GCSTCounterItem;
 import uk.ac.ebi.spot.gwas.deposition.exception.EntityNotFoundException;
@@ -24,6 +25,7 @@ public class GCSTCounter {
     @Autowired
     Environment environment;
 
+    @Transactional
     public synchronized String getNext() {
 
         List<GCSTCounterItem> gcstCounterItemList = gcstCounterItemRepository.findAll();
