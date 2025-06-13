@@ -4,7 +4,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>uk.ac.ebi.spot.gwasdepo</groupId>
+    <groupId>uk.ac.ebi.spot.gwas</groupId>
     <artifactId>gwasdepo-deposition-service</artifactId>
     <version>0.0.9-SNAPSHOT</version>
     <packaging>jar</packaging>
@@ -12,9 +12,9 @@
     <name>GWAS Deposition App Backend Service</name>
 
     <parent>
-        <groupId>uk.ac.ebi.spot.gwasdepo</groupId>
+        <groupId>uk.ac.ebi.spot.gwas</groupId>
         <artifactId>gwasdepo-master</artifactId>
-        <version>1.0.3</version>
+        <version>1.0.7</version>
     </parent>
 
     <properties>
@@ -33,20 +33,9 @@
 
     <repositories>
         <repository>
-            <id>spot-releases</id>
-            <name>Releases</name>
-            <url>http://gwas-gromit.ebi.ac.uk:8081/gwas/nexus/repository/maven-releases/</url>
-            <releases>
-                <enabled>true</enabled>
-            </releases>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-        </repository>
-        <repository>
-            <id>spot-snapshots</id>
-            <name>Snapshot</name>
-            <url>http://gwas-gromit.ebi.ac.uk:8081/gwas/nexus/repository/maven-snapshots/</url>
+            <name>Central Portal Snapshots</name>
+            <id>central-portal-snapshots</id>
+            <url>https://central.sonatype.com/repository/maven-snapshots/</url>
             <releases>
                 <enabled>false</enabled>
             </releases>
@@ -102,12 +91,12 @@
 
     <dependencies>
         <dependency>
-            <groupId>uk.ac.ebi.spot.gwasdepo</groupId>
+            <groupId>uk.ac.ebi.spot.gwas</groupId>
             <artifactId>gwasdepo-commons</artifactId>
             <version>1.0.48-SNAPSHOT</version>
         </dependency>
         <dependency>
-            <groupId>uk.ac.ebi.spot.gwasdepo</groupId>
+            <groupId>uk.ac.ebi.spot.gwas</groupId>
             <artifactId>gwasdepo-template-validator</artifactId>
             <version>1.0.23-SNAPSHOT</version>
         </dependency>
@@ -158,10 +147,10 @@
             <groupId>org.springframework.data</groupId>
             <artifactId>spring-data-rest-hal-browser</artifactId>
         </dependency>
-            <dependency>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-starter-data-solr</artifactId>
-            </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-solr</artifactId>
+        </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-mail</artifactId>
