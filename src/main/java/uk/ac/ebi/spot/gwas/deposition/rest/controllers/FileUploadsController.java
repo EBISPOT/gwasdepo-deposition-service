@@ -112,7 +112,7 @@ public class FileUploadsController {
     }
 
     /*
-     * POST /v1/submissions/{submissionId}/edituploads
+     * POST /v1/submissions/{submissionId}/uploads/edit
      */
     @PostMapping(
             value = "/{submissionId}" + GWASDepositionBackendConstants.API_EDIT_UPLOADS,
