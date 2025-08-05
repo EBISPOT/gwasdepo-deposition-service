@@ -3,7 +3,6 @@ package uk.ac.ebi.spot.gwas.deposition.rest.controllers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.hateoas.Link;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.Resources;
@@ -21,10 +20,7 @@ import uk.ac.ebi.spot.gwas.deposition.config.GWASDepositionBackendConfig;
 import uk.ac.ebi.spot.gwas.deposition.constants.GWASDepositionBackendConstants;
 import uk.ac.ebi.spot.gwas.deposition.constants.GeneralCommon;
 import uk.ac.ebi.spot.gwas.deposition.constants.SubmissionType;
-import uk.ac.ebi.spot.gwas.deposition.domain.FileUpload;
-import uk.ac.ebi.spot.gwas.deposition.domain.Study;
-import uk.ac.ebi.spot.gwas.deposition.domain.Submission;
-import uk.ac.ebi.spot.gwas.deposition.domain.User;
+import uk.ac.ebi.spot.gwas.deposition.domain.*;
 import uk.ac.ebi.spot.gwas.deposition.dto.FileUploadDto;
 import uk.ac.ebi.spot.gwas.deposition.exception.EntityNotFoundException;
 import uk.ac.ebi.spot.gwas.deposition.rest.dto.FileUploadDtoAssembler;
@@ -33,18 +29,26 @@ import uk.ac.ebi.spot.gwas.deposition.util.BackendUtil;
 import uk.ac.ebi.spot.gwas.deposition.util.HeadersUtil;
 
 import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
+import java.util.Map;
 
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
-
+import uk.ac.ebi.spot.gwas.deposition.rest.dto.ExtendedFileUploadDto;
+import uk.ac.ebi.spot.gwas.deposition.rest.dto.ExtendedFileUploadDtoAssembler;
+import uk.ac.ebi.spot.gwas.deposition.service.PgsValidationInfoService;
+import uk.ac.ebi.spot.gwas.deposition.constants.DataType;
+import uk.ac.ebi.spot.gwas.deposition.domain.PgsValidationInfo;
+import uk.ac.ebi.spot.gwas.deposition.service.PgsValidationClient;
 @RestController
 @RequestMapping(value = GeneralCommon.API_V1 + GWASDepositionBackendConstants.API_SUBMISSIONS)
 public class FileUploadsController {
 
     private static final Logger log = LoggerFactory.getLogger(FileUploadsController.class);
+
 
     @Autowired
     private JWTService jwtService;
@@ -73,43 +77,68 @@ public class FileUploadsController {
     @Autowired
     PublicationAuditService publicationAuditService;
 
-    /*
+    @Autowired
+    private PgsValidationInfoService pgsValidationInfoService;
+
+    @Autowired
+    private PgsValidationClient pgsValidationClient;
+
+    /**
      * POST /v1/submissions/{submissionId}/uploads
+     *
+     * For GWAS → original flow.
+     * For PGS  → store the file, run the PGS validator, update status,
+     *            skip any template-schema outcome.
      */
     @PostMapping(
-            value = "/{submissionId}" + GWASDepositionBackendConstants.API_UPLOADS,
+            value    = "/{submissionId}" + GWASDepositionBackendConstants.API_UPLOADS,
             consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
-            produces = MediaType.APPLICATION_JSON_VALUE
-    )
+            produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.CREATED)
-    @ResponseBody
-    public Resource<FileUploadDto> uploadFile(@RequestParam MultipartFile file,
-                                              @PathVariable String submissionId,
-                                              HttpServletRequest request) {
-        User user = userService.findUser(jwtService.extractUser(HeadersUtil.extractJWT(request)), false);
-        log.info("[{}] Request to upload a new file [{}] to submission: {}", user.getName(), file.getOriginalFilename(), submissionId);
+    public Resource<ExtendedFileUploadDto> uploadFile(
+            @RequestParam("file") MultipartFile file,
+            @RequestParam(value = "data-type", defaultValue = "GWAS") DataType dataType,
+            @PathVariable String submissionId,
+            HttpServletRequest request) throws IOException {
+
+        User user = userService.findUser(
+                jwtService.extractUser(HeadersUtil.extractJWT(request)), false);
+
         Submission submission = submissionService.getSubmission(submissionId, user);
-        FileUpload fileUpload;
-        if (submission.getType().equals(SubmissionType.SUMMARY_STATS.name())) {
-            fileUpload = fileHandlerService.handleSummaryStatsFile(submission, file, user);
-            String submissionEvent = String.format("SubmissionId-%s prefilled",submissionId);
-            publicationAuditService.createAuditEvent(PublicationEventType.TEMPLATE_UPLOAD.name(),
-                    submissionId,  submissionEvent, false, user);
-        } else {
-            fileUpload = fileHandlerService.handleMetadataFile(submission, file, user, null,null);
-            String submissionEvent = String.format("SubmissionId-%s",submissionId);
-            publicationAuditService.createAuditEvent(PublicationEventType.TEMPLATE_UPLOAD.name(),
-                    submissionId,  submissionEvent, false, user);
+
+        FileUpload fileUpload = (submission.getType().equals(SubmissionType.SUMMARY_STATS.name()))
+                ? fileHandlerService.handleSummaryStatsFile(submission, file, user)
+                : fileHandlerService.handleMetadataFile(submission, file, user, null, null);
+
+        PgsValidationInfo pvi = null;
+        if (dataType == DataType.PGS) {
+            Map<String, Object> rsp = pgsValidationClient.validate(file, request);
+
+            pvi = new PgsValidationInfo(
+                    fileUpload.getId(),
+                    (String) rsp.get("validationStatus"),
+                    (List<String>) rsp.get("pcstIds"));
+
+            fileUpload.setStatus((String) rsp.get("validationStatus"));
+            fileUploadsService.save(fileUpload);
+            pgsValidationInfoService.save(pvi);
+            log.info("Stored PGS validation result for {} ⇒ {}",
+                    fileUpload.getId(), pvi.getValidationStatus());
         }
-        auditProxy.addAuditEntry(AuditHelper.fileCreate(submission.getCreated().getUserId(), fileUpload, submission, true, null));
 
-        final ControllerLinkBuilder lb = linkTo(
-                methodOn(FileUploadsController.class).getFileUpload(submissionId, fileUpload.getId(), null));
+        auditProxy.addAuditEntry(AuditHelper.fileCreate(
+                submission.getCreated().getUserId(), fileUpload, submission, true, null));
 
-        Resource<FileUploadDto> resource = new Resource<>(FileUploadDtoAssembler.assemble(fileUpload, null));
-        resource.add(BackendUtil.underBasePath(lb, gwasDepositionBackendConfig.getProxyPrefix()).withSelfRel());
+        Resource<ExtendedFileUploadDto> resource = new Resource<>(
+                ExtendedFileUploadDtoAssembler.assemble(fileUpload, null, pvi));
+
+        resource.add(BackendUtil.underBasePath(
+                linkTo(methodOn(FileUploadsController.class)
+                        .getFileUpload(submissionId, fileUpload.getId(), null)),
+                gwasDepositionBackendConfig.getProxyPrefix()).withSelfRel());
         return resource;
     }
+
 
     /*
      * POST /v1/submissions/{submissionId}/edituploads
@@ -160,8 +189,8 @@ public class FileUploadsController {
     @GetMapping(value = "/{submissionId}" + GWASDepositionBackendConstants.API_UPLOADS + "/{fileUploadId}",
             produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.OK)
-    public Resource<FileUploadDto> getFileUpload(@PathVariable String submissionId,
-                                                 @PathVariable String fileUploadId, HttpServletRequest request) {
+    public Resource<ExtendedFileUploadDto> getFileUpload(@PathVariable String submissionId,
+                                                         @PathVariable String fileUploadId, HttpServletRequest request) {
         User user = userService.findUser(jwtService.extractUser(HeadersUtil.extractJWT(request)), false);
         log.info("[{}] Request to retrieve file [{}] from submission: {}", user.getName(), fileUploadId, submissionId);
         Submission submission = submissionService.getSubmission(submissionId, user);
@@ -172,11 +201,15 @@ public class FileUploadsController {
         FileUpload fileUpload = fileUploadsService.getFileUpload(fileUploadId);
         log.info("Returning file [{}] for submission: {}", fileUpload.getFileName(), submission.getId());
         auditProxy.addAuditEntry(AuditHelper.fileRetrieve(submission.getCreated().getUserId(), fileUpload, submission));
+        PgsValidationInfo pvi = pgsValidationInfoService
+                .get(fileUploadId)
+                .orElse(null);
 
         final ControllerLinkBuilder lb = linkTo(
                 methodOn(FileUploadsController.class).getFileUpload(submissionId, fileUploadId, null));
-
-        Resource<FileUploadDto> resource = new Resource<>(FileUploadDtoAssembler.assemble(fileUpload, null));
+        log.info("Calling PGS validator for fileUploadId={}", fileUpload.getId());
+        Resource<ExtendedFileUploadDto> resource = new Resource<>(
+                ExtendedFileUploadDtoAssembler.assemble(fileUpload, null, pvi));
         resource.add(BackendUtil.underBasePath(lb, gwasDepositionBackendConfig.getProxyPrefix()).withSelfRel());
         return resource;
     }
@@ -187,23 +220,44 @@ public class FileUploadsController {
     @GetMapping(value = "/{submissionId}" + GWASDepositionBackendConstants.API_UPLOADS,
             produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.OK)
-    public Resources<FileUploadDto> getFileUploads(@PathVariable String submissionId, HttpServletRequest request) {
-        User user = userService.findUser(jwtService.extractUser(HeadersUtil.extractJWT(request)), false);
-        log.info("[{}] Request to retrieve files from submission: {}", user.getName(), submissionId);
-        Submission submission = submissionService.getSubmission(submissionId, user);
-        List<FileUpload> fileUploads = fileUploadsService.getFileUploads(submission.getFileUploads());
-        log.info("Returning {} files for submission: {}", fileUploads.size(), submission.getId());
+    public Resources<Resource<ExtendedFileUploadDto>> getFileUploads(
+            @PathVariable String submissionId,
+            HttpServletRequest request) {
 
-        List<FileUploadDto> result = new ArrayList<>();
-        for (FileUpload fileUpload : fileUploads) {
-            FileUploadDto fileUploadDto = FileUploadDtoAssembler.assemble(fileUpload, null);
-            final ControllerLinkBuilder lb = linkTo(methodOn(FileUploadsController.class).getFileUpload(submissionId, fileUpload.getId(), null));
-            fileUploadDto.add(BackendUtil.underBasePath(lb, gwasDepositionBackendConfig.getProxyPrefix()).withSelfRel());
-            result.add(fileUploadDto);
+        User user = userService.findUser(
+                jwtService.extractUser(HeadersUtil.extractJWT(request)), false);
+
+        Submission submission = submissionService.getSubmission(submissionId, user);
+
+        List<FileUpload> fileUploads =
+                fileUploadsService.getFileUploads(submission.getFileUploads());
+
+        List<Resource<ExtendedFileUploadDto>> result = new ArrayList<>();
+
+        for (FileUpload fu : fileUploads) {
+
+            PgsValidationInfo pvi = pgsValidationInfoService
+                    .get(fu.getId())
+                    .orElse(null);
+
+            ExtendedFileUploadDto dto =
+                    ExtendedFileUploadDtoAssembler.assemble(fu, null, pvi);
+
+            Resource<ExtendedFileUploadDto> res = new Resource<>(dto);
+
+            res.add(BackendUtil.underBasePath(
+                    linkTo(methodOn(FileUploadsController.class)
+                            .getFileUpload(submissionId, fu.getId(), null)),
+                    gwasDepositionBackendConfig.getProxyPrefix()).withSelfRel());
+
+            result.add(res);
         }
 
-        final ControllerLinkBuilder lb = linkTo(methodOn(FileUploadsController.class).getFileUploads(submissionId, null));
-        return new Resources<>(result, BackendUtil.underBasePath(lb, gwasDepositionBackendConfig.getProxyPrefix()).withSelfRel());
+        return new Resources<>(result,
+                BackendUtil.underBasePath(
+                        linkTo(methodOn(FileUploadsController.class)
+                                .getFileUploads(submissionId, null)),
+                        gwasDepositionBackendConfig.getProxyPrefix()).withSelfRel());
     }
 
     /**
