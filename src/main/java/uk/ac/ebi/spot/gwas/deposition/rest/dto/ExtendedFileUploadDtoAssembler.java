@@ -9,6 +9,10 @@ import java.util.List;
 
 public class ExtendedFileUploadDtoAssembler {
 
+    private ExtendedFileUploadDtoAssembler() {
+        throw new AssertionError("Static utility class – no instances allowed");
+    }
+
     public static ExtendedFileUploadDto assemble(FileUpload fileUpload,
                                                  List<SummaryStatsStatusDto> ssStatuses,
                                                  PgsValidationInfo pvi) {

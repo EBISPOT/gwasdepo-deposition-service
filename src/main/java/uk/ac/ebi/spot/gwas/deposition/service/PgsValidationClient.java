@@ -11,6 +11,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.core.ParameterizedTypeReference;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
@@ -25,8 +26,11 @@ public class PgsValidationClient {
 
     @Value("${pgs.validator.url:https://deposition-validator-dot-pgs-catalog.appspot.com/validate_metadata}")
     private String validatorUrl;
-
     private final RestTemplateBuilder builder;
+    private static final String FIELD_VALIDATION_STATUS            = "validationStatus";
+    private static final String FIELD_ERROR_MESSAGES   = "errorMessages";
+    private static final String FIELD_WARNING_MESSAGES = "warningMessages";
+    private static final String FIELD_PCST_IDS         = "pcstIds";
 
     /**
      * Send the uploaded metadata file to the external PGS validator.
@@ -53,24 +57,27 @@ public class PgsValidationClient {
         HttpEntity<?> entity = new HttpEntity<>(body, hdr);
 
         try {
-            ResponseEntity<Map> rsp =
-                    rest.exchange(validatorUrl, HttpMethod.POST, entity, Map.class);
+            ResponseEntity<Map<String, Object>> rsp =
+                    rest.exchange(
+                            validatorUrl,
+                            HttpMethod.POST,
+                            entity,
+                            new ParameterizedTypeReference<Map<String, Object>>() {});
 
-            // normalise the JSON the service returns
-            // { "valid": false, "errorMessages": {...}, "warningMessages": {...} }
+            Map<String, Object> remote = rsp.getBody() != null
+                    ? rsp.getBody()
+                    : Collections.<String, Object>emptyMap();
 
-            Map<String, Object> remote = rsp.getBody();
-
-            Map<String, Object> out = new HashMap<>();
+            Map<String, Object> out = new HashMap<String, Object>();
             boolean valid = Boolean.TRUE.equals(remote.get("valid"));
 
-            out.put("validationStatus",  valid ? "VALID" : "INVALID");
-            out.put("pcstIds",           Collections.emptyList());    // reserved
-            out.put("errorMessages",     remote.get("errorMessages"));
-            out.put("warningMessages",   remote.get("warningMessages"));
+            out.put(FIELD_VALIDATION_STATUS,  valid ? "VALID" : "INVALID");
+            out.put(FIELD_PCST_IDS,           Collections.emptyList());    // reserved
+            out.put(FIELD_ERROR_MESSAGES,     remote.get(FIELD_ERROR_MESSAGES));
+            out.put(FIELD_WARNING_MESSAGES,   remote.get(FIELD_WARNING_MESSAGES));
 
-            log.info("PGS validator [{}] {}", out.get("validationStatus"),
-                    valid ? "" : remote.get("errorMessages"));
+            log.info("PGS validator [{}] {}", out.get(FIELD_VALIDATION_STATUS),
+                    valid ? "" : remote.get(FIELD_ERROR_MESSAGES));
             return out;
 
         } catch (RestClientResponseException ex) {
@@ -78,11 +85,11 @@ public class PgsValidationClient {
                     ex.getRawStatusCode(), ex.getResponseBodyAsString());
 
             Map<String,Object> err = new HashMap<>();
-            err.put("validationStatus",  "ERROR");
+            err.put(FIELD_VALIDATION_STATUS,  "ERROR");
             err.put("message",           ex.getResponseBodyAsString());
-            err.put("pcstIds",           Collections.emptyList());
-            err.put("errorMessages",     Collections.emptyMap());
-            err.put("warningMessages",   Collections.emptyMap());
+            err.put(FIELD_PCST_IDS,           Collections.emptyList());
+            err.put(FIELD_ERROR_MESSAGES,     Collections.emptyMap());
+            err.put(FIELD_WARNING_MESSAGES,   Collections.emptyMap());
             return err;
         }
     }
