@@ -132,3 +132,7 @@ validator:
 comms:
   messaging:
     enabled: false
+
+pgs:
+  validator:
+    url: https://deposition-validator-dot-pgs-catalog.appspot.com/validate_metadata

@@ -24,7 +24,7 @@ import java.util.*;
 @Slf4j
 public class PgsValidationClient {
 
-    @Value("${pgs.validator.url:https://deposition-validator-dot-pgs-catalog.appspot.com/validate_metadata}")
+    @Value("${pgs.validator.url}")
     private String validatorUrl;
     private final RestTemplateBuilder builder;
     private static final String FIELD_VALIDATION_STATUS            = "validationStatus";
@@ -51,8 +51,6 @@ public class PgsValidationClient {
 
         HttpHeaders hdr = new HttpHeaders();
         hdr.setContentType(MediaType.MULTIPART_FORM_DATA);
-        Optional.ofNullable(req.getHeader(HttpHeaders.AUTHORIZATION))
-                .ifPresent(token -> hdr.set(HttpHeaders.AUTHORIZATION, token));
 
         HttpEntity<?> entity = new HttpEntity<>(body, hdr);
 
