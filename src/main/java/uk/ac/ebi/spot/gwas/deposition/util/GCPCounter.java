@@ -4,10 +4,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import uk.ac.ebi.spot.gwas.deposition.constants.GWASDepositionBackendConstants;
 import uk.ac.ebi.spot.gwas.deposition.domain.GCPCounterItem;
 import uk.ac.ebi.spot.gwas.deposition.repository.GCPCounterItemRepository;
-import uk.ac.ebi.spot.gwas.deposition.service.BodyOfWorkService;
 
 import java.util.List;
 
@@ -21,6 +21,7 @@ public class GCPCounter {
     @Autowired
     private GCPCounterItemRepository gcpCounterItemRepository;
 
+    @Transactional
     public String getNext() {
         int counter = 1;
         List<GCPCounterItem> gcpCounterItemList = gcpCounterItemRepository.findAll();

@@ -26,3 +26,6 @@ NO_MAPPING=Invalid file uploaded. Please download a new template from the submis
 NO_DATA=No studies have been provided.
 NO_SS_DATA=No summary stats data found for publication: [(${context})]
 NO_SAMPLE_DATA=No sample data provided although studies are present.
+NO_STUDY_SHEET=Study sheet not found.
+NO_SAMPLE_SHEET=Sample sheet not found.
+MISSING_SAMPLE_DATA_FOR_STUDY=Missing sample information for study: '[(${value})]'

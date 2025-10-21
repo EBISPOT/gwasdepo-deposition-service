@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.Resource;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
+import uk.ac.ebi.spot.gwas.deposition.constants.BodyOfWorkType;
 import uk.ac.ebi.spot.gwas.deposition.constants.GWASDepositionBackendConstants;
 import uk.ac.ebi.spot.gwas.deposition.constants.GeneralCommon;
 import uk.ac.ebi.spot.gwas.deposition.domain.SSGlobusResponse;
@@ -137,6 +138,7 @@ public class BodyOfWorkControllerTest extends IntegrationTest {
         assertEquals(bodyOfWork.getLastAuthor().getFirstName(), actual.getLastAuthor().getFirstName());
 
         BodyOfWorkDto updated = new BodyOfWorkDto(actual.getBodyOfWorkId(),
+                BodyOfWorkType.GCP,
                 "Updated title",
                 actual.getDescription(),
                 new AuthorDto("1", "2", "group", "email"),

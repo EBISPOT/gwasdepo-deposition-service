@@ -31,7 +31,7 @@ spring:
 gwas-deposition:
   db: gwasdepo
   solr:
-    enabled: true
+    enabled: false
   auth:
     curators:
       auth-mechanism: EMAIL_WHITELISTING
@@ -67,3 +67,7 @@ rabbitmq:
     queue-name: metadata-yml-update-sandbox
     exchange-name: metadata-yml-update-exchange-sandbox
     routing-key: metadata-yml-update-route-sandbox
+
+pgs:
+  validator:
+    url: https://deposition-validator-dot-pgs-catalog.appspot.com/validate_metadata
