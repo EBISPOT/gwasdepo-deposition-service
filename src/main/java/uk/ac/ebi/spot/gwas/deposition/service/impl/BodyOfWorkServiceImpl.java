@@ -57,15 +57,17 @@ public class BodyOfWorkServiceImpl implements BodyOfWorkService {
     @Override
     public BodyOfWork createBodyOfWork(BodyOfWork bodyOfWork) {
         log.info("Creating body of work: {}", bodyOfWork.getTitle());
-        if (bodyOfWork.getBowType() == BodyOfWorkType.GCP) {
-            bodyOfWork.setBowId(gcpCounter.getNext());
-        }
-        else if (bodyOfWork.getBowType() == BodyOfWorkType.PCP) {
-            bodyOfWork.setBowId(PCPCounter.getNext());
+        if(bodyOfWork.getBowType() != null ) {
+            if (bodyOfWork.getBowType() == BodyOfWorkType.GCP) {
+                bodyOfWork.setBowId(gcpCounter.getNext());
+            } else if (bodyOfWork.getBowType() == BodyOfWorkType.PCP) {
+                bodyOfWork.setBowId(PCPCounter.getNext());
+            }
         }
         else {
+            bodyOfWork.setBowId(gcpCounter.getNext());
             log.error("Invalid BoW type: {}", bodyOfWork.getBowType());
-            throw new IllegalArgumentException("BodyOfWork.bowType is required (PCP or GCP)");
+            //throw new IllegalArgumentException("BodyOfWork.bowType is required (PCP or GCP)");
         }
         bodyOfWork = bodyOfWorkRepository.insert(bodyOfWork);
         log.info("Body of work created: {}", bodyOfWork.getId());
