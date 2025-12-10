@@ -1,3 +1,9 @@
+include:
+  - template: Jobs/SAST.gitlab-ci.yml
+  - template: Jobs/Secret-Detection.gitlab-ci.yml
+  - template: Jobs/Dependency-Scanning.gitlab-ci.yml
+  - template: Jobs/Container-Scanning.gitlab-ci.yml
+
 image: docker:latest
 services:
   - docker:dind
@@ -52,6 +58,15 @@ build-backend-container:
     - docker login -u "${DOCKER_HUB_USER}" --password-stdin < dhpw.txt
     - docker build --cache-from $BACKEND_REGISTRY_IMAGE:latest -t $BACKEND_REGISTRY_IMAGE:$CI_COMMIT_SHA .
     - docker push $BACKEND_REGISTRY_IMAGE:$CI_COMMIT_SHA
+
+container_scanning:
+  stage: docker-release
+  needs: ["build-backend-container"]
+  variables:
+    CS_IMAGE: $BACKEND_REGISTRY_IMAGE:$CI_COMMIT_SHA
+    CS_REGISTRY_USER: $DOCKER_HUB_USER
+    CS_REGISTRY_PASSWORD: $DOCKER_HUB_PASSWORD
+    GIT_STRATEGY: fetch
 
 build-backend-release:
   variables:
