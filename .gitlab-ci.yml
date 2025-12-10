@@ -12,6 +12,7 @@ stages:
   - build
   - test
   - docker
+  - scan
   - docker-release
   - deploy-sandbox
   - deploy-sandbox-migration
@@ -60,7 +61,7 @@ build-backend-container:
     - docker push $BACKEND_REGISTRY_IMAGE:$CI_COMMIT_SHA
 
 container_scanning:
-  stage: docker-release
+  stage: scan
   needs: ["build-backend-container"]
   variables:
     CS_IMAGE: $BACKEND_REGISTRY_IMAGE:$CI_COMMIT_SHA
