@@ -1,8 +1,8 @@
 # Import base image
-FROM openjdk:8u212-jre
+FROM eclipse-temurin:8-jre-alpine
 
 # Create log file directory and set permission
-RUN groupadd -r gwas-deposition-backend && useradd -r --create-home -g gwas-deposition-backend gwas-deposition-backend
+RUN addgroup -S gwas-deposition-backend && adduser -S -G gwas-deposition-backend -h /home/gwas-deposition-backend gwas-deposition-backend
 RUN if [ ! -d /var/log/gwas/ ];then mkdir /var/log/gwas/;fi
 RUN chown -R gwas-deposition-backend:gwas-deposition-backend /var/log/gwas
 
