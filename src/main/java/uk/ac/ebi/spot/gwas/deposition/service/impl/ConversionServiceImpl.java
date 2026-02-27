@@ -161,8 +161,9 @@ public class ConversionServiceImpl implements ConversionService {
             association = associationRepository.insert(association);
             submission.addAssociation(association.getId());
         }
-
-        submissionService.validateSnps(submission.getId());
+        if(!submissionDataDto.getAssociations().isEmpty()) {    //gwasdepo-195 remove ensembl validations for user submissions
+            submissionService.validateSnps(submission.getId());
+        }
 
         log.info("Found {} samples.", submissionDataDto.getSamples().size());
         for (SampleDto sampleDto : submissionDataDto.getSamples()) {

@@ -55,6 +55,9 @@ gwas-deposition:
   email-config:
     base-url: http://193.62.54.159/gwas/deposition/submission/
 
+ensembl-snp-validation:
+  enabled: false
+
 email:
   enabled: true
 
